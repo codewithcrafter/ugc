@@ -14,8 +14,14 @@ import { UgcModalController } from './components/ugcModal.js';
 import { GalleryController } from './components/gallery.js';
 import { TestimonialsSlider } from './components/testimonialsSlider.js';
 import { FloatingContactController } from './components/floatingContact.js';
+import { CustomCursorController } from './components/cursor.js';
+import { PhotographyMotionController } from './components/motion.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+  // 0. Initialize Premium Photography Agency Custom Cursor & Motion Design System
+  new CustomCursorController();
+  new PhotographyMotionController();
+
   // 1. Initialize Dynamic Year in Footer
   const yearEl = document.getElementById('current-year');
   if (yearEl) {
@@ -28,16 +34,14 @@ document.addEventListener('DOMContentLoaded', () => {
     new LeadFormController(leadFormContainer);
   }
 
-  // 3. Initialize Premium UGC Video Carousel
+  // 3. Initialize Centered Animated Smartphone Reels Experience
   const sliderContainer = document.getElementById('product-slider-container');
   if (sliderContainer) {
     const reelsData =
       productConfig.ugcReels && productConfig.ugcReels.length
         ? productConfig.ugcReels
         : productConfig.slider;
-    new ProductSlider(sliderContainer, reelsData, {
-      speed: 0.65,
-    });
+    new ProductSlider(sliderContainer, reelsData);
   }
 
   // 4. Initialize Interactive Overlapping Image Stack ("The Craft & Philosophy")
@@ -207,6 +211,41 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  // 9. Coordinated Scroll Reveal Motion System
+  const initScrollReveals = () => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const revealTargets = document.querySelectorAll(
+      '.hero-pitch, .lead-card, .section-header-compact, .ugc-card, .gallery-card, .testimonial-card, .spec-card, .faq-item, .faq-concierge-card, .brand-logo-card, .about-text-content, .image-stack-deck'
+    );
+
+    if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+      revealTargets.forEach((el) => el.classList.add('is-revealed'));
+      return;
+    }
+
+    revealTargets.forEach((el) => el.classList.add('reveal-init'));
+
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-revealed');
+            obs.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: '0px 0px -40px 0px',
+        threshold: 0.12,
+      }
+    );
+
+    revealTargets.forEach((el) => observer.observe(el));
+  };
+
+  initScrollReveals();
 
   console.info(
     `[AURA Studio] Landing Page initialized successfully. Brand: ${productConfig.brand.name}.`

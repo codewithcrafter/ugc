@@ -28,7 +28,7 @@
     <meta name="twitter:image" content="/images/hero_product.jpg" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%23C85A32'/><circle cx='16' cy='16' r='6' fill='%23FAF8F5'/></svg>" />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%237047EB'/><circle cx='16' cy='16' r='6' fill='%23E5FF75'/></svg>" />
 
     <!-- Google Fonts: Plus Jakarta Sans & Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -62,6 +62,9 @@
   </head>
 
   <body>
+    <!-- Ambient Pastel Light Sweep on Page Load / Reload -->
+    <div class="page-load-light-sweep" id="page-load-light-sweep" aria-hidden="true"></div>
+
     <!-- Accessibility Skip Link -->
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
@@ -166,8 +169,8 @@
             </div>
 
             <h1 class="hero-title">
-              Pure Acoustic Clarity.<br />
-              <span class="title-serif">Crafted for Everyday Serenity.</span>
+              <span class="hero-line-mask"><span class="hero-line-inner">Pure Acoustic Clarity.</span></span><br />
+              <span class="title-serif hero-line-mask"><span class="hero-line-inner">Crafted for Everyday Serenity.</span></span>
             </h1>
 
             <p class="hero-description">
@@ -263,22 +266,22 @@
         </div>
       </section>
 
-      <!-- SECTION 2: PREMIUM UGC VIDEO CAROUSEL -->
+      <!-- SECTION 2: PREMIUM ANIMATED SMARTPHONE REELS EXPERIENCE -->
       <section class="section-ugc-carousel" id="product-slider">
         <div class="container carousel-intro-container">
           <div class="section-header-compact">
             <span class="section-eyebrow">COMMUNITY IN MOTION</span>
             <h2 class="section-title">Real Spaces. Unfiltered Acoustics.</h2>
             <p class="section-lead">
-              Watch how architects, interior creators, and morning ritualists experience AURA in their private sanctuaries. Hover to pause, click to play, or swipe.
+              Watch how architects, interior creators, and morning ritualists experience AURA in their private sanctuaries. Scroll inside the phone or use the side controls to explore community reels.
             </p>
           </div>
         </div>
 
-        <!-- Full-Width Horizontal Infinite Looping Carousel Track -->
-        <div class="ugc-carousel-fullwidth">
-          <div id="product-slider-container" class="ugc-carousel-outer">
-            <!-- Rendered dynamically by UgcVideoCarousel -->
+        <!-- Centered Interactive Smartphone Showcase -->
+        <div class="ugc-smartphone-section-body">
+          <div id="product-slider-container" class="ugc-phone-container">
+            <!-- Rendered dynamically by SmartphoneReelsViewer -->
           </div>
         </div>
       </section>
