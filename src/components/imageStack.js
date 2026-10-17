@@ -179,32 +179,32 @@ export class ImageStackController {
       }
 
       if (diff === 0) {
-        // Foreground Active Card
-        card.style.transform = 'translate3d(0, 0, 0) scale(1) rotate(0deg)';
+        // Foreground Active Card: elevated in Z-space, receptive to 3D hover/tilt
+        card.style.transform = 'translate3d(0, 0, 10px) scale(1) rotate(0deg)';
         card.style.zIndex = '5';
         card.style.opacity = '1';
         card.style.pointerEvents = 'auto';
         card.classList.add('is-active');
         card.setAttribute('aria-hidden', 'false');
       } else if (diff === 1) {
-        // First Layer Behind (Subtle offset to the right & top, slight positive tilt)
-        card.style.transform = 'translate3d(24px, -14px, -20px) scale(0.95) rotate(3deg)';
+        // First Layer Behind: offset right & top, subtle positive 3D tilt
+        card.style.transform = 'translate3d(28px, -16px, -35px) scale(0.94) rotate(3.2deg)';
         card.style.zIndex = '4';
         card.style.opacity = '0.92';
         card.style.pointerEvents = 'auto';
         card.classList.remove('is-active');
         card.setAttribute('aria-hidden', 'true');
       } else if (diff === 2) {
-        // Second Layer Behind (Subtle offset to the left & higher, slight negative tilt)
-        card.style.transform = 'translate3d(-20px, -24px, -40px) scale(0.90) rotate(-2.5deg)';
+        // Second Layer Behind: offset left & higher, subtle negative 3D tilt
+        card.style.transform = 'translate3d(-24px, -28px, -75px) scale(0.88) rotate(-2.8deg)';
         card.style.zIndex = '3';
         card.style.opacity = '0.78';
         card.style.pointerEvents = 'auto';
         card.classList.remove('is-active');
         card.setAttribute('aria-hidden', 'true');
       } else if (diff === 3) {
-        // Third Layer Behind (Subtle centered elevation)
-        card.style.transform = 'translate3d(12px, -32px, -60px) scale(0.85) rotate(1.5deg)';
+        // Third Layer Behind: centered deep elevation
+        card.style.transform = 'translate3d(14px, -38px, -110px) scale(0.83) rotate(1.8deg)';
         card.style.zIndex = '2';
         card.style.opacity = '0.55';
         card.style.pointerEvents = 'none';
@@ -212,7 +212,7 @@ export class ImageStackController {
         card.setAttribute('aria-hidden', 'true');
       } else {
         // Deep background cards
-        card.style.transform = 'translate3d(0, -38px, -80px) scale(0.80) rotate(0deg)';
+        card.style.transform = 'translate3d(0, -44px, -140px) scale(0.78) rotate(0deg)';
         card.style.zIndex = '1';
         card.style.opacity = '0';
         card.style.pointerEvents = 'none';

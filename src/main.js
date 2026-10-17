@@ -5,7 +5,7 @@
  */
 
 import { productConfig } from './config.js';
-import { ProductSlider } from './components/slider.js';
+import { SmartphoneReelsFeed, ProductSlider } from './components/slider.js';
 import { LeadFormController } from './components/leadForm.js';
 import { ImageStackController } from './components/imageStack.js';
 import { BrandLogoWall } from './components/brandWall.js';
@@ -16,6 +16,7 @@ import { TestimonialsSlider } from './components/testimonialsSlider.js';
 import { FloatingContactController } from './components/floatingContact.js';
 import { CustomCursorController } from './components/cursor.js';
 import { PhotographyMotionController } from './components/motion.js';
+import { Motion3DController } from './components/motion3d.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // 0. Initialize Premium Photography Agency Custom Cursor & Motion Design System
@@ -34,14 +35,14 @@ document.addEventListener('DOMContentLoaded', () => {
     new LeadFormController(leadFormContainer);
   }
 
-  // 3. Initialize Centered Animated Smartphone Reels Experience
+  // 3. Initialize Interactive Smartphone UGC Reels Feed
   const sliderContainer = document.getElementById('product-slider-container');
   if (sliderContainer) {
     const reelsData =
       productConfig.ugcReels && productConfig.ugcReels.length
         ? productConfig.ugcReels
         : productConfig.slider;
-    new ProductSlider(sliderContainer, reelsData);
+    new SmartphoneReelsFeed(sliderContainer, reelsData);
   }
 
   // 4. Initialize Interactive Overlapping Image Stack ("The Craft & Philosophy")
@@ -77,7 +78,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // 9. Initialize Floating Contact Toolbar, WhatsApp, Direct Call & Guided FAQ Chatbot
   new FloatingContactController(productConfig);
 
-  // 5. Initialize UGC Lightbox Modal
+  // 10. Initialize 3D Motion, Cinematic Entrances & Interactive Tilt Engine (after components mount)
+  new Motion3DController();
+
+  // 11. Initialize UGC Lightbox Modal
   const ugcModalEl = document.getElementById('ugc-modal');
   let ugcModalController = null;
   if (ugcModalEl) {

@@ -159,6 +159,14 @@
     <main id="main-content">
       <!-- SECTION 1: HERO SECTION (TWO-COLUMN LAYOUT) -->
       <section class="section-hero" id="hero">
+        <!-- Ambient 3D Creative Studio Lighting Mesh -->
+        <div class="hero-ambient-lighting" aria-hidden="true">
+          <div class="ambient-orb-3d orb-violet"></div>
+          <div class="ambient-orb-3d orb-coral"></div>
+          <div class="ambient-orb-3d orb-sky"></div>
+          <div class="ambient-orb-3d orb-lime"></div>
+        </div>
+
         <div class="container hero-grid">
           
           <!-- LEFT COLUMN: PRODUCT PITCH -->
@@ -169,8 +177,8 @@
             </div>
 
             <h1 class="hero-title">
-              <span class="hero-line-mask"><span class="hero-line-inner">Pure Acoustic Clarity.</span></span><br />
-              <span class="title-serif hero-line-mask"><span class="hero-line-inner">Crafted for Everyday Serenity.</span></span>
+              <span class="hero-line hero-line-1">Pure Acoustic Clarity.</span>
+              <span class="hero-line hero-line-2 title-serif">Crafted for Everyday Serenity.</span>
             </h1>
 
             <p class="hero-description">
@@ -253,41 +261,95 @@
             </div>
           </div>
 
-          <!-- RIGHT COLUMN: LEAD CAPTURE FORM -->
-          <div class="hero-form-column" id="lead-form">
-            <!-- Rendered dynamically by LeadFormController -->
-            <div id="lead-form-container">
+          <!-- RIGHT COLUMN: 3D LAYERED MEDIA STAGE & LEAD CAPTURE FORM -->
+          <div class="hero-stage-column" id="lead-form">
+            
+            <!-- 3D Layered Composition of Existing Product Media -->
+            <div class="hero-3d-composition tilt-card-3d" id="hero-media-card" tabindex="0" role="region" aria-label="AURA Studio 3D Acoustic Capsule Showcase">
+              <!-- Ambient soft colorful lighting behind the 3D composition -->
+              <div class="hero-composition-aura" aria-hidden="true">
+                <div class="aura-orb aura-orb-violet"></div>
+                <div class="aura-orb aura-orb-pink"></div>
+                <div class="aura-orb aura-orb-sky"></div>
+              </div>
+
+              <!-- Layer 1: Architectural Backdrop Plane (-24px translateZ) -->
+              <div class="hero-layer-backdrop" aria-hidden="true"></div>
+
+              <!-- Layer 2: Main Foreground Image Card (+16px translateZ) -->
+              <div class="hero-layer-main-card">
+                <img 
+                  src="/images/hero_product.jpg" 
+                  alt="AURA Studio Ambient Sound Capsule in Hand-Finished Cast Stone with Solid Brass Volume Dials" 
+                  class="hero-layer-img" 
+                  width="720" 
+                  height="480" 
+                  loading="eager"
+                />
+                <div class="tilt-glare-layer" aria-hidden="true"></div>
+              </div>
+
+              <!-- Layer 3: Floating Acoustic Wave Pill (+42px translateZ) -->
+              <div class="hero-layer-float-pill" aria-hidden="true">
+                <span class="live-pulse"></span>
+                <span class="pill-label">360° Studio Sound Sanctuary</span>
+              </div>
+
+              <!-- Layer 4: Floating Material & Craftsmanship Badge (+56px translateZ) -->
+              <div class="hero-layer-float-badge" aria-hidden="true">
+                <div class="badge-icon-disc">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"></circle>
+                    <path d="M12 7v5l3 2"></path>
+                  </svg>
+                </div>
+                <div class="badge-text-group">
+                  <strong class="badge-headline">Cast Mineral &amp; Solid Brass</strong>
+                  <span class="badge-caption">Bespoke Travertine Finish</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Lead Capture Form with Tactile 3D Depth -->
+            <div id="lead-form-container" class="hero-form-wrapper">
               <div class="lead-card-skeleton" aria-hidden="true">
                 <p>Loading inquiry form...</p>
               </div>
             </div>
+
           </div>
 
         </div>
       </section>
 
-      <!-- SECTION 2: PREMIUM ANIMATED SMARTPHONE REELS EXPERIENCE -->
-      <section class="section-ugc-carousel" id="product-slider">
-        <div class="container carousel-intro-container">
+      <!-- SECTION 2: INTERACTIVE SMARTPHONE UGC REELS FEED -->
+      <section class="section-ugc-reels section-ugc-carousel" id="product-slider">
+        <div class="container reels-intro-container carousel-intro-container">
           <div class="section-header-compact">
             <span class="section-eyebrow">COMMUNITY IN MOTION</span>
             <h2 class="section-title">Real Spaces. Unfiltered Acoustics.</h2>
             <p class="section-lead">
-              Watch how architects, interior creators, and morning ritualists experience AURA in their private sanctuaries. Scroll inside the phone or use the side controls to explore community reels.
+              Watch how architects, interior creators, and morning ritualists experience AURA in their private sanctuaries. Scroll inside the smartphone to explore vertical reels, tap to play or pause, and toggle audio.
             </p>
           </div>
         </div>
 
-        <!-- Centered Interactive Smartphone Showcase -->
-        <div class="ugc-smartphone-section-body">
-          <div id="product-slider-container" class="ugc-phone-container">
-            <!-- Rendered dynamically by SmartphoneReelsViewer -->
+        <!-- Centered Smartphone Reels Showcase Stage -->
+        <div class="reels-phone-showcase-wrap ugc-smartphone-section-body">
+          <div id="product-slider-container" class="smartphone-reels-mount ugc-phone-container">
+            <!-- Rendered dynamically by SmartphoneReelsFeed -->
           </div>
         </div>
       </section>
 
       <!-- SECTION 3: ABOUT THE PRODUCT / BRAND -->
       <section class="section-about" id="about">
+        <!-- Ambient 3D Colorful Studio Lighting -->
+        <div class="section-ambient-lighting" aria-hidden="true">
+          <div class="ambient-orb-3d orb-lavender"></div>
+          <div class="ambient-orb-3d orb-coral-soft"></div>
+        </div>
+
         <div class="container about-grid">
           <!-- Left: Editorial Visual (Interactive Overlapping Image Stack) -->
           <div class="about-visual-col">
@@ -382,6 +444,12 @@
 
       <!-- SECTION 5: PRODUCT GALLERY / UGC SHOWCASE -->
       <section class="section-ugc" id="ugc-showcase">
+        <!-- Ambient 3D Colorful Studio Lighting -->
+        <div class="section-ambient-lighting" aria-hidden="true">
+          <div class="ambient-orb-3d orb-sky-soft"></div>
+          <div class="ambient-orb-3d orb-lime-soft"></div>
+        </div>
+
         <div class="container">
           <div class="section-header-compact">
             <span class="section-eyebrow">COMMUNITY & MOMENTS</span>
@@ -526,6 +594,12 @@
 
       <!-- SECTION 6: CURATED VISUAL GALLERY (MASONRY) -->
       <section class="section-gallery" id="gallery">
+        <!-- Ambient 3D Colorful Studio Lighting -->
+        <div class="section-ambient-lighting" aria-hidden="true">
+          <div class="ambient-orb-3d orb-violet-soft"></div>
+          <div class="ambient-orb-3d orb-pink-soft"></div>
+        </div>
+
         <div class="container">
           <div class="section-header-compact text-center">
             <span class="section-eyebrow">CURATED PERSPECTIVES</span>

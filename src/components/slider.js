@@ -1,35 +1,47 @@
 /**
- * AURA Studio — Smartphone Reels Viewer
- * -----------------------------------------------------
- * Transforms the UGC carousel into a centered, animated smartphone mockup
- * featuring a real vertical 9:16 short-video reels feed.
+ * AURA STUDIO — SMARTPHONE REELS FEED CONTROLLER
+ * -----------------------------------------------
+ * Replaces the horizontal card carousel with a premium, centrally positioned
+ * smartphone mockup featuring a genuinely interactive vertical video feed
+ * inspired by Instagram Reels / TikTok.
  *
- * Capabilities:
- * - Centered flagship smartphone chassis with realistic physical details
- * - Dynamic Island, status bar, screen clipping & home indicator
- * - 9:16 vertical scroll-snapping feed with smooth reel transitions
- * - Mouse-wheel, touch swipe, keyboard (Arrow Up/Down), and button navigation
- * - Top segmented story progress bars (jump to any reel)
- * - Right-side functional action toolbar (Like heart toggle, sound toggle, share link toast, story details)
- * - Bottom creator profile, product tags, captions, and animated acoustic waveform
- * - Video play/pause synchronization & poster fallback
- * - Ambient floating pastel lighting orbs
- * - Full responsive scaling (1440px -> 320px) and prefers-reduced-motion support
+ * Key Capabilities:
+ * - High-precision realistic smartphone frame with ceramic pearl chassis & ambient glow
+ * - Dynamic Island / Punch-hole camera, status bar, and home indicator
+ * - Genuinely scrollable vertical feed using CSS scroll snap
+ * - Keyboard navigation (ArrowUp, ArrowDown, Space, 'M')
+ * - Flanking desktop controls (Next, Previous, 01/06 Counter)
+ * - Single dominant reel in focus with 9:16 portrait display
+ * - Play/Pause tap interactions with centered micro-feedback animations
+ * - Double-tap heart burst micro-interaction
+ * - Sound toggle (starts muted for autoplay policy compliance)
+ * - Interactive action bar: Like toggle, Mute toggle, Share with clipboard toast, Details link
+ * - Segmented story/reels progress indicator
+ * - Graceful video fallback: smoothly handles missing or erroring video files
+ *   by displaying the verified high-resolution poster without broken UI
+ * - Full reduced-motion compliance
  */
 
-export class SmartphoneReelsViewer {
+export class SmartphoneReelsFeed {
   constructor(containerElement, reelsData = [], options = {}) {
     this.container = containerElement;
     this.reels = Array.isArray(reelsData) && reelsData.length ? reelsData : [];
+    this.options = options;
+
     this.currentIndex = 0;
     this.isMuted = true;
-    this.isScrolling = false;
-    this.scrollCooldown = false;
-    this.wheelCooldownTime = 450; // ms between wheel snap steps
-    this.prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    this.intersectionObserver = null;
-    this.toastTimeout = null;
-    this.likedState = new Set(); // tracks liked reel IDs
+    this.isPlaying = true;
+    this.likedMap = new Map(); // tracks liked status per reel id
+    this.audioContext = null; // for ambient audio fallback
+
+    this.prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches;
+
+    this.feedObserver = null;
+    this.phoneEntranceObserver = null;
+    this.scrollTimeout = null;
+    this.lastTapTime = 0;
 
     this.init();
   }
@@ -39,226 +51,209 @@ export class SmartphoneReelsViewer {
 
     this.render();
     this.cacheElements();
-    this.setupIntersectionObserver();
+    this.setupReelObserver();
+    this.setupEntranceObserver();
     this.bindEvents();
+
+    // Initialize first reel state
     this.updateActiveReel(0, false);
   }
 
   render() {
     const totalReels = this.reels.length;
 
-    // Top progress segments
-    const progressSegmentsHtml = this.reels
+    // Build segment indicators
+    const segmentsHtml = this.reels
       .map(
         (_, i) => `
-        <button 
-          type="button" 
-          class="progress-segment ${i === 0 ? 'is-active is-filled' : ''}" 
-          data-segment-index="${i}" 
-          aria-label="Go to story ${i + 1} of ${totalReels}"
-        >
-          <span class="segment-fill"></span>
-        </button>
+        <div class="reel-segment-bar ${i === 0 ? 'is-active' : ''}" data-segment-index="${i}">
+          <div class="segment-fill"></div>
+        </div>
       `
       )
       .join('');
 
-    // Bottom dot indicators
-    const dotsHtml = this.reels
-      .map(
-        (_, i) => `
-        <button 
-          type="button" 
-          class="reels-dot ${i === 0 ? 'is-active' : ''}" 
-          data-dot-index="${i}" 
-          aria-label="Jump to reel ${i + 1}"
-        ></button>
-      `
-      )
-      .join('');
-
-    // Render individual reel cards inside vertical feed
+    // Build individual vertical reel cards
     const reelsHtml = this.reels
-      .map((item, index) => {
-        const hasVideo = Boolean(item.videoSrc);
-        const isLiked = this.likedState.has(item.id);
+      .map((reel, index) => {
+        const hasVideo = Boolean(reel.videoSrc);
+        const initialLiked = this.likedMap.get(reel.id) || false;
 
         return `
         <article 
-          class="reel-item ${index === 0 ? 'is-active' : ''}" 
-          data-index="${index}" 
-          data-reel-id="${item.id}"
-          role="article" 
-          aria-label="${item.title} by ${item.creator}"
+          class="phone-reel-card ${index === 0 ? 'is-current' : ''}" 
+          data-reel-id="${reel.id}"
+          data-reel-index="${index}"
+          role="group" 
+          aria-roledescription="reel" 
+          aria-label="${reel.title} by ${reel.creator}"
+          tabindex="-1"
         >
           <!-- Media Layer -->
-          <div class="reel-media-wrapper">
+          <div class="reel-media-stage">
             ${
               hasVideo
                 ? `
               <video 
-                class="reel-video-element" 
-                poster="${item.poster}"
+                class="reel-media-video" 
+                poster="${reel.poster}"
                 playsinline 
                 muted 
                 loop 
                 preload="metadata"
-                aria-label="${item.title}"
+                aria-label="${reel.title}"
               >
-                <source src="${item.videoSrc}" type="video/mp4" />
+                <source src="${reel.videoSrc}" type="video/mp4" />
               </video>
             `
                 : ''
             }
             <img 
-              src="${item.poster}" 
-              alt="${item.alt || item.title}" 
-              class="reel-poster-img ${hasVideo ? 'has-video-element' : ''}" 
+              src="${reel.poster}" 
+              alt="${reel.alt || reel.title}" 
+              class="reel-media-poster ${hasVideo ? 'with-video' : ''}"
               loading="${index === 0 ? 'eager' : 'lazy'}"
               width="720"
               height="1280"
             />
 
-            <!-- Play/Pause Feedback Circle -->
-            <div class="reel-center-feedback" aria-hidden="true">
-              <div class="feedback-circle">
-                <svg class="icon-feedback-play" viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
-                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                </svg>
-                <svg class="icon-feedback-pause" viewBox="0 0 24 24" width="28" height="28" fill="currentColor" style="display:none;">
-                  <rect x="6" y="4" width="4" height="16" rx="1.5"></rect>
-                  <rect x="14" y="4" width="4" height="16" rx="1.5"></rect>
-                </svg>
-              </div>
-            </div>
+            <!-- Top Vignette Scrim -->
+            <div class="reel-scrim-top" aria-hidden="true"></div>
+            <!-- Bottom Vignette Scrim for Caption Readability -->
+            <div class="reel-scrim-bottom" aria-hidden="true"></div>
           </div>
 
-          <!-- Vertical Functional Action Bar (Right side) -->
-          <aside class="reel-action-bar" aria-label="Reel Actions">
-            <!-- Like Button -->
+          <!-- Reel Right Action Column -->
+          <aside class="reel-actions-column" aria-label="Reel Actions">
+            <!-- Like Action -->
             <button 
               type="button" 
-              class="reel-action-btn action-like ${isLiked ? 'is-liked' : ''}" 
+              class="reel-action-btn btn-like ${initialLiked ? 'is-liked' : ''}" 
               data-action="like" 
-              data-reel-id="${item.id}"
-              aria-label="Love this reel" 
-              title="Love this reel"
+              aria-label="Like this reel"
+              title="Like"
             >
               <div class="action-btn-circle">
-                <svg class="heart-icon" viewBox="0 0 24 24" width="19" height="19" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg class="icon-heart" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                 </svg>
               </div>
-              <span class="action-label like-label">${isLiked ? 'Loved' : 'Love'}</span>
+              <span class="action-btn-label">Like</span>
             </button>
 
-            <!-- Audio Mute/Unmute Button -->
+            <!-- Sound Mute/Unmute Action -->
             <button 
               type="button" 
-              class="reel-action-btn action-sound" 
-              data-action="sound" 
-              aria-label="Toggle sound" 
-              title="Mute / Unmute audio"
+              class="reel-action-btn btn-audio" 
+              data-action="audio" 
+              aria-label="Toggle audio"
+              title="Mute / Unmute"
             >
               <div class="action-btn-circle">
-                <svg class="sound-icon-muted" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg class="icon-sound-muted" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
                   <line x1="23" y1="9" x2="17" y2="15"></line>
                   <line x1="17" y1="9" x2="23" y2="15"></line>
                 </svg>
-                <svg class="sound-icon-unmuted" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                <svg class="icon-sound-unmuted" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:none;">
                   <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
                   <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
                 </svg>
               </div>
-              <span class="action-label sound-label">Sound</span>
+              <span class="action-btn-label">Sound</span>
             </button>
 
-            <!-- Share / Copy Link Button -->
+            <!-- Share Action -->
             <button 
               type="button" 
-              class="reel-action-btn action-share" 
+              class="reel-action-btn btn-share" 
               data-action="share" 
-              data-reel-id="${item.id}"
-              aria-label="Share this reel" 
-              title="Copy share link"
+              aria-label="Share this reel"
+              title="Share Link"
             >
               <div class="action-btn-circle">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="18" cy="5" r="3"></circle>
-                  <circle cx="6" cy="12" r="3"></circle>
-                  <circle cx="18" cy="19" r="3"></circle>
-                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                 </svg>
               </div>
-              <span class="action-label">Share</span>
+              <span class="action-btn-label">Share</span>
             </button>
 
-            <!-- Details / Lightbox Expand Button -->
-            <button 
-              type="button" 
-              class="reel-action-btn action-details" 
-              data-action="details" 
-              data-reel-id="${item.id}"
-              aria-label="Open detailed story lightbox" 
-              title="Expand story"
+            <!-- Inquire / Lead Form Action -->
+            <a 
+              href="#lead-form" 
+              class="reel-action-btn btn-inquire" 
+              data-action="inquire" 
+              aria-label="Inquire about ${reel.productTag}"
+              title="Product Details"
             >
-              <div class="action-btn-circle">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="15 3 21 3 21 9"></polyline>
-                  <polyline points="9 21 3 21 3 15"></polyline>
-                  <line x1="21" y1="3" x2="14" y2="10"></line>
-                  <line x1="3" y1="21" x2="10" y2="14"></line>
+              <div class="action-btn-circle circle-accent">
+                <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <path d="M16 10a4 4 0 0 1-8 0"></path>
                 </svg>
               </div>
-              <span class="action-label">Story</span>
-            </button>
+              <span class="action-btn-label">Details</span>
+            </a>
+
+            <!-- Spinning Vinyl Audio Disc (Signature Reels Feature) -->
+            <div class="reel-vinyl-disc" aria-hidden="true" title="Audio disc">
+              <div class="vinyl-body">
+                <div class="vinyl-groove"></div>
+                <div class="vinyl-label">${reel.avatar || reel.creator.charAt(0)}</div>
+              </div>
+              <span class="vinyl-music-note note-1">♪</span>
+              <span class="vinyl-music-note note-2">♫</span>
+            </div>
           </aside>
 
-          <!-- Bottom Creator & Caption Overlay -->
-          <div class="reel-bottom-overlay">
+          <!-- Bottom Caption Overlay -->
+          <div class="reel-caption-overlay">
             <!-- Creator Profile Header -->
             <div class="reel-creator-header">
-              <div class="reel-creator-avatar">${item.avatar || item.creator.charAt(0)}</div>
-              <div class="reel-creator-meta">
-                <div class="reel-handle-line">
-                  <span class="reel-creator-handle">${item.handle}</span>
-                  <svg class="verified-check" viewBox="0 0 24 24" width="14" height="14" fill="#3897F0" aria-label="Verified Creator">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-5-5 1.41-1.41L11 14.17l7.59-7.59L20 8l-9 9z"></path>
-                  </svg>
-                </div>
-                <span class="reel-creator-role">${item.role}</span>
+              <div class="reel-creator-avatar">
+                <span>${reel.avatar || reel.creator.charAt(0)}</span>
               </div>
-            </div>
-
-            <!-- Product Pill & Duration -->
-            <div class="reel-tag-row">
-              <span class="reel-product-pill">
-                <span class="tag-dot"></span>
-                <span>${item.productTag}</span>
-              </span>
-              <span class="reel-duration-badge">${item.duration}</span>
+              <div class="reel-creator-info">
+                <div class="reel-handle-group">
+                  <span class="reel-creator-handle">${reel.handle}</span>
+                  <button type="button" class="reel-follow-chip" aria-label="Follow ${reel.handle}">Follow</button>
+                </div>
+                <span class="reel-creator-role">${reel.role}</span>
+              </div>
             </div>
 
             <!-- Title & Caption -->
-            <h3 class="reel-item-title">${item.title}</h3>
-            <p class="reel-caption-text">${item.caption}</p>
+            <h3 class="reel-title-heading">${reel.title}</h3>
+            <p class="reel-caption-body">${reel.caption}</p>
 
-            <!-- Mini Acoustic Waveform -->
-            <div class="reel-waveform-row" aria-hidden="true">
-              <svg class="waveform-music-note" viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <!-- Product Pill Tag -->
+            <a href="#lead-form" class="reel-product-pill" title="Learn about ${reel.productTag}">
+              <svg class="pill-spark-icon" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+                <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z"/>
               </svg>
-              <span class="waveform-label">AURA Ambient Sanctuary • 360° Studio Sound</span>
-              <div class="waveform-bars">
-                <span class="w-bar bar-1"></span>
-                <span class="w-bar bar-2"></span>
-                <span class="w-bar bar-3"></span>
-                <span class="w-bar bar-4"></span>
+              <span class="pill-tag-text">${reel.productTag}</span>
+              <svg class="pill-arrow-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </a>
+
+            <!-- Audio Track Indicator -->
+            <div class="reel-audio-track-tag" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor">
+                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+              </svg>
+              <div class="audio-marquee">
+                <span>${reel.creator} • AURA 360° Studio Sound Experience</span>
               </div>
             </div>
+          </div>
+
+          <!-- Bottom Time Progress Track -->
+          <div class="reel-time-progress" aria-hidden="true">
+            <div class="progress-bar-fill"></div>
           </div>
         </article>
       `;
@@ -266,585 +261,720 @@ export class SmartphoneReelsViewer {
       .join('');
 
     this.container.innerHTML = `
-      <div class="smartphone-reels-experience" role="region" aria-label="AURA Interactive Smartphone UGC Feed">
-        <!-- Ambient Pastel Glow Orbs behind Phone -->
-        <div class="ambient-phone-glow" aria-hidden="true">
-          <div class="ambient-orb orb-lavender"></div>
-          <div class="ambient-orb orb-pink"></div>
-          <div class="ambient-orb orb-blue"></div>
-          <div class="ambient-orb orb-lime"></div>
+      <div class="smartphone-showcase-stage" id="smartphone-stage">
+        
+        <!-- Soft Pastel Ambient Backlight Aura (Violet, Pink, Sky Blue) -->
+        <div class="smartphone-ambient-aura" aria-hidden="true">
+          <div class="aura-glow-orb orb-violet"></div>
+          <div class="aura-glow-orb orb-pink"></div>
+          <div class="aura-glow-orb orb-sky"></div>
         </div>
 
-        <!-- Phone Stage: Prev Arrow + Phone Mockup + Next Arrow -->
-        <div class="phone-stage-container">
-          <!-- Desktop Prev Reel Floating Button -->
-          <button 
-            type="button" 
-            class="reel-stage-nav btn-stage-prev" 
-            id="reel-stage-prev" 
-            aria-label="Previous reel story"
-            title="Previous story (or scroll up)"
-          >
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="18 15 12 9 6 15"></polyline>
-            </svg>
-            <span class="nav-direction-text">Prev</span>
-          </button>
+        <!-- Phone Hardware Mockup -->
+        <div 
+          class="smartphone-device-frame" 
+          id="smartphone-frame"
+          tabindex="0"
+          role="region"
+          aria-label="Interactive Smartphone UGC Reels Feed"
+        >
+          <!-- Physical Hardware Exterior Accents -->
+          <div class="phone-edge-highlight" aria-hidden="true"></div>
+          <div class="phone-button-vol-up" aria-hidden="true"></div>
+          <div class="phone-button-vol-down" aria-hidden="true"></div>
+          <div class="phone-button-power" aria-hidden="true"></div>
+          
+          <!-- Phone Chassis Bezel -->
+          <div class="phone-chassis-bezel">
+            
+            <!-- Top Speaker Grille -->
+            <div class="phone-top-speaker" aria-hidden="true"></div>
 
-          <!-- Smartphone Hardware Chassis -->
-          <div 
-            class="smartphone-chassis" 
-            id="smartphone-chassis" 
-            tabindex="0" 
-            role="application" 
-            aria-label="Interactive Smartphone: Use Arrow keys or scroll inside to navigate reels"
-          >
-            <!-- Hardware Buttons on Chassis Edges -->
-            <div class="phone-btn-volume-up" aria-hidden="true"></div>
-            <div class="phone-btn-volume-down" aria-hidden="true"></div>
-            <div class="phone-btn-action" aria-hidden="true"></div>
-            <div class="phone-btn-power" aria-hidden="true"></div>
-
-            <!-- Outer Bezel Frame -->
-            <div class="phone-bezel">
-              <!-- Clipped Screen Viewport -->
-              <div class="phone-screen" id="phone-screen">
-
-                <!-- Phone Status Bar -->
-                <header class="phone-status-bar" aria-hidden="true">
-                  <span class="status-time">9:41</span>
-                  
-                  <!-- Dynamic Island Pill Cutout -->
-                  <div class="dynamic-island">
-                    <span class="island-camera"></span>
-                    <span class="island-sensor"></span>
-                    <span class="island-pulse"></span>
-                  </div>
-
-                  <div class="status-system-icons">
-                    <!-- Cellular -->
-                    <svg class="sys-icon" viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
-                      <rect x="2" y="16" width="3" height="6" rx="0.5"/>
-                      <rect x="7" y="12" width="3" height="10" rx="0.5"/>
-                      <rect x="12" y="8" width="3" height="14" rx="0.5"/>
-                      <rect x="17" y="4" width="3" height="18" rx="0.5"/>
-                    </svg>
-                    <!-- Wifi -->
-                    <svg class="sys-icon" viewBox="0 0 24 24" width="13" height="13" fill="currentColor">
-                      <path d="M12 18c.8 0 1.5.7 1.5 1.5S12.8 21 12 21s-1.5-.7-1.5-1.5S11.2 18 12 18zm-4.9-3.9a7 7 0 0 1 9.8 0l-1.4 1.4a5 5 0 0 0-7 0l-1.4-1.4zm-2.8-2.8a11 11 0 0 1 15.4 0l-1.4 1.4a9 9 0 0 0-12.6 0l-1.4-1.4z"/>
-                    </svg>
-                    <!-- Battery -->
-                    <svg class="sys-icon" viewBox="0 0 24 24" width="15" height="13" fill="currentColor">
-                      <rect x="2" y="6" width="16" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
-                      <rect x="4" y="8" width="11" height="8" rx="1"/>
-                      <path d="M20 10v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                  </div>
-                </header>
-
-                <!-- Top Segmented Story Progress Bars -->
-                <nav class="phone-progress-bar" id="phone-progress-bar" aria-label="Reel story progress">
-                  ${progressSegmentsHtml}
-                </nav>
-
-                <!-- Vertical Snap Reels Feed Viewport -->
-                <main 
-                  class="reels-feed-viewport" 
-                  id="reels-feed-viewport" 
-                  tabindex="0" 
-                  role="feed" 
-                  aria-label="Sanctuary Stories Vertical Feed"
-                >
-                  ${reelsHtml}
-                </main>
-
-                <!-- In-Phone Feedback Toast Message -->
-                <div class="phone-toast-pill" id="phone-toast-pill" aria-live="polite">
-                  <span class="toast-text" id="phone-toast-text">Link copied to clipboard! ✨</span>
+            <!-- Active Glass Display Screen -->
+            <div class="phone-screen-viewport">
+              
+              <!-- Native Phone Status Bar Header -->
+              <header class="phone-status-bar" aria-hidden="true">
+                <span class="status-clock">9:41</span>
+                
+                <!-- Dynamic Island / Sleek Camera Pill -->
+                <div class="dynamic-island-pill" title="Dynamic Island">
+                  <span class="island-lens-circle"></span>
+                  <span class="island-mic-dot"></span>
+                  <span class="island-sound-indicator">
+                    <span class="eq-bar bar-1"></span>
+                    <span class="eq-bar bar-2"></span>
+                    <span class="eq-bar bar-3"></span>
+                  </span>
                 </div>
 
-                <!-- Initial Gentle Swipe Hint -->
-                <div class="phone-swipe-hint" id="phone-swipe-hint" aria-hidden="true">
-                  <span class="swipe-hint-chevron">
-                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                      <polyline points="18 15 12 9 6 15"></polyline>
+                <!-- Signal, Wi-Fi, Battery Icons -->
+                <div class="status-icons-group">
+                  <svg class="status-svg" viewBox="0 0 18 12" width="15" height="10" fill="currentColor">
+                    <rect x="0" y="8" width="3" height="4" rx="0.5"/>
+                    <rect x="4" y="6" width="3" height="6" rx="0.5"/>
+                    <rect x="8" y="3.5" width="3" height="8.5" rx="0.5"/>
+                    <rect x="12" y="0.5" width="3" height="11.5" rx="0.5"/>
+                  </svg>
+                  <svg class="status-svg" viewBox="0 0 16 12" width="14" height="10" fill="currentColor">
+                    <path d="M8 9.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM4.7 7.7a4.67 4.67 0 0 1 6.6 0 .8.8 0 0 0 1.13-1.13 6.27 6.27 0 0 0-8.86 0 .8.8 0 0 0 1.13 1.13zm-2.83-2.83a8.67 8.67 0 0 1 12.26 0 .8.8 0 0 0 1.13-1.13 10.27 10.27 0 0 0-14.52 0 .8.8 0 0 0 1.13 1.13z"/>
+                  </svg>
+                  <svg class="status-svg" viewBox="0 0 24 12" width="20" height="10" fill="currentColor">
+                    <rect x="0.5" y="0.5" width="20" height="11" rx="3" stroke="currentColor" fill="none" stroke-width="1"/>
+                    <rect x="2.5" y="2.5" width="14" height="7" rx="1.5"/>
+                    <path d="M22 4v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </div>
+              </header>
+
+              <!-- Story / Segment Progress Bars -->
+              <div class="phone-segments-track" aria-hidden="true">
+                ${segmentsHtml}
+              </div>
+
+              <!-- Reels App Header Overlay -->
+              <div class="phone-reels-header">
+                <div class="reels-header-left">
+                  <span class="reels-app-logo">Reels</span>
+                  <span class="reels-community-badge">AURA Studio</span>
+                </div>
+                
+                <button 
+                  type="button" 
+                  class="reels-top-sound-btn" 
+                  aria-label="Toggle sound across all reels"
+                  title="Toggle Sound"
+                >
+                  <span class="sound-top-icon icon-top-muted">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                      <line x1="23" y1="9" x2="17" y2="15"></line>
+                      <line x1="17" y1="9" x2="23" y2="15"></line>
                     </svg>
                   </span>
-                  <span class="swipe-hint-label">Scroll inside phone</span>
+                  <span class="sound-top-icon icon-top-unmuted" style="display:none;">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                      <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                  </span>
+                </button>
+              </div>
+
+              <!-- The Genuine Vertically Scrollable Reels Feed Track -->
+              <div 
+                class="phone-reels-feed-scroll" 
+                id="reels-scroll-feed" 
+                tabindex="-1"
+                aria-label="Vertical Reels Track. Scroll inside phone or use Arrow Keys to navigate."
+              >
+                ${reelsHtml}
+              </div>
+
+              <!-- Interactive Center Pop Indicator (Play / Pause / Heart Burst) -->
+              <div class="reel-center-pop" id="center-pop" aria-hidden="true">
+                <div class="pop-icon-box pop-play">
+                  <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
                 </div>
+                <div class="pop-icon-box pop-pause">
+                  <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                    <rect x="6" y="4" width="4" height="16" rx="1"></rect>
+                    <rect x="14" y="4" width="4" height="16" rx="1"></rect>
+                  </svg>
+                </div>
+                <div class="pop-icon-box pop-heart">
+                  <svg viewBox="0 0 24 24" width="44" height="44" fill="#F43F5E">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                  </svg>
+                </div>
+              </div>
 
-                <!-- Bottom Home Bar Indicator -->
-                <div class="phone-home-bar" aria-hidden="true"></div>
+              <!-- In-Phone Copied Toast Notification -->
+              <div class="phone-toast-pill" id="phone-toast" role="status" aria-live="polite">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span>Reel link copied to clipboard</span>
+              </div>
 
-              </div> <!-- /.phone-screen -->
-            </div> <!-- /.phone-bezel -->
-          </div> <!-- /.smartphone-chassis -->
+              <!-- Bottom Home Indicator Bar -->
+              <div class="phone-home-indicator" aria-hidden="true"></div>
 
-          <!-- Desktop Next Reel Floating Button -->
-          <button 
-            type="button" 
-            class="reel-stage-nav btn-stage-next" 
-            id="reel-stage-next" 
-            aria-label="Next reel story"
-            title="Next story (or scroll down)"
-          >
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="6 9 12 15 18 9"></polyline>
+            </div> <!-- /phone-screen-viewport -->
+          </div> <!-- /phone-chassis-bezel -->
+
+          <!-- Flanking Desktop Quick Navigation Controls -->
+          <div class="phone-flanking-controls" aria-label="Reel Navigation Controls">
+            <button 
+              type="button" 
+              class="flank-nav-btn btn-flank-prev" 
+              id="flank-prev-btn"
+              aria-label="Previous reel" 
+              title="Previous Reel (Up Arrow)"
+            >
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="18 15 12 9 6 15"></polyline>
+              </svg>
+            </button>
+
+            <div class="flank-counter-badge" aria-live="polite">
+              <span class="counter-num current-reel-num">01</span>
+              <span class="counter-divider">/</span>
+              <span class="counter-num total-reel-num">0${totalReels}</span>
+            </div>
+
+            <button 
+              type="button" 
+              class="flank-nav-btn btn-flank-next" 
+              id="flank-next-btn"
+              aria-label="Next reel" 
+              title="Next Reel (Down Arrow)"
+            >
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </button>
+          </div>
+
+        </div> <!-- /smartphone-device-frame -->
+
+        <!-- Bottom Accessibility & Interaction Hint -->
+        <div class="smartphone-hint-bar" aria-hidden="true">
+          <span class="hint-pill-glass">
+            <svg class="hint-arrow-anim" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <polyline points="19 12 12 19 5 12"></polyline>
             </svg>
-            <span class="nav-direction-text">Next</span>
-          </button>
-        </div> <!-- /.phone-stage-container -->
-
-        <!-- Bottom Controller Bar (Reel Counter + Dots + Quick Jump) -->
-        <div class="reels-bottom-controls">
-          <div class="reels-counter-badge">
-            <span class="counter-pulse" aria-hidden="true"></span>
-            <span class="counter-numbers">
-              <strong class="counter-curr" id="reel-counter-curr">1</strong>
-              <span class="counter-div">/</span>
-              <span class="counter-total">${totalReels}</span>
-            </span>
-            <span class="counter-label">Sanctuary Reels</span>
-          </div>
-
-          <div class="reels-dots-bar" id="reels-dots-bar" aria-label="Reel selection dots">
-            ${dotsHtml}
-          </div>
-
-          <div class="reels-desktop-hints">
-            <span class="kbd-pill"><kbd>↑</kbd> <kbd>↓</kbd> Keys</span>
-            <span class="hint-sep">•</span>
-            <span class="kbd-pill">Mouse Wheel Inside</span>
-          </div>
+            Scroll inside phone or use ↑ / ↓ arrow keys
+          </span>
         </div>
-      </div>
+
+      </div> <!-- /smartphone-showcase-stage -->
     `;
   }
 
   cacheElements() {
-    this.stageWrapper = this.container.querySelector('.smartphone-reels-experience');
-    this.chassis = this.container.querySelector('#smartphone-chassis');
-    this.screen = this.container.querySelector('#phone-screen');
-    this.viewport = this.container.querySelector('#reels-feed-viewport');
-    this.reelItems = Array.from(this.container.querySelectorAll('.reel-item'));
-    this.progressSegments = Array.from(this.container.querySelectorAll('.progress-segment'));
-    this.dots = Array.from(this.container.querySelectorAll('.reels-dot'));
-    this.prevBtn = this.container.querySelector('#reel-stage-prev');
-    this.nextBtn = this.container.querySelector('#reel-stage-next');
-    this.counterCurr = this.container.querySelector('#reel-counter-curr');
-    this.toastPill = this.container.querySelector('#phone-toast-pill');
-    this.toastText = this.container.querySelector('#phone-toast-text');
-    this.swipeHint = this.container.querySelector('#phone-swipe-hint');
+    this.stage = this.container.querySelector('#smartphone-stage');
+    this.frame = this.container.querySelector('#smartphone-frame');
+    this.feed = this.container.querySelector('#reels-scroll-feed');
+    this.cards = Array.from(this.container.querySelectorAll('.phone-reel-card'));
+    this.segments = Array.from(
+      this.container.querySelectorAll('.reel-segment-bar')
+    );
+    this.centerPop = this.container.querySelector('#center-pop');
+    this.toast = this.container.querySelector('#phone-toast');
+    this.prevBtn = this.container.querySelector('#flank-prev-btn');
+    this.nextBtn = this.container.querySelector('#flank-next-btn');
+    this.currentNumEl = this.container.querySelector('.current-reel-num');
+    this.topSoundBtn = this.container.querySelector('.reels-top-sound-btn');
+
+    // Handle video errors gracefully for each reel
+    this.cards.forEach((card) => {
+      const video = card.querySelector('video');
+      const poster = card.querySelector('.reel-media-poster');
+
+      if (video) {
+        // If the video fails to load (404), hide it and mark card as visual edition
+        video.addEventListener('error', () => {
+          video.style.display = 'none';
+          if (poster) {
+            poster.classList.remove('with-video');
+            poster.classList.add('is-fallback-poster');
+          }
+          card.classList.add('is-photo-story');
+        });
+
+        // When video metadata / frame is loaded
+        video.addEventListener('loadeddata', () => {
+          card.classList.remove('is-photo-story');
+          card.classList.add('is-video-ready');
+        });
+
+        // Loop time update for progress bar
+        video.addEventListener('timeupdate', () => {
+          if (video.duration && !card.classList.contains('is-photo-story')) {
+            const pct = (video.currentTime / video.duration) * 100;
+            const progressFill = card.querySelector('.progress-bar-fill');
+            if (progressFill) progressFill.style.width = `${pct}%`;
+          }
+        });
+      } else {
+        card.classList.add('is-photo-story');
+      }
+    });
   }
 
-  setupIntersectionObserver() {
-    // Detect which reel is currently active inside the scroll viewport
-    const options = {
-      root: this.viewport,
-      threshold: 0.6,
+  setupReelObserver() {
+    if (!this.feed) return;
+
+    // Observe each reel card to determine active snap position
+    const observerOptions = {
+      root: this.feed,
+      rootMargin: '0px',
+      threshold: 0.6, // dominant visibility
     };
 
-    this.intersectionObserver = new IntersectionObserver((entries) => {
+    this.feedObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          const index = parseInt(entry.target.getAttribute('data-index'), 10);
+          const index = parseInt(
+            entry.target.getAttribute('data-reel-index'),
+            10
+          );
           if (!isNaN(index) && index !== this.currentIndex) {
             this.updateActiveReel(index, true);
           }
         }
       });
-    }, options);
+    }, observerOptions);
 
-    this.reelItems.forEach((item) => {
-      this.intersectionObserver.observe(item);
-    });
+    this.cards.forEach((card) => this.feedObserver.observe(card));
   }
 
-  bindEvents() {
-    // 1. Desktop Prev/Next Buttons
-    this.prevBtn?.addEventListener('click', () => this.goToPrevReel());
-    this.nextBtn?.addEventListener('click', () => this.goToNextReel());
+  setupEntranceObserver() {
+    if (!this.frame) return;
 
-    // 2. Click on Progress Segments (Direct Jump)
-    this.progressSegments.forEach((segment) => {
-      segment.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const index = parseInt(segment.getAttribute('data-segment-index'), 10);
-        if (!isNaN(index)) this.goToReel(index);
-      });
-    });
-
-    // 3. Click on Dots
-    this.dots.forEach((dot) => {
-      dot.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const index = parseInt(dot.getAttribute('data-dot-index'), 10);
-        if (!isNaN(index)) this.goToReel(index);
-      });
-    });
-
-    // 4. Mouse Wheel over Phone Screen: smooth reel-by-reel snapping without hijacking outer page scroll
-    this.setupWheelHandler();
-
-    // 5. Keyboard Navigation when focused on Phone Chassis or Viewport
-    const handleKeyNav = (e) => {
-      if (['ArrowDown', 'PageDown'].includes(e.key)) {
-        e.preventDefault();
-        this.goToNextReel();
-      } else if (['ArrowUp', 'PageUp'].includes(e.key)) {
-        e.preventDefault();
-        this.goToPrevReel();
-      } else if (e.key === ' ' && e.target === this.viewport) {
-        e.preventDefault();
-        this.toggleCurrentPlayPause();
-      }
-    };
-
-    this.chassis?.addEventListener('keydown', handleKeyNav);
-    this.viewport?.addEventListener('keydown', handleKeyNav);
-
-    // 6. Action buttons inside reels (Like, Sound, Share, Details)
-    this.setupReelActionButtons();
-
-    // 7. Video Play/Pause toggle on clicking media
-    this.setupMediaClickHandlers();
-
-    // 8. Dismiss swipe hint after first interaction
-    const dismissHint = () => {
-      if (this.swipeHint) {
-        this.swipeHint.style.opacity = '0';
-        this.swipeHint.style.pointerEvents = 'none';
-      }
-    };
-    this.viewport?.addEventListener('scroll', dismissHint, { once: true, passive: true });
-    this.viewport?.addEventListener('touchstart', dismissHint, { once: true, passive: true });
-  }
-
-  setupWheelHandler() {
-    if (!this.viewport) return;
-
-    this.viewport.addEventListener(
-      'wheel',
-      (e) => {
-        const delta = e.deltaY;
-        const isAtTop = this.viewport.scrollTop <= 5;
-        const isAtBottom =
-          this.viewport.scrollTop + this.viewport.clientHeight >=
-          this.viewport.scrollHeight - 5;
-
-        // If scrolling down and not at the very end, handle inside phone
-        if (delta > 20) {
-          if (!isAtBottom) {
-            e.preventDefault();
-            if (!this.scrollCooldown) {
-              this.scrollCooldown = true;
-              this.goToNextReel();
-              setTimeout(() => {
-                this.scrollCooldown = false;
-              }, this.wheelCooldownTime);
-            }
-          }
-        } else if (delta < -20) {
-          // If scrolling up and not at the top, handle inside phone
-          if (!isAtTop) {
-            e.preventDefault();
-            if (!this.scrollCooldown) {
-              this.scrollCooldown = true;
-              this.goToPrevReel();
-              setTimeout(() => {
-                this.scrollCooldown = false;
-              }, this.wheelCooldownTime);
-            }
-          }
-        }
-      },
-      { passive: false }
-    );
-  }
-
-  setupReelActionButtons() {
-    this.container.addEventListener('click', (e) => {
-      const btn = e.target.closest('.reel-action-btn');
-      if (!btn) return;
-
-      e.stopPropagation();
-      const action = btn.getAttribute('data-action');
-      const reelId = btn.getAttribute('data-reel-id');
-      const reelItem = this.reels.find((r) => r.id === reelId);
-
-      switch (action) {
-        case 'like':
-          this.handleLikeAction(btn, reelId);
-          break;
-        case 'sound':
-          this.handleSoundAction();
-          break;
-        case 'share':
-          this.handleShareAction(reelItem);
-          break;
-        case 'details':
-          this.handleDetailsAction(reelItem);
-          break;
-      }
-    });
-  }
-
-  handleLikeAction(btn, reelId) {
-    const heartSvg = btn.querySelector('.heart-icon');
-    const label = btn.querySelector('.like-label');
-    const isLiked = this.likedState.has(reelId);
-
-    if (isLiked) {
-      this.likedState.delete(reelId);
-      btn.classList.remove('is-liked');
-      if (heartSvg) heartSvg.setAttribute('fill', 'none');
-      if (label) label.textContent = 'Love';
-      this.showToast('Unsaved from favourites');
-    } else {
-      this.likedState.add(reelId);
-      btn.classList.add('is-liked');
-      if (heartSvg) heartSvg.setAttribute('fill', 'currentColor');
-      if (label) label.textContent = 'Loved';
-
-      // Pulse animation
-      btn.classList.add('heart-burst');
-      setTimeout(() => btn.classList.remove('heart-burst'), 600);
-
-      this.showToast('Added to favourite spaces ❤️');
-    }
-  }
-
-  handleSoundAction() {
-    this.isMuted = !this.isMuted;
-
-    // Apply to all video elements
-    const allVideos = this.container.querySelectorAll('video');
-    allVideos.forEach((v) => {
-      v.muted = this.isMuted;
-    });
-
-    // Update all sound buttons
-    const allSoundBtns = this.container.querySelectorAll('.action-sound');
-    allSoundBtns.forEach((btn) => {
-      const mutedIcon = btn.querySelector('.sound-icon-muted');
-      const unmutedIcon = btn.querySelector('.sound-icon-unmuted');
-      const label = btn.querySelector('.sound-label');
-
-      if (mutedIcon) mutedIcon.style.display = this.isMuted ? 'block' : 'none';
-      if (unmutedIcon) unmutedIcon.style.display = this.isMuted ? 'none' : 'block';
-      if (label) label.textContent = this.isMuted ? 'Muted' : 'Sound';
-    });
-
-    this.showToast(this.isMuted ? 'Audio muted 🔇' : 'Acoustics unmuted 🔊');
-  }
-
-  handleShareAction(reelItem) {
-    const title = reelItem ? reelItem.title : 'AURA Studio Reel';
-    const url = window.location.href.split('#')[0] + `#reel-${reelItem ? reelItem.id : ''}`;
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard
-        .writeText(url)
-        .then(() => {
-          this.showToast('Story link copied to clipboard! 📋');
-        })
-        .catch(() => {
-          this.showToast(`Shared: ${title}`);
-        });
-    } else {
-      this.showToast(`Shared: ${title}`);
-    }
-  }
-
-  handleDetailsAction(reelItem) {
-    if (!reelItem) return;
-
-    // Dispatch the existing ugc-reel-clicked event to open the studio modal
-    const event = new CustomEvent('ugc-reel-clicked', {
-      detail: reelItem,
-      bubbles: true,
-    });
-    this.container.dispatchEvent(event);
-  }
-
-  setupMediaClickHandlers() {
-    this.reelItems.forEach((item) => {
-      const mediaWrapper = item.querySelector('.reel-media-wrapper');
-      if (!mediaWrapper) return;
-
-      mediaWrapper.addEventListener('click', (e) => {
-        // Ignore if clicking action toolbar
-        if (e.target.closest('.reel-action-bar')) return;
-
-        const video = item.querySelector('video');
-        const feedback = item.querySelector('.reel-center-feedback');
-        const playIcon = item.querySelector('.icon-feedback-play');
-        const pauseIcon = item.querySelector('.icon-feedback-pause');
-
-        if (video) {
-          if (video.paused) {
-            video.play().catch(() => {});
-            this.showFeedbackPulse(feedback, playIcon, pauseIcon, false);
+    const entranceObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            this.frame.classList.add('has-entered');
+            // Autoplay current reel if allowed
+            this.playReel(this.currentIndex);
           } else {
-            video.pause();
-            this.showFeedbackPulse(feedback, playIcon, pauseIcon, true);
+            this.pauseAllReels();
           }
-        } else {
-          // Poster image only: show soft interactive pulse & open details
-          const reelId = item.getAttribute('data-reel-id');
-          const reelData = this.reels.find((r) => r.id === reelId);
-          if (reelData) {
-            this.handleDetailsAction(reelData);
-          }
-        }
-      });
+        });
+      },
+      { threshold: 0.25 }
+    );
+
+    entranceObserver.observe(this.frame);
+    this.phoneEntranceObserver = entranceObserver;
+  }
+
+  updateActiveReel(index, shouldPlay = true) {
+    if (index < 0 || index >= this.reels.length) return;
+
+    const prevIndex = this.currentIndex;
+    this.currentIndex = index;
+
+    // Pause previous video
+    if (prevIndex !== index && this.cards[prevIndex]) {
+      this.pauseReel(prevIndex);
+      this.cards[prevIndex].classList.remove('is-current');
+    }
+
+    // Activate current card
+    const currentCard = this.cards[index];
+    if (currentCard) {
+      currentCard.classList.add('is-current');
+      if (shouldPlay && this.isPlaying) {
+        this.playReel(index);
+      }
+    }
+
+    // Update segment timeline bars
+    this.segments.forEach((seg, i) => {
+      seg.classList.remove('is-active', 'is-completed');
+      if (i < index) {
+        seg.classList.add('is-completed');
+      } else if (i === index) {
+        seg.classList.add('is-active');
+      }
+    });
+
+    // Update flanking counter
+    if (this.currentNumEl) {
+      this.currentNumEl.textContent = `0${index + 1}`;
+    }
+
+    // Update button states
+    if (this.prevBtn) {
+      this.prevBtn.disabled = index === 0;
+      this.prevBtn.style.opacity = index === 0 ? '0.4' : '1';
+    }
+    if (this.nextBtn) {
+      this.nextBtn.disabled = index === this.reels.length - 1;
+      this.nextBtn.style.opacity =
+        index === this.reels.length - 1 ? '0.4' : '1';
+    }
+  }
+
+  playReel(index) {
+    const card = this.cards[index];
+    if (!card) return;
+
+    const video = card.querySelector('video');
+    if (video && video.style.display !== 'none') {
+      video.muted = this.isMuted;
+      video.playsInline = true;
+
+      // Autoplay promise handling
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Autoplay blocked by browser policy; retain poster & wait for user gesture
+          video.muted = true;
+          this.isMuted = true;
+          this.updateAudioIcons();
+        });
+      }
+    }
+
+    // Animate vinyl disc when active
+    const vinyl = card.querySelector('.reel-vinyl-disc');
+    if (vinyl && !this.prefersReducedMotion) {
+      vinyl.classList.add('is-spinning');
+    }
+  }
+
+  pauseReel(index) {
+    const card = this.cards[index];
+    if (!card) return;
+
+    const video = card.querySelector('video');
+    if (video) {
+      video.pause();
+    }
+
+    const vinyl = card.querySelector('.reel-vinyl-disc');
+    if (vinyl) {
+      vinyl.classList.remove('is-spinning');
+    }
+  }
+
+  pauseAllReels() {
+    this.cards.forEach((card) => {
+      const video = card.querySelector('video');
+      if (video) video.pause();
+      const vinyl = card.querySelector('.reel-vinyl-disc');
+      if (vinyl) vinyl.classList.remove('is-spinning');
     });
   }
 
-  showFeedbackPulse(feedbackEl, playIcon, pauseIcon, isNowPaused) {
-    if (!feedbackEl) return;
+  scrollToReel(index) {
+    if (!this.feed || index < 0 || index >= this.reels.length) return;
+    const targetCard = this.cards[index];
+    if (targetCard) {
+      this.feed.scrollTo({
+        top: targetCard.offsetTop,
+        behavior: this.prefersReducedMotion ? 'auto' : 'smooth',
+      });
+    }
+  }
 
-    if (playIcon) playIcon.style.display = isNowPaused ? 'none' : 'block';
-    if (pauseIcon) pauseIcon.style.display = isNowPaused ? 'block' : 'none';
+  toggleSound() {
+    this.isMuted = !this.isMuted;
+    this.updateAudioIcons();
 
-    feedbackEl.classList.remove('pulse-active');
-    void feedbackEl.offsetWidth; // trigger reflow
-    feedbackEl.classList.add('pulse-active');
+    // Apply to all videos
+    this.cards.forEach((card) => {
+      const video = card.querySelector('video');
+      if (video) {
+        video.muted = this.isMuted;
+      }
+    });
+
+    // Provide warm ambient harmonic acoustic tone via Web Audio when unmuted
+    if (!this.isMuted) {
+      this.playAcousticChime();
+    }
+  }
+
+  updateAudioIcons() {
+    const mutedSvg = this.container.querySelectorAll(
+      '.icon-sound-muted, .icon-top-muted'
+    );
+    const unmutedSvg = this.container.querySelectorAll(
+      '.icon-sound-unmuted, .icon-top-unmuted'
+    );
+
+    mutedSvg.forEach((el) => {
+      el.style.display = this.isMuted ? 'block' : 'none';
+    });
+    unmutedSvg.forEach((el) => {
+      el.style.display = this.isMuted ? 'none' : 'block';
+    });
+
+    // Animate Dynamic Island audio equalizer bars when sound is active
+    const eqBars = this.container.querySelector('.island-sound-indicator');
+    if (eqBars) {
+      if (this.isMuted) {
+        eqBars.classList.remove('is-playing-eq');
+      } else {
+        eqBars.classList.add('is-playing-eq');
+      }
+    }
+  }
+
+  playAcousticChime() {
+    try {
+      if (!this.audioContext) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) this.audioContext = new AudioCtx();
+      }
+      if (this.audioContext && this.audioContext.state === 'suspended') {
+        this.audioContext.resume();
+      }
+      if (this.audioContext) {
+        const now = this.audioContext.currentTime;
+        // Warm 432Hz ambient chord (pure acoustic sanctuary tone)
+        const notes = [432, 540, 648];
+        notes.forEach((freq, i) => {
+          const osc = this.audioContext.createOscillator();
+          const gain = this.audioContext.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + i * 0.08);
+
+          gain.gain.setValueAtTime(0.001, now + i * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.04, now + i * 0.08 + 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + i * 0.08 + 1.2);
+
+          osc.connect(gain);
+          gain.connect(this.audioContext.destination);
+
+          osc.start(now + i * 0.08);
+          osc.stop(now + i * 0.08 + 1.25);
+        });
+      }
+    } catch {
+      // AudioContext unavailable or restricted; safe silent fallback
+    }
+  }
+
+  showCenterPop(type) {
+    if (!this.centerPop || this.prefersReducedMotion) return;
+
+    this.centerPop.classList.remove('pop-active', 'show-play', 'show-pause', 'show-heart');
+    void this.centerPop.offsetWidth; // Force reflow
+
+    this.centerPop.classList.add('pop-active', `show-${type}`);
 
     setTimeout(() => {
-      feedbackEl.classList.remove('pulse-active');
-    }, 700);
-  }
-
-  toggleCurrentPlayPause() {
-    const activeItem = this.reelItems[this.currentIndex];
-    if (!activeItem) return;
-
-    const video = activeItem.querySelector('video');
-    const feedback = activeItem.querySelector('.reel-center-feedback');
-    const playIcon = activeItem.querySelector('.icon-feedback-play');
-    const pauseIcon = activeItem.querySelector('.icon-feedback-pause');
-
-    if (video) {
-      if (video.paused) {
-        video.play().catch(() => {});
-        this.showFeedbackPulse(feedback, playIcon, pauseIcon, false);
-      } else {
-        video.pause();
-        this.showFeedbackPulse(feedback, playIcon, pauseIcon, true);
+      if (this.centerPop) {
+        this.centerPop.classList.remove('pop-active');
       }
-    }
+    }, 600);
   }
 
-  showToast(message) {
-    if (!this.toastPill || !this.toastText) return;
+  showToast(message = 'Reel link copied to clipboard') {
+    if (!this.toast) return;
 
-    this.toastText.textContent = message;
-    this.toastPill.classList.add('is-visible');
+    const span = this.toast.querySelector('span');
+    if (span) span.textContent = message;
+
+    this.toast.classList.add('is-visible');
 
     if (this.toastTimeout) clearTimeout(this.toastTimeout);
     this.toastTimeout = setTimeout(() => {
-      this.toastPill.classList.remove('is-visible');
-    }, 2200);
+      this.toast?.classList.remove('is-visible');
+    }, 2400);
   }
 
-  goToReel(index) {
-    if (index < 0 || index >= this.reels.length) return;
-    const targetItem = this.reelItems[index];
-    if (!targetItem || !this.viewport) return;
+  toggleLike(reelId, button) {
+    const isCurrentlyLiked = this.likedMap.get(reelId) || false;
+    const nextState = !isCurrentlyLiked;
+    this.likedMap.set(reelId, nextState);
 
-    const targetTop = targetItem.offsetTop;
-    this.viewport.scrollTo({
-      top: targetTop,
-      behavior: this.prefersReducedMotion ? 'auto' : 'smooth',
-    });
-
-    this.updateActiveReel(index, false);
-  }
-
-  goToNextReel() {
-    if (this.currentIndex < this.reels.length - 1) {
-      this.goToReel(this.currentIndex + 1);
-    } else {
-      // Gentle bounce at end or wrap around
-      this.goToReel(0);
-    }
-  }
-
-  goToPrevReel() {
-    if (this.currentIndex > 0) {
-      this.goToReel(this.currentIndex - 1);
-    } else {
-      this.goToReel(this.reels.length - 1);
-    }
-  }
-
-  updateActiveReel(newIndex, triggeredByScroll = false) {
-    this.currentIndex = newIndex;
-
-    // 1. Update reel item classes
-    this.reelItems.forEach((item, i) => {
-      const isCurrent = i === newIndex;
-      item.classList.toggle('is-active', isCurrent);
-
-      const video = item.querySelector('video');
-      if (video) {
-        if (isCurrent) {
-          video.currentTime = 0;
-          video.muted = this.isMuted;
-          video.play().catch(() => {});
-        } else {
-          video.pause();
-        }
+    if (button) {
+      if (nextState) {
+        button.classList.add('is-liked');
+        const label = button.querySelector('.action-btn-label');
+        if (label) label.textContent = 'Liked';
+        this.showCenterPop('heart');
+      } else {
+        button.classList.remove('is-liked');
+        const label = button.querySelector('.action-btn-label');
+        if (label) label.textContent = 'Like';
       }
-    });
-
-    // 2. Update Top Story Progress Segments
-    this.progressSegments.forEach((segment, i) => {
-      segment.classList.toggle('is-active', i === newIndex);
-      segment.classList.toggle('is-filled', i <= newIndex);
-    });
-
-    // 3. Update Dots
-    this.dots.forEach((dot, i) => {
-      dot.classList.toggle('is-active', i === newIndex);
-    });
-
-    // 4. Update Counter Text
-    if (this.counterCurr) {
-      this.counterCurr.textContent = newIndex + 1;
     }
+  }
 
-    // 5. Update Prev/Next button states
-    if (this.prevBtn) {
-      this.prevBtn.setAttribute(
-        'aria-label',
-        newIndex === 0
-          ? `Loop to last story (${this.reels.length})`
-          : `Previous story (${newIndex})`
+  copyReelLink(reel) {
+    const url = `${window.location.origin}${window.location.pathname}#product-slider`;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(url)
+        .then(() => this.showToast(`Link for ${reel.creator} copied!`))
+        .catch(() => this.showToast('Reel link copied!'));
+    } else {
+      this.showToast('Reel link copied!');
+    }
+  }
+
+  bindEvents() {
+    // 1. Desktop Flanking Prev/Next Navigation
+    this.prevBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      this.scrollToReel(this.currentIndex - 1);
+    });
+
+    this.nextBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      this.scrollToReel(this.currentIndex + 1);
+    });
+
+    // 2. Story Segment Click to jump directly to reel
+    this.segments.forEach((seg) => {
+      seg.addEventListener('click', () => {
+        const idx = parseInt(seg.getAttribute('data-segment-index'), 10);
+        if (!isNaN(idx)) this.scrollToReel(idx);
+      });
+    });
+
+    // 3. Top Sound Button
+    this.topSoundBtn?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleSound();
+    });
+
+    // 4. Keyboard Navigation when frame or feed has focus
+    const handleKeyNav = (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+        e.preventDefault();
+        this.scrollToReel(this.currentIndex + 1);
+      } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+        e.preventDefault();
+        this.scrollToReel(this.currentIndex - 1);
+      } else if (e.key === ' ' || e.key === 'k') {
+        e.preventDefault();
+        this.togglePlayPauseCurrent();
+      } else if (e.key === 'm' || e.key === 'M') {
+        e.preventDefault();
+        this.toggleSound();
+      }
+    };
+
+    this.frame?.addEventListener('keydown', handleKeyNav);
+    this.feed?.addEventListener('keydown', handleKeyNav);
+
+    // 5. Card click handlers & double-tap detection
+    this.cards.forEach((card, index) => {
+      const reel = this.reels[index];
+      const video = card.querySelector('video');
+
+      // Tap / Click on the main stage (excluding action buttons)
+      card.addEventListener('click', (e) => {
+        // Prevent if clicking on interactive action buttons or links
+        if (
+          e.target.closest(
+            '.reel-action-btn, .reel-follow-chip, .reel-product-pill, a, button'
+          )
+        ) {
+          return;
+        }
+
+        const now = Date.now();
+        // Double-tap detection (< 300ms) -> Heart like
+        if (now - this.lastTapTime < 300) {
+          const likeBtn = card.querySelector('.btn-like');
+          this.toggleLike(reel.id, likeBtn);
+          this.lastTapTime = 0;
+          return;
+        }
+        this.lastTapTime = now;
+
+        // Single tap -> Play / Pause toggle
+        this.togglePlayPauseCurrent();
+      });
+
+      // Like Button
+      const likeBtn = card.querySelector('.btn-like');
+      likeBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleLike(reel.id, likeBtn);
+      });
+
+      // Audio Button in Action Column
+      const audioBtn = card.querySelector('.btn-audio');
+      audioBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleSound();
+      });
+
+      // Share Button
+      const shareBtn = card.querySelector('.btn-share');
+      shareBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.copyReelLink(reel);
+      });
+
+      // Follow Chip Toggle
+      const followChip = card.querySelector('.reel-follow-chip');
+      followChip?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isFollowing = followChip.classList.toggle('is-following');
+        followChip.textContent = isFollowing ? 'Following' : 'Follow';
+        if (isFollowing) {
+          this.showToast(`Following ${reel.handle}`);
+        }
+      });
+    });
+
+    // 6. Natural wheel scroll inside phone container
+    if (this.feed) {
+      this.feed.addEventListener(
+        'wheel',
+        (e) => {
+          // Allow natural vertical scroll, prevent page bounce if inside feed
+          const isAtTop = this.feed.scrollTop <= 0;
+          const isAtBottom =
+            this.feed.scrollTop + this.feed.clientHeight >=
+            this.feed.scrollHeight - 2;
+
+          if ((e.deltaY < 0 && !isAtTop) || (e.deltaY > 0 && !isAtBottom)) {
+            // Internal scrolling within phone boundaries
+            e.stopPropagation();
+          }
+        },
+        { passive: true }
       );
     }
-    if (this.nextBtn) {
-      this.nextBtn.setAttribute(
-        'aria-label',
-        newIndex === this.reels.length - 1
-          ? `Loop to first story (1)`
-          : `Next story (${newIndex + 2})`
-      );
+  }
+
+  togglePlayPauseCurrent() {
+    const card = this.cards[this.currentIndex];
+    if (!card) return;
+
+    const video = card.querySelector('video');
+    if (video && video.style.display !== 'none') {
+      if (video.paused) {
+        video.play().catch(() => {});
+        this.isPlaying = true;
+        this.showCenterPop('play');
+        const vinyl = card.querySelector('.reel-vinyl-disc');
+        if (vinyl) vinyl.classList.add('is-spinning');
+      } else {
+        video.pause();
+        this.isPlaying = false;
+        this.showCenterPop('pause');
+        const vinyl = card.querySelector('.reel-vinyl-disc');
+        if (vinyl) vinyl.classList.remove('is-spinning');
+      }
+    } else {
+      // Photo story mode: toggle subtle ambient pulse and center pop
+      this.isPlaying = !this.isPlaying;
+      card.classList.toggle('is-paused', !this.isPlaying);
+      this.showCenterPop(this.isPlaying ? 'play' : 'pause');
     }
   }
 
   destroy() {
-    if (this.intersectionObserver) {
-      this.intersectionObserver.disconnect();
+    if (this.feedObserver) {
+      this.feedObserver.disconnect();
     }
-    if (this.toastTimeout) {
-      clearTimeout(this.toastTimeout);
+    if (this.phoneEntranceObserver) {
+      this.phoneEntranceObserver.disconnect();
     }
+    this.pauseAllReels();
   }
 }
 
-// Backward-compatibility aliases
-export const ProductSlider = SmartphoneReelsViewer;
-export const UgcVideoCarousel = SmartphoneReelsViewer;
-export default SmartphoneReelsViewer;
+// Backward compatibility aliases
+export const ProductSlider = SmartphoneReelsFeed;
+export const UgcVideoCarousel = SmartphoneReelsFeed;
+export const SmartphoneReelsViewer = SmartphoneReelsFeed;
+export default SmartphoneReelsFeed;
