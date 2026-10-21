@@ -43,10 +43,11 @@ export class GalleryController {
   renderCard(item, index) {
     const ratioClass = item.ratio ? `ratio-${item.ratio}` : '';
     const tag = item.tag || 'Perspective';
+    const variantClass = index % 2 === 0 ? 'reveal-mask' : 'reveal-3d';
 
     return `
       <article 
-        class="gallery-card ${ratioClass}" 
+        class="gallery-card ${ratioClass} ${variantClass} reveal-wave-item" 
         data-gallery-index="${index}" 
         tabindex="0" 
         role="button" 

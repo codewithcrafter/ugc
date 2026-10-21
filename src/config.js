@@ -109,6 +109,39 @@ export const productConfig = {
     },
   },
 
+  /**
+   * Scroll-to-Start Cinematic UGC Video Intro (Scene 00)
+   * -----------------------------------------------------
+   * Displayed before the main hero section with a dedicated opening screen
+   * that waits for user scroll before revealing the cinematic video.
+   */
+  ugcIntro: {
+    enabled: true,
+    metaScene: '[SCENE 00] PROLOGUE // CREATOR SHOWREEL',
+    fpsTag: '24 FPS · 50MM F/1.4 ARCHIVAL',
+    headline: 'REAL STORIES. REAL CREATORS.',
+    subtitle: 'AURA Studio — Where authentic content comes to life.',
+    scrollPrompt: 'SCROLL TO EXPLORE',
+    videoCaption: 'MADE TO FEEL REAL.',
+    videoSrc: '/videos/intro_ugc.mp4',
+    poster: '/images/ugc_reel_1.jpg',
+    floatingFrames: [
+      {
+        id: 'frame-1',
+        image: '/images/ugc_morning.jpg',
+        alt: 'Authentic creator morning ritual capture',
+        label: 'Moment 01',
+      },
+      {
+        id: 'frame-2',
+        image: '/images/ugc_workspace.jpg',
+        alt: 'Tactile creator workspace moment',
+        label: 'Moment 02',
+      },
+    ],
+    transitionCue: 'Explore Overview & Inquiries',
+  },
+
   hero: {
     eyebrow: 'MEET YOUR NEW FAVOURITE',
     title: 'Pure Acoustic Clarity. Crafted for Everyday Serenity.',

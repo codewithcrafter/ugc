@@ -9,6 +9,7 @@ Recommended specs:
 - Optimized for web streaming (`faststart` / moov atom at beginning)
 
 File mapping (configured in `src/config.js`):
+- `public/videos/intro_ugc.mp4` -> [Scene 00] Cinematic Intro Showreel (Elena Rostova / Creator Story)
 - `public/videos/reel_1.mp4` -> Elena Rostova (Morning Pour-over)
 - `public/videos/reel_2.mp4` -> Alex Morgan (Drafting Desk & Brass Dial)
 - `public/videos/reel_3.mp4` -> Sophia Lindqvist (Terrace Golden Hour)

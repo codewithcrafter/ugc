@@ -1,0 +1,176 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-heading: 'Outfit', sans-serif;
+    
+    --color-pearl: #FFFCF8;
+    --color-violet: #7545F5;
+    --color-lavender: #E9DFFF;
+    --color-pink: #FFB8CB;
+    --color-sky: #DDEBFF;
+    --color-lime: #E4FF83;
+    --color-plum: #23153C;
+    --color-text-primary: #1A1918;
+    --color-text-secondary: #555260;
+  }
+
+  body {
+    background-color: var(--color-pearl);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Utility: No Scrollbar
+   -------------------------------------------------------------------------- */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* --------------------------------------------------------------------------
+   Ambient Creative Studio Lighting Background Mesh
+   -------------------------------------------------------------------------- */
+.hero-ambient-mesh {
+  background-image: 
+    radial-gradient(circle at 12% 20%, rgba(233, 223, 255, 0.75) 0%, transparent 48%),
+    radial-gradient(circle at 88% 28%, rgba(255, 224, 235, 0.7) 0%, transparent 45%),
+    radial-gradient(circle at 50% 80%, rgba(221, 235, 255, 0.65) 0%, transparent 55%),
+    radial-gradient(circle at 82% 85%, rgba(229, 255, 117, 0.35) 0%, transparent 40%);
+  background-size: 140% 140%;
+  animation: heroAurora 18s ease-in-out infinite alternate;
+}
+
+@keyframes heroAurora {
+  0% { background-position: 0% 0%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 50% 100%; }
+}
+
+/* --------------------------------------------------------------------------
+   Continuous Single-Row Brand Logo Marquee
+   -------------------------------------------------------------------------- */
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marqueeScroll 25s linear infinite;
+}
+
+/* --------------------------------------------------------------------------
+   Keyframe Animations for Modal, Heart Burst, and Fade
+   -------------------------------------------------------------------------- */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-scale-up {
+  animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes heartBurst {
+  0% { transform: scale(0.2); opacity: 0; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+.animate-heart-burst {
+  animation: heartBurst 0.75s ease-out forwards;
+}
+
+@keyframes scaleFade {
+  0% { transform: scale(0.7); opacity: 0; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+.animate-scale-fade {
+  animation: scaleFade 0.6s ease-out forwards;
+}
+
+/* --------------------------------------------------------------------------
+   Optical Shimmer & Sheen Effect
+   -------------------------------------------------------------------------- */
+@keyframes brandSweep {
+  0%, 70% { left: -60%; opacity: 0; }
+  85% { opacity: 0.65; }
+  100% { left: 160%; opacity: 0; }
+}
+
+.optical-sheen-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%);
+  transform: skewX(-20deg);
+  pointer-events: none;
+  animation: brandSweep 8s infinite ease-in-out;
+}
+
+/* --------------------------------------------------------------------------
+   Custom Scrollbar
+   -------------------------------------------------------------------------- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FFFCF8;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(117, 69, 245, 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(117, 69, 245, 0.5);
+}
+
+/* --------------------------------------------------------------------------
+   Reduced Motion Preferences
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

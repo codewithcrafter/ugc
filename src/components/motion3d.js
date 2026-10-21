@@ -24,8 +24,8 @@ export class Motion3DController {
     this.prefersReducedMotion = window.matchMedia(
       '(prefers-reduced-motion: reduce)'
     ).matches;
-    this.isTouchDevice = window.matchMedia(
-      '(hover: none) or (pointer: coarse)'
+    this.isTouchOnly = window.matchMedia(
+      '(hover: none) and (pointer: coarse)'
     ).matches;
 
     this.mouseX = window.innerWidth / 2;
@@ -36,6 +36,7 @@ export class Motion3DController {
     this.ringY = this.mouseY;
 
     this.tiltCards = [];
+    this.boundListeners = [];
     this.magneticButtons = [];
     this.parallaxOrbs = [];
     this.scrollObserver = null;
@@ -46,13 +47,15 @@ export class Motion3DController {
 
   init() {
     this.initPageEntrance();
-    this.initScrollReveals();
+    this.initViewfinderAccents();
 
-    if (!this.prefersReducedMotion && !this.isTouchDevice) {
-      this.initCustomCursor();
+    if (!this.prefersReducedMotion) {
       this.init3DTilt();
+      this.setupSmartphoneTilt();
       this.initMagneticButtons();
+      this.initCustomCursor();
       this.initAmbientParallax();
+      this.initScrollParallax();
       this.startLoop();
     }
   }
@@ -79,61 +82,17 @@ export class Motion3DController {
   }
 
   /**
-   * 2. Scroll-Triggered Staggered 3D Perspective Reveals
-   * Uses IntersectionObserver with actual translateZ and rotateX transforms
-   */
-  initScrollReveals() {
-    const revealTargets = [
-      '.section-header-compact',
-      '.hero-3d-composition',
-      '.about-grid',
-      '.smartphone-showcase-stage',
-      '.ugc-card',
-      '.gallery-card',
-      '.testimonials-slider-component',
-      '.faq-item',
-      '.faq-concierge-card',
-      '.footer-top-row',
-    ];
-
-    const elementsToReveal = document.querySelectorAll(revealTargets.join(', '));
-    elementsToReveal.forEach((el, index) => {
-      el.classList.add('reveal-3d');
-      // Stagger child cards if in a grid
-      if (el.classList.contains('ugc-card') || el.classList.contains('gallery-card')) {
-        const stagger = (index % 4) * 0.09;
-        el.style.setProperty('--reveal-stagger', `${stagger}s`);
-      }
-    });
-
-    const observerOptions = {
-      rootMargin: '0px 0px -40px 0px',
-      threshold: 0.12,
-    };
-
-    this.scrollObserver = new IntersectionObserver((entries, observer) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-revealed');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, observerOptions);
-
-    elementsToReveal.forEach((el) => this.scrollObserver.observe(el));
-  }
-
-  /**
    * 3. Interactive 3D Perspective Tilt on Mouse Movement
    * Calculates actual pointer coordinates relative to each card:
-   * - Left/Right: tilts around Y axis (rotateY)
-   * - Up/Down: tilts around X axis (rotateX)
-   * - Image layer moves forward in 3D (translateZ)
+   * - Left/Right: tilts visibly around Y axis (rotateY)
+   * - Up/Down: tilts visibly around X axis (rotateX)
+   * - Image layer & badges move forward with genuine 3D depth (translateZ)
    * - Card shadow dynamically updates with tilt position
-   * - Smooth return to position on mouseleave
+   * - Smooth return to position on pointer leave (~8 degrees max tilt)
    */
   init3DTilt() {
     const cardSelectors = [
+      '#hero-media-card',
       '.hero-3d-composition',
       '.lead-card',
       '.ugc-card',
@@ -141,7 +100,6 @@ export class Motion3DController {
       '.spec-card',
       '.faq-concierge-card',
       '.hero-eyebrow',
-      '.about-floating-badge',
     ];
 
     const elements = document.querySelectorAll(cardSelectors.join(', '));
@@ -151,9 +109,10 @@ export class Motion3DController {
       card.dataset.tiltBound = 'true';
       card.classList.add('tilt-card-3d');
 
-      // Inject dynamic glare layer if missing
-      if (!card.querySelector('.tilt-glare-layer')) {
-        const glare = document.createElement('div');
+      // Inject dynamic specular glare layer if missing
+      let glare = card.querySelector('.tilt-glare-layer');
+      if (!glare) {
+        glare = document.createElement('div');
         glare.className = 'tilt-glare-layer';
         glare.setAttribute('aria-hidden', 'true');
         card.appendChild(glare);
@@ -163,22 +122,57 @@ export class Motion3DController {
       let rafPending = false;
       let targetX = 0;
       let targetY = 0;
+      let resetTimer = null;
 
-      // Restrained max tilt (6deg to 9deg)
-      const maxTilt = card.classList.contains('hero-3d-composition')
-        ? 8.5
+      // Maximum tilt angle: approximately 8 degrees as requested
+      const maxTilt = card.classList.contains('hero-3d-composition') || card.id === 'hero-media-card'
+        ? 8.0
         : card.classList.contains('lead-card')
         ? 6.5
         : card.classList.contains('ugc-card')
-        ? 9
-        : 7.5;
+        ? 8.0
+        : card.classList.contains('gallery-card')
+        ? 8.0
+        : 7.0;
 
-      const onMouseEnter = () => {
+      const isHeroMedia = card.classList.contains('hero-3d-composition') || card.id === 'hero-media-card';
+      const isUgcCard = card.classList.contains('ugc-card');
+      const isGalleryCard = card.classList.contains('gallery-card');
+
+      // Cache child 3D layers
+      const heroMainCard = isHeroMedia ? card.querySelector('.hero-layer-main-card') : null;
+      const heroImg = isHeroMedia ? card.querySelector('.hero-layer-img') : null;
+      const heroFloatPill = isHeroMedia ? card.querySelector('.hero-layer-float-pill') : null;
+      const heroFloatBadge = isHeroMedia ? card.querySelector('.hero-layer-float-badge') : null;
+      const heroBackdrop = isHeroMedia ? card.querySelector('.hero-layer-backdrop') : null;
+
+      const ugcImg = isUgcCard ? card.querySelector('.ugc-card-img') : null;
+      const ugcPlay = isUgcCard ? card.querySelector('.play-circle, .ugc-play-overlay') : null;
+      const ugcPill = isUgcCard ? card.querySelector('.ugc-category-pill') : null;
+      const ugcQuote = isUgcCard ? card.querySelector('.ugc-card-quote') : null;
+
+      const galleryImg = isGalleryCard ? card.querySelector('.gallery-card-img') : null;
+      const galleryIcon = isGalleryCard ? card.querySelector('.gallery-card-expand-icon') : null;
+
+      const onPointerEnter = (e) => {
+        if (e.pointerType === 'touch') return;
+        if (resetTimer) {
+          clearTimeout(resetTimer);
+          resetTimer = null;
+        }
+
         bounds = card.getBoundingClientRect();
         card.classList.add('is-tilting');
+
+        if (isHeroMedia) {
+          card.style.animationPlayState = 'paused';
+        }
+
+        card.style.transition = 'transform 0.08s ease-out, box-shadow 0.2s ease-out, border-color 0.2s ease';
       };
 
-      const onMouseMove = (e) => {
+      const onPointerMove = (e) => {
+        if (e.pointerType === 'touch') return;
         if (!bounds) bounds = card.getBoundingClientRect();
         targetX = e.clientX;
         targetY = e.clientY;
@@ -194,46 +188,158 @@ export class Motion3DController {
             const x = targetX - bounds.left;
             const y = targetY - bounds.top;
 
-            // Normalized coordinates: -1 to +1
+            // Normalized coordinates: -1 (left/top) to +1 (right/bottom)
             const xPercent = Math.max(-1, Math.min(1, (x / bounds.width - 0.5) * 2));
             const yPercent = Math.max(-1, Math.min(1, (y / bounds.height - 0.5) * 2));
 
-            // Rotations
-            const tiltX = -yPercent * maxTilt;
-            const tiltY = xPercent * maxTilt;
+            // Visible 3D Rotations around X and Y axes
+            // Moving horizontally tilts card left/right around Y axis
+            // Moving vertically tilts card forward/backward around X axis
+            const tiltY = (xPercent * maxTilt).toFixed(2);
+            const tiltX = (-yPercent * maxTilt).toFixed(2);
 
-            card.style.setProperty('--tilt-x', `${tiltX.toFixed(2)}deg`);
-            card.style.setProperty('--tilt-y', `${tiltY.toFixed(2)}deg`);
+            // Direct 3D transform with perspective, rotateX, rotateY, translateZ
+            card.style.transform = `perspective(1000px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(10px) scale3d(1.02, 1.02, 1.02)`;
+
+            // Dynamic lighting shadow responding to pointer movement
+            const shadowX = (-xPercent * 18).toFixed(1);
+            const shadowY = (-yPercent * 18 + 24).toFixed(1);
+            card.style.boxShadow = `${shadowX}px ${shadowY}px 48px -6px rgba(117, 69, 245, 0.24), 0 8px 24px rgba(26, 25, 24, 0.06)`;
+
+            // Specular glare tracking cursor
             card.style.setProperty('--glare-x', `${((x / bounds.width) * 100).toFixed(1)}%`);
             card.style.setProperty('--glare-y', `${((y / bounds.height) * 100).toFixed(1)}%`);
-            card.style.setProperty('--glare-opacity', '0.52');
+            card.style.setProperty('--glare-opacity', '0.55');
 
-            // Dynamic 3D lighting shadow based on tilt position
-            const shadowX = (-tiltY * 2.8).toFixed(1);
-            const shadowY = (tiltX * 2.8 + 22).toFixed(1);
-            card.style.boxShadow = `${shadowX}px ${shadowY}px 48px rgba(117, 69, 245, 0.17), 0 8px 24px rgba(26, 25, 24, 0.06)`;
+            // 3D Depth Offsets on interior elements (translateZ)
+            if (isHeroMedia) {
+              if (heroMainCard) {
+                heroMainCard.style.transform = 'translateZ(24px)';
+              }
+              if (heroImg) {
+                heroImg.style.transform = 'scale(1.04) translateZ(12px)';
+              }
+              if (heroFloatPill) {
+                const pillShiftX = (xPercent * 6).toFixed(1);
+                const pillShiftY = (yPercent * 6).toFixed(1);
+                heroFloatPill.style.transform = `translateZ(56px) translate3d(${pillShiftX}px, ${pillShiftY}px, 0)`;
+              }
+              if (heroFloatBadge) {
+                const badgeShiftX = (xPercent * 8).toFixed(1);
+                const badgeShiftY = (yPercent * 8).toFixed(1);
+                heroFloatBadge.style.transform = `translateZ(70px) translate3d(${badgeShiftX}px, ${badgeShiftY}px, 0)`;
+              }
+              if (heroBackdrop) {
+                const backShiftX = (-xPercent * 6).toFixed(1);
+                const backShiftY = (-yPercent * 6).toFixed(1);
+                heroBackdrop.style.transform = `translateZ(-22px) translate3d(${backShiftX}px, ${backShiftY}px, 0)`;
+              }
+            } else if (isUgcCard) {
+              if (ugcImg) {
+                ugcImg.style.transform = 'scale(1.05) translateZ(22px)';
+              }
+              if (ugcPlay) {
+                ugcPlay.style.transform = 'translateZ(44px) scale(1.06)';
+              }
+              if (ugcPill) {
+                ugcPill.style.transform = 'translateZ(30px)';
+              }
+              if (ugcQuote) {
+                ugcQuote.style.transform = 'translateZ(14px)';
+              }
+            } else if (isGalleryCard) {
+              if (galleryImg) {
+                galleryImg.style.transform = 'scale(1.05) translateZ(20px)';
+              }
+              if (galleryIcon) {
+                galleryIcon.style.transform = 'translateZ(32px)';
+              }
+            }
 
             rafPending = false;
           });
         }
       };
 
-      const onMouseLeave = () => {
+      const onPointerLeave = (e) => {
+        if (e.pointerType === 'touch') return;
         bounds = null;
         card.classList.remove('is-tilting');
-        card.style.setProperty('--tilt-x', '0deg');
-        card.style.setProperty('--tilt-y', '0deg');
-        card.style.setProperty('--glare-opacity', '0');
+
+        // Smooth reset with custom cubic-bezier
+        card.style.transition = 'transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.55s ease, border-color 0.4s ease';
+        card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0) scale3d(1, 1, 1)';
         card.style.boxShadow = '';
+        card.style.setProperty('--glare-opacity', '0');
+
+        // Reset child 3D depth layers
+        if (isHeroMedia) {
+          if (heroMainCard) {
+            heroMainCard.style.transition = 'transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)';
+            heroMainCard.style.transform = 'translateZ(16px)';
+          }
+          if (heroImg) {
+            heroImg.style.transition = 'transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)';
+            heroImg.style.transform = 'scale(1) translateZ(0)';
+          }
+          if (heroFloatPill) {
+            heroFloatPill.style.transition = 'transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)';
+            heroFloatPill.style.transform = 'translateZ(42px)';
+          }
+          if (heroFloatBadge) {
+            heroFloatBadge.style.transition = 'transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)';
+            heroFloatBadge.style.transform = 'translateZ(56px)';
+          }
+          if (heroBackdrop) {
+            heroBackdrop.style.transition = 'transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)';
+            heroBackdrop.style.transform = 'translateZ(-24px)';
+          }
+
+          resetTimer = setTimeout(() => {
+            if (!card.classList.contains('is-tilting')) {
+              card.style.animationPlayState = 'running';
+              card.style.transform = '';
+            }
+          }, 550);
+        } else if (isUgcCard) {
+          if (ugcImg) {
+            ugcImg.style.transition = 'transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)';
+            ugcImg.style.transform = 'scale(1) translateZ(0)';
+          }
+          if (ugcPlay) {
+            ugcPlay.style.transition = 'transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)';
+            ugcPlay.style.transform = 'translateZ(0) scale(1)';
+          }
+          if (ugcPill) {
+            ugcPill.style.transition = 'transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)';
+            ugcPill.style.transform = 'translateZ(0)';
+          }
+          if (ugcQuote) {
+            ugcQuote.style.transition = 'transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)';
+            ugcQuote.style.transform = 'translateZ(0)';
+          }
+        } else if (isGalleryCard) {
+          if (galleryImg) {
+            galleryImg.style.transition = 'transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)';
+            galleryImg.style.transform = 'scale(1) translateZ(0)';
+          }
+          if (galleryIcon) {
+            galleryIcon.style.transition = 'transform 0.55s cubic-bezier(0.16, 1, 0.3, 1)';
+            galleryIcon.style.transform = 'translateZ(0)';
+          }
+        }
       };
 
-      card.addEventListener('mouseenter', onMouseEnter, { passive: true });
-      card.addEventListener('mousemove', onMouseMove, { passive: true });
-      card.addEventListener('mouseleave', onMouseLeave, { passive: true });
-    });
+      card.addEventListener('pointerenter', onPointerEnter, { passive: true });
+      card.addEventListener('pointermove', onPointerMove, { passive: true });
+      card.addEventListener('pointerleave', onPointerLeave, { passive: true });
 
-    // 4. Smartphone 3D Perspective Tilt on Desktop
-    this.setupSmartphoneTilt();
+      this.boundListeners.push(
+        { el: card, type: 'pointerenter', fn: onPointerEnter },
+        { el: card, type: 'pointermove', fn: onPointerMove },
+        { el: card, type: 'pointerleave', fn: onPointerLeave }
+      );
+    });
   }
 
   /**
@@ -254,6 +360,7 @@ export class Motion3DController {
     let targetY = 0;
 
     const onStageMouseMove = (e) => {
+      if (e.pointerType === 'touch') return;
       if (!phoneBounds) phoneBounds = phoneFrame.getBoundingClientRect();
       targetX = e.clientX;
       targetY = e.clientY;
@@ -272,17 +379,17 @@ export class Motion3DController {
           const xPercent = Math.max(-1, Math.min(1, (x / phoneBounds.width - 0.5) * 2));
           const yPercent = Math.max(-1, Math.min(1, (y / phoneBounds.height - 0.5) * 2));
 
-          // Restrained 5.5deg max tilt for comfortable reels interaction
-          const tiltX = -yPercent * 5.5;
-          const tiltY = xPercent * 5.5;
+          // Restrained 5.0deg max tilt for comfortable reels interaction
+          const tiltX = (-yPercent * 5.0).toFixed(2);
+          const tiltY = (xPercent * 5.0).toFixed(2);
 
           phoneFrame.classList.add('is-tilting');
-          phoneFrame.style.setProperty('--tilt-x', `${tiltX.toFixed(2)}deg`);
-          phoneFrame.style.setProperty('--tilt-y', `${tiltY.toFixed(2)}deg`);
+          phoneFrame.style.transition = 'transform 0.08s ease-out, box-shadow 0.25s ease';
+          phoneFrame.style.transform = `perspective(1400px) rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(8px)`;
 
           // Dynamic metallic/ceramic rim shadow tracking pointer
           const shadowX = (-tiltY * 3.2).toFixed(1);
-          const shadowY = (tiltX * 3.2 + 32).toFixed(1);
+          const shadowY = (parseFloat(tiltX) * 3.2 + 32).toFixed(1);
           phoneFrame.style.boxShadow = `
             0 0 0 1px rgba(255, 255, 255, 1) inset,
             0 0 0 3px rgba(233, 223, 255, 0.85) inset,
@@ -295,19 +402,25 @@ export class Motion3DController {
       }
     };
 
-    const onStageMouseLeave = () => {
+    const onStageMouseLeave = (e) => {
+      if (e.pointerType === 'touch') return;
       phoneBounds = null;
       phoneFrame.classList.remove('is-tilting');
-      phoneFrame.style.setProperty('--tilt-x', '0deg');
-      phoneFrame.style.setProperty('--tilt-y', '0deg');
+      phoneFrame.style.transition = 'transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.55s ease';
+      phoneFrame.style.transform = 'perspective(1400px) rotateX(0deg) rotateY(0deg) translateZ(0)';
       phoneFrame.style.boxShadow = '';
     };
 
-    stage.addEventListener('mouseenter', () => {
+    stage.addEventListener('pointerenter', () => {
       phoneBounds = phoneFrame.getBoundingClientRect();
     }, { passive: true });
-    stage.addEventListener('mousemove', onStageMouseMove, { passive: true });
-    stage.addEventListener('mouseleave', onStageMouseLeave, { passive: true });
+    stage.addEventListener('pointermove', onStageMouseMove, { passive: true });
+    stage.addEventListener('pointerleave', onStageMouseLeave, { passive: true });
+
+    this.boundListeners.push(
+      { el: stage, type: 'pointermove', fn: onStageMouseMove },
+      { el: stage, type: 'pointerleave', fn: onStageMouseLeave }
+    );
   }
 
   /**
@@ -330,38 +443,39 @@ export class Motion3DController {
     buttons.forEach((btn) => {
       let rect = null;
 
-      btn.addEventListener(
-        'mouseenter',
-        () => {
-          rect = btn.getBoundingClientRect();
-          btn.classList.add('is-magnetic');
-        },
-        { passive: true }
-      );
+      const onEnter = (e) => {
+        if (e.pointerType === 'touch') return;
+        rect = btn.getBoundingClientRect();
+        btn.classList.add('is-magnetic');
+      };
 
-      btn.addEventListener(
-        'mousemove',
-        (e) => {
-          if (!rect) rect = btn.getBoundingClientRect();
-          const centerX = rect.left + rect.width / 2;
-          const centerY = rect.top + rect.height / 2;
+      const onMove = (e) => {
+        if (e.pointerType === 'touch') return;
+        if (!rect) rect = btn.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
 
-          const distanceX = (e.clientX - centerX) * 0.22;
-          const distanceY = (e.clientY - centerY) * 0.22;
+        const distanceX = Math.max(-8, Math.min(8, (e.clientX - centerX) * 0.22));
+        const distanceY = Math.max(-8, Math.min(8, (e.clientY - centerY) * 0.22));
 
-          btn.style.transform = `translate3d(${distanceX.toFixed(1)}px, ${distanceY.toFixed(1)}px, 0)`;
-        },
-        { passive: true }
-      );
+        btn.style.transform = `translate3d(${distanceX.toFixed(1)}px, ${distanceY.toFixed(1)}px, 0)`;
+      };
 
-      btn.addEventListener(
-        'mouseleave',
-        () => {
-          rect = null;
-          btn.style.transform = '';
-          btn.classList.remove('is-magnetic');
-        },
-        { passive: true }
+      const onLeave = (e) => {
+        if (e.pointerType === 'touch') return;
+        rect = null;
+        btn.style.transform = '';
+        btn.classList.remove('is-magnetic');
+      };
+
+      btn.addEventListener('pointerenter', onEnter, { passive: true });
+      btn.addEventListener('pointermove', onMove, { passive: true });
+      btn.addEventListener('pointerleave', onLeave, { passive: true });
+
+      this.boundListeners.push(
+        { el: btn, type: 'pointerenter', fn: onEnter },
+        { el: btn, type: 'pointermove', fn: onMove },
+        { el: btn, type: 'pointerleave', fn: onLeave }
       );
     });
   }
@@ -398,8 +512,9 @@ export class Motion3DController {
     let isVisible = false;
 
     window.addEventListener(
-      'mousemove',
+      'pointermove',
       (e) => {
+        if (e.pointerType === 'touch') return;
         this.mouseX = e.clientX;
         this.mouseY = e.clientY;
 
@@ -411,7 +526,7 @@ export class Motion3DController {
       { passive: true }
     );
 
-    document.documentElement.addEventListener('mouseleave', () => {
+    document.documentElement.addEventListener('pointerleave', () => {
       isVisible = false;
       this.cursorEl?.classList.remove('is-active');
     });
@@ -421,36 +536,28 @@ export class Motion3DController {
       'mouseover',
       (e) => {
         if (!this.cursorEl) return;
-
         const target = e.target;
 
-        // 1. Drag / Swipe on Image Deck
         if (target.closest('.image-stack-deck')) {
           this.setCursorState('drag', 'DRAG');
           return;
         }
 
-        // 2. Play / Video in Phone Reels or UGC Video
         if (target.closest('.phone-reel-card, .ugc-card-media')) {
           this.setCursorState('play', '');
           return;
         }
 
-        // 3. Inspect / View in Gallery or 3D Product Media
         if (target.closest('.gallery-card, .hero-3d-composition')) {
           this.setCursorState('view', 'VIEW');
           return;
         }
 
-        // 4. Interactive Links & Buttons
-        if (
-          target.closest('a, button, input, textarea, select, [role="button"]')
-        ) {
+        if (target.closest('a, button, input, textarea, select, [role="button"]')) {
           this.setCursorState('hover', '');
           return;
         }
 
-        // Default neutral state
         this.setCursorState('default', '');
       },
       { passive: true }
@@ -481,8 +588,61 @@ export class Motion3DController {
    */
   initAmbientParallax() {
     this.parallaxOrbs = Array.from(
-      document.querySelectorAll('.ambient-orb-3d, .aura-glow-orb, .aura-orb')
+      document.querySelectorAll(
+        '.ambient-orb-3d, .aura-glow-orb, .aura-orb, .hero-headline-backdrop-glow'
+      )
     );
+  }
+
+  /**
+   * Vertical Scroll Multiplane Parallax for Background Lighting
+   * Gently shifts ambient pastel mesh orbs based on scroll progress
+   */
+  initScrollParallax() {
+    const orbs = document.querySelectorAll('.ambient-orb-3d, .aura-glow-orb');
+    if (!orbs.length) return;
+
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const scrollY = window.scrollY || window.pageYOffset;
+          orbs.forEach((orb, i) => {
+            const speed = ((i % 3) + 1) * 0.08;
+            const yOffset = -scrollY * speed;
+            orb.style.setProperty('--scroll-parallax', `${yOffset.toFixed(1)}px`);
+          });
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    this.boundListeners.push({ el: window, type: 'scroll', fn: onScroll });
+    onScroll();
+  }
+
+  /**
+   * Viewfinder Corner Brackets & Lens Reticle Accents
+   * Injects photographic camera crop accents on visual media cards
+   */
+  initViewfinderAccents() {
+    const targets = document.querySelectorAll('.gallery-card, .ugc-card-media');
+    targets.forEach((target) => {
+      if (target.querySelector('.viewfinder-overlay')) return;
+
+      const vf = document.createElement('div');
+      vf.className = 'viewfinder-overlay';
+      vf.setAttribute('aria-hidden', 'true');
+      vf.innerHTML = `
+        <span class="vf-bracket vf-tl"></span>
+        <span class="vf-bracket vf-tr"></span>
+        <span class="vf-bracket vf-bl"></span>
+        <span class="vf-bracket vf-br"></span>
+      `;
+      target.appendChild(vf);
+    });
   }
 
   /**
@@ -490,7 +650,6 @@ export class Motion3DController {
    */
   startLoop() {
     const loop = () => {
-      // 1. Smooth interpolation for cursor ring
       const ease = 0.2;
       this.ringX += (this.mouseX - this.ringX) * ease;
       this.ringY += (this.mouseY - this.ringY) * ease;
@@ -502,13 +661,13 @@ export class Motion3DController {
         this.cursorRing.style.transform = `translate3d(${this.ringX}px, ${this.ringY}px, 0)`;
       }
 
-      // 2. Parallax drift for ambient glowing orbs
+      // Parallax drift for ambient glowing orbs
       if (this.parallaxOrbs.length > 0) {
         const normX = (this.mouseX / window.innerWidth - 0.5) * 2;
         const normY = (this.mouseY / window.innerHeight - 0.5) * 2;
 
         this.parallaxOrbs.forEach((orb, i) => {
-          const depth = (i % 3 + 1) * 7; // 7px to 21px subtle shift
+          const depth = ((i % 3) + 1) * 7;
           const shiftX = -normX * depth;
           const shiftY = -normY * depth;
           orb.style.setProperty('--parallax-x', `${shiftX.toFixed(1)}px`);
@@ -529,6 +688,11 @@ export class Motion3DController {
     if (this.scrollObserver) {
       this.scrollObserver.disconnect();
     }
+    this.boundListeners.forEach(({ el, type, fn }) => {
+      el.removeEventListener(type, fn);
+    });
+    this.boundListeners = [];
+
     const cursorRoot = document.getElementById('studio-cursor-root');
     cursorRoot?.remove();
   }

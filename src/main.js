@@ -14,20 +14,43 @@ import { UgcModalController } from './components/ugcModal.js';
 import { GalleryController } from './components/gallery.js';
 import { TestimonialsSlider } from './components/testimonialsSlider.js';
 import { FloatingContactController } from './components/floatingContact.js';
-import { CustomCursorController } from './components/cursor.js';
-import { PhotographyMotionController } from './components/motion.js';
-import { Motion3DController } from './components/motion3d.js';
+import { HeadlineRotatorController } from './components/headlineRotator.js';
+import { UgcIntroController } from './components/ugcIntro.js';
+import { CinematicStoryEngine } from './components/cinematicStory.js';
+import { ScrollRevealController } from './components/scrollReveal.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 0. Initialize Premium Photography Agency Custom Cursor & Motion Design System
-  new CustomCursorController();
-  new PhotographyMotionController();
+  // Ensure page-loaded is active immediately so all UI elements are visible
+  document.body.classList.add('page-loaded');
+
+  // Initialize ScrollReveal to ensure all content elements are immediately visible
+  const scrollReveal = new ScrollRevealController();
+  scrollReveal.revealAllImmediately();
+
+  // 0. Initialize Cinematic Scroll-Driven UGC Video Intro (Scene 00)
+  if (productConfig.ugcIntro && productConfig.ugcIntro.enabled !== false) {
+    new UgcIntroController({
+      sectionId: 'ugc-intro',
+      config: productConfig.ugcIntro,
+    });
+  }
 
   // 1. Initialize Dynamic Year in Footer
   const yearEl = document.getElementById('current-year');
   if (yearEl) {
     yearEl.textContent = new Date().getFullYear();
   }
+
+  // 1b. Initialize Cinematic Hero Rotating Headline
+  new HeadlineRotatorController('hero-rotator-wrapper', {
+    phrases: [
+      'Crafted for Everyday Serenity.',
+      'Designed for Deeper Focus.',
+      'Made for Modern Living.',
+      'Sound Meets Stillness.',
+    ],
+    interval: 3500,
+  });
 
   // 2. Initialize Lead Capture Form (Hero Right Column)
   const leadFormContainer = document.getElementById('lead-form-container');
@@ -78,8 +101,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // 9. Initialize Floating Contact Toolbar, WhatsApp, Direct Call & Guided FAQ Chatbot
   new FloatingContactController(productConfig);
 
-  // 10. Initialize 3D Motion, Cinematic Entrances & Interactive Tilt Engine (after components mount)
-  new Motion3DController();
+  // 10. Master Cinematic Storytelling & Interactive Film Engine
+  const cinematicEngine = new CinematicStoryEngine();
+  cinematicEngine.refresh();
 
   // 11. Initialize UGC Lightbox Modal
   const ugcModalEl = document.getElementById('ugc-modal');
@@ -203,7 +227,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const targetEl = document.querySelector(targetId);
       if (targetEl) {
         e.preventDefault();
-        targetEl.scrollIntoView({ behavior: 'smooth' });
+        const headerEl = document.getElementById('site-header');
+        const headerHeight = headerEl ? headerEl.offsetHeight : 76;
+        const targetTop = targetEl.getBoundingClientRect().top + window.pageYOffset - headerHeight - 12;
+        window.scrollTo({
+          top: Math.max(0, targetTop),
+          behavior: 'smooth',
+        });
 
         // If target is lead form, focus the first input after scrolling
         if (targetId === '#lead-form') {
@@ -215,41 +245,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
-
-  // 9. Coordinated Scroll Reveal Motion System
-  const initScrollReveals = () => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const revealTargets = document.querySelectorAll(
-      '.hero-pitch, .lead-card, .section-header-compact, .ugc-card, .gallery-card, .testimonial-card, .spec-card, .faq-item, .faq-concierge-card, .brand-logo-card, .about-text-content, .image-stack-deck'
-    );
-
-    if (prefersReducedMotion || !('IntersectionObserver' in window)) {
-      revealTargets.forEach((el) => el.classList.add('is-revealed'));
-      return;
-    }
-
-    revealTargets.forEach((el) => el.classList.add('reveal-init'));
-
-    const observer = new IntersectionObserver(
-      (entries, obs) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-revealed');
-            obs.unobserve(entry.target);
-          }
-        });
-      },
-      {
-        root: null,
-        rootMargin: '0px 0px -40px 0px',
-        threshold: 0.12,
-      }
-    );
-
-    revealTargets.forEach((el) => observer.observe(el));
-  };
-
-  initScrollReveals();
 
   console.info(
     `[AURA Studio] Landing Page initialized successfully. Brand: ${productConfig.brand.name}.`

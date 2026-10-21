@@ -20,11 +20,8 @@ export class PhotographyMotionController {
   }
 
   init() {
-    this.initCinematicReveals();
-
     if (this.isDesktop && !this.prefersReducedMotion) {
       this.initMagneticButtons();
-      this.initMouseReactiveCards();
       this.initViewfinderAccents();
     }
   }

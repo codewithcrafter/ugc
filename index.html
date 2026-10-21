@@ -133,8 +133,10 @@
           <ul class="mobile-nav-list">
             <li><a href="#product-slider" class="mobile-nav-link">Product Views</a></li>
             <li><a href="#about" class="mobile-nav-link">About the Craft</a></li>
-            <li><a href="#trust" class="mobile-nav-link">Trusted by Brands</a></li>
+            <li><a href="#trust" class="mobile-nav-link">Brands</a></li>
             <li><a href="#ugc-showcase" class="mobile-nav-link">In Everyday Life</a></li>
+            <li><a href="#gallery" class="mobile-nav-link">Gallery</a></li>
+            <li><a href="#testimonials" class="mobile-nav-link">Reviews</a></li>
             <li><a href="#faq" class="mobile-nav-link">FAQs</a></li>
           </ul>
 
@@ -157,6 +159,190 @@
 
     <!-- Main Content Flow -->
     <main id="main-content">
+      <!-- SECTION 0: SCROLL-TO-START CINEMATIC UGC VIDEO INTRO (SCENE 00) -->
+      <section class="section-ugc-intro" id="ugc-intro" aria-label="AURA Studio Creator Story Intro">
+        <!-- Ambient Luminous Mesh Lighting (Bright Studio Palette) -->
+        <div class="intro-ambient-lighting" aria-hidden="true">
+          <div class="ambient-orb-3d orb-violet intro-orb-1"></div>
+          <div class="ambient-orb-3d orb-lavender intro-orb-2"></div>
+          <div class="ambient-orb-3d orb-coral intro-orb-3"></div>
+          <div class="ambient-orb-3d orb-lime intro-orb-4"></div>
+        </div>
+
+        <div class="ugc-intro-track" id="ugc-intro-track">
+          <div class="container ugc-intro-container">
+
+            <!-- Top Editorial Meta Slate Bar -->
+            <header class="intro-meta-bar" id="intro-meta-bar">
+              <div class="intro-meta-left">
+                <span class="scene-meta-tag intro-scene-tag">
+                  [SCENE 00] PROLOGUE // CREATOR SHOWREEL
+                </span>
+                <span class="intro-meta-live-badge">
+                  <span class="intro-live-dot" aria-hidden="true"></span>
+                  <span id="intro-video-status-badge">24 FPS · 50MM F/1.4 ARCHIVAL</span>
+                </span>
+              </div>
+              <div class="intro-meta-right">
+                <a href="#hero" class="intro-skip-link" id="intro-skip-btn">
+                  <span>Skip to Overview</span>
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <polyline points="19 12 12 19 5 12"></polyline>
+                  </svg>
+                </a>
+              </div>
+            </header>
+
+            <!-- Opening Screen: Editorial Typography & Subtle Floating Frames -->
+            <div class="intro-opening-hero" id="intro-opening-hero">
+              <!-- Subtle Floating Photographic Frames (Restrained Film-Inspired Details) -->
+              <aside class="intro-floating-frame frame-left" id="intro-frame-left" aria-hidden="true">
+                <div class="frame-media">
+                  <img src="/images/ugc_morning.jpg" alt="Creator morning ritual" width="110" height="145" loading="eager" />
+                </div>
+                <span class="frame-label">Moment 01 // Ritual</span>
+              </aside>
+
+              <aside class="intro-floating-frame frame-right" id="intro-frame-right" aria-hidden="true">
+                <div class="frame-media">
+                  <img src="/images/ugc_workspace.jpg" alt="Creator tactile workspace" width="110" height="145" loading="eager" />
+                </div>
+                <span class="frame-label">Moment 02 // Tactile</span>
+              </aside>
+
+              <!-- Central Opening Copy -->
+              <div class="intro-hero-copy" id="intro-hero-copy">
+                <div class="intro-eyebrow">
+                  <span class="eyebrow-accent-dot" aria-hidden="true"></span>
+                  <span class="eyebrow-text">AURA STUDIO SHOWREEL</span>
+                </div>
+                <h1 class="intro-headline" id="intro-main-headline">
+                  REAL STORIES. REAL CREATORS.
+                </h1>
+                <p class="intro-subtitle" id="intro-main-subtitle">
+                  AURA Studio — Where authentic content comes to life.
+                </p>
+              </div>
+            </div>
+
+            <!-- Central Video Stage (Emerges as User Scrolls) -->
+            <div class="intro-video-stage" id="intro-video-stage">
+              <div class="ugc-intro-video-card" id="ugc-intro-video-card" tabindex="0" role="region" aria-label="Cinematic UGC video player">
+                
+                <!-- Viewfinder Corner Reticles & Film Metadata -->
+                <div class="viewfinder-overlay" aria-hidden="true">
+                  <div class="vf-bracket vf-tl"></div>
+                  <div class="vf-bracket vf-tr"></div>
+                  <div class="vf-bracket vf-bl"></div>
+                  <div class="vf-bracket vf-br"></div>
+                  <div class="vf-crosshair"></div>
+                  <div class="intro-rec-indicator">
+                    <span class="rec-dot"></span>
+                    <span class="rec-text">REC · 24FPS</span>
+                  </div>
+                </div>
+
+                <!-- HTML5 Video Element with High-Res Poster Frame -->
+                <video
+                  id="ugc-intro-video"
+                  class="intro-video-element"
+                  src="/videos/intro_ugc.mp4"
+                  poster="/images/ugc_reel_1.jpg"
+                  autoplay
+                  muted
+                  playsinline
+                  loop
+                  preload="auto"
+                  aria-label="AURA Studio Creator Story Video"
+                >
+                  <source src="/videos/intro_ugc.mp4" type="video/mp4" />
+                  Your browser does not support HTML5 video.
+                </video>
+
+                <!-- Big Play Button Overlay (when paused or autoplay blocked) -->
+                <div class="intro-video-play-overlay" id="intro-video-play-overlay" aria-hidden="true">
+                  <div class="play-overlay-pill">
+                    <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
+                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    <span>Play Creator Video</span>
+                  </div>
+                </div>
+
+                <!-- Bottom Floating Controls & Caption Bar -->
+                <div class="intro-video-controls-bar">
+                  <div class="intro-video-caption-wrap">
+                    <span class="intro-revealed-caption" id="intro-revealed-caption">
+                      MADE TO FEEL REAL.
+                    </span>
+                  </div>
+
+                  <div class="intro-controls-group">
+                    <button 
+                      type="button" 
+                      class="intro-ctrl-btn" 
+                      id="intro-play-toggle-btn" 
+                      aria-label="Play showreel"
+                    >
+                      <svg class="icon-play" viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                      </svg>
+                      <svg class="icon-pause" viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="display: none;">
+                        <rect x="6" y="4" width="4" height="16"></rect>
+                        <rect x="14" y="4" width="4" height="16"></rect>
+                      </svg>
+                      <span class="play-btn-text">Play</span>
+                    </button>
+
+                    <button 
+                      type="button" 
+                      class="intro-ctrl-btn" 
+                      id="intro-mute-toggle-btn" 
+                      aria-label="Unmute audio"
+                    >
+                      <svg class="icon-muted" viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+                        <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                        <line x1="23" y1="9" x2="17" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
+                        <line x1="17" y1="9" x2="23" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
+                      </svg>
+                      <svg class="icon-unmuted" viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="display: none;">
+                        <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                      </svg>
+                      <span class="mute-btn-text">Muted</span>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Bottom Opening Screen Prompt: SCROLL TO EXPLORE & Progress Bar -->
+            <div class="intro-scroll-prompt-wrap" id="intro-scroll-prompt-wrap">
+              <a href="#hero" class="intro-scroll-prompt" id="intro-scroll-prompt" aria-label="Scroll down to explore showreel">
+                <span class="prompt-text">SCROLL TO EXPLORE</span>
+                <span class="prompt-arrow-circle" aria-hidden="true">
+                  <svg class="prompt-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <polyline points="19 12 12 19 5 12"></polyline>
+                  </svg>
+                </span>
+              </a>
+
+              <!-- Thin Animated Scroll-Progress Track -->
+              <div class="intro-progress-track" aria-hidden="true">
+                <div class="intro-progress-fill" id="intro-scroll-progress-fill"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- Film Scene Bridge: Prologue Scene 00 to Scene 01 (Hero) -->
+      <div class="film-scene-bridge" aria-hidden="true"></div>
+
       <!-- SECTION 1: HERO SECTION (TWO-COLUMN LAYOUT) -->
       <section class="section-hero" id="hero">
         <!-- Ambient 3D Creative Studio Lighting Mesh -->
@@ -169,17 +355,27 @@
 
         <div class="container hero-grid">
           
-          <!-- LEFT COLUMN: PRODUCT PITCH -->
+          <!-- LEFT COLUMN: PRODUCT PITCH & DYNAMIC ROTATING HEADLINE -->
           <div class="hero-pitch">
+            <!-- Subtle Creative Studio Atmospheric Glow Behind Typography -->
+            <div class="hero-headline-backdrop-glow" aria-hidden="true"></div>
+
             <div class="hero-eyebrow">
               <span class="eyebrow-accent-dot" aria-hidden="true"></span>
               <span class="eyebrow-text">MEET YOUR NEW FAVOURITE</span>
             </div>
 
             <h1 class="hero-title">
-              <span class="hero-line hero-line-1">Pure Acoustic Clarity.</span>
-              <span class="hero-line hero-line-2 title-serif">Crafted for Everyday Serenity.</span>
+              <span class="hero-line hero-title-prefix">Pure Acoustic Clarity.</span>
+              <span class="hero-rotator-wrapper" id="hero-rotator-wrapper" aria-live="polite">
+                <span class="hero-rotator-item is-active title-serif" data-index="0">Crafted for Everyday Serenity.</span>
+              </span>
             </h1>
+
+            <!-- Thin Studio Architectural Accent Line -->
+            <div class="hero-studio-accent-line" aria-hidden="true">
+              <span class="accent-line-glow"></span>
+            </div>
 
             <p class="hero-description">
               A warm, architectural acoustic capsule that blends 360° studio clarity with tactile minimalist design. Engineered for creative focus, morning rituals, and mindful living.
@@ -261,71 +457,27 @@
             </div>
           </div>
 
-          <!-- RIGHT COLUMN: 3D LAYERED MEDIA STAGE & LEAD CAPTURE FORM -->
-          <div class="hero-stage-column" id="lead-form">
-            
-            <!-- 3D Layered Composition of Existing Product Media -->
-            <div class="hero-3d-composition tilt-card-3d" id="hero-media-card" tabindex="0" role="region" aria-label="AURA Studio 3D Acoustic Capsule Showcase">
-              <!-- Ambient soft colorful lighting behind the 3D composition -->
-              <div class="hero-composition-aura" aria-hidden="true">
-                <div class="aura-orb aura-orb-violet"></div>
-                <div class="aura-orb aura-orb-pink"></div>
-                <div class="aura-orb aura-orb-sky"></div>
-              </div>
-
-              <!-- Layer 1: Architectural Backdrop Plane (-24px translateZ) -->
-              <div class="hero-layer-backdrop" aria-hidden="true"></div>
-
-              <!-- Layer 2: Main Foreground Image Card (+16px translateZ) -->
-              <div class="hero-layer-main-card">
-                <img 
-                  src="/images/hero_product.jpg" 
-                  alt="AURA Studio Ambient Sound Capsule in Hand-Finished Cast Stone with Solid Brass Volume Dials" 
-                  class="hero-layer-img" 
-                  width="720" 
-                  height="480" 
-                  loading="eager"
-                />
-                <div class="tilt-glare-layer" aria-hidden="true"></div>
-              </div>
-
-              <!-- Layer 3: Floating Acoustic Wave Pill (+42px translateZ) -->
-              <div class="hero-layer-float-pill" aria-hidden="true">
-                <span class="live-pulse"></span>
-                <span class="pill-label">360° Studio Sound Sanctuary</span>
-              </div>
-
-              <!-- Layer 4: Floating Material & Craftsmanship Badge (+56px translateZ) -->
-              <div class="hero-layer-float-badge" aria-hidden="true">
-                <div class="badge-icon-disc">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"></circle>
-                    <path d="M12 7v5l3 2"></path>
-                  </svg>
-                </div>
-                <div class="badge-text-group">
-                  <strong class="badge-headline">Cast Mineral &amp; Solid Brass</strong>
-                  <span class="badge-caption">Bespoke Travertine Finish</span>
-                </div>
-              </div>
-            </div>
-
+          <!-- RIGHT COLUMN: INQUIRY FORM -->
+          <div class="hero-stage-column hero-form-column" id="lead-form">
             <!-- Lead Capture Form with Tactile 3D Depth -->
             <div id="lead-form-container" class="hero-form-wrapper">
               <div class="lead-card-skeleton" aria-hidden="true">
                 <p>Loading inquiry form...</p>
               </div>
             </div>
-
           </div>
 
         </div>
       </section>
 
+      <!-- Film Scene Bridge: Scene 01 to Scene 02 -->
+      <div class="film-scene-bridge" aria-hidden="true"></div>
+
       <!-- SECTION 2: INTERACTIVE SMARTPHONE UGC REELS FEED -->
       <section class="section-ugc-reels section-ugc-carousel" id="product-slider">
         <div class="container reels-intro-container carousel-intro-container">
-          <div class="section-header-compact">
+          <div class="section-header-compact reveal-up">
+            <span class="scene-meta-tag">[SCENE 02] 24FPS // 9:16 VERTICAL MOTION REELS</span>
             <span class="section-eyebrow">COMMUNITY IN MOTION</span>
             <h2 class="section-title">Real Spaces. Unfiltered Acoustics.</h2>
             <p class="section-lead">
@@ -335,12 +487,15 @@
         </div>
 
         <!-- Centered Smartphone Reels Showcase Stage -->
-        <div class="reels-phone-showcase-wrap ugc-smartphone-section-body">
+        <div class="reels-phone-showcase-wrap ugc-smartphone-section-body reveal-3d">
           <div id="product-slider-container" class="smartphone-reels-mount ugc-phone-container">
             <!-- Rendered dynamically by SmartphoneReelsFeed -->
           </div>
         </div>
       </section>
+
+      <!-- Film Scene Bridge: Scene 02 to Scene 03 -->
+      <div class="film-scene-bridge" aria-hidden="true"></div>
 
       <!-- SECTION 3: ABOUT THE PRODUCT / BRAND -->
       <section class="section-about" id="about">
@@ -352,7 +507,7 @@
 
         <div class="container about-grid">
           <!-- Left: Editorial Visual (Interactive Overlapping Image Stack) -->
-          <div class="about-visual-col">
+          <div class="about-visual-col reveal-left reveal-mask">
             <div id="about-image-stack-container" class="image-stack-wrapper">
               <!-- Rendered dynamically by ImageStackController -->
               <noscript>
@@ -375,7 +530,8 @@
           </div>
 
           <!-- Right: Narrative & What Makes It Different -->
-          <div class="about-text-col">
+          <div class="about-text-col reveal-right">
+            <span class="scene-meta-tag">[SCENE 03] TACTILE ACOUSTICS // CAST MINERAL ARCHIVE</span>
             <span class="section-eyebrow">THE CRAFT & PHILOSOPHY</span>
             <h2 class="section-title">Sound That Feels Like Part of Your Architecture</h2>
             
@@ -393,30 +549,30 @@
             </div>
 
             <!-- Value Highlights Grid -->
-            <div class="about-specs-grid">
-              <div class="spec-card">
+            <div class="about-specs-grid reveal-wave">
+              <div class="spec-card reveal-up reveal-wave-item">
                 <span class="spec-card-num">01</span>
                 <h4 class="spec-card-title">Dual Custom Drivers</h4>
                 <p class="spec-card-desc">48mm full-range neodymium transducers with tuned passive radiators.</p>
               </div>
-              <div class="spec-card">
+              <div class="spec-card reveal-up reveal-wave-item">
                 <span class="spec-card-num">02</span>
                 <h4 class="spec-card-title">Lossless Bluetooth 5.4</h4>
                 <p class="spec-card-desc">Instant wireless sync and zero-latency USB-C studio connection.</p>
               </div>
-              <div class="spec-card">
+              <div class="spec-card reveal-up reveal-wave-item">
                 <span class="spec-card-num">03</span>
                 <h4 class="spec-card-title">Solid Brass Hardware</h4>
                 <p class="spec-card-desc">Every volume dial is machined from solid brass with silky damped friction.</p>
               </div>
-              <div class="spec-card">
+              <div class="spec-card reveal-up reveal-wave-item">
                 <span class="spec-card-num">04</span>
                 <h4 class="spec-card-title">18h All-Day Play</h4>
                 <p class="spec-card-desc">High-density battery cell built for weekend getaways and focused study.</p>
               </div>
             </div>
 
-            <div class="about-action">
+            <div class="about-action reveal-up">
               <a href="#lead-form" class="btn btn-primary">
                 <span>Inquire About Availability</span>
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -428,19 +584,18 @@
         </div>
       </section>
 
+      <!-- Film Scene Bridge: Scene 03 to Scene 04 -->
+      <div class="film-scene-bridge" aria-hidden="true"></div>
+
       <!-- SECTION 4: TRUSTED BY LEADING BRANDS (MOVING BRAND LOGO WALL) -->
-      <section class="section-brand-wall" id="trust">
-        <div id="brand-wall-container" class="brand-wall-container">
-          <!-- Rendered dynamically by BrandLogoWall component -->
-          <noscript>
-            <div class="brand-wall-header-wrap container text-center">
-              <span class="section-eyebrow">TRUSTED BY LEADING BRANDS</span>
-              <h2 class="section-title">Recognized Across Design, Sound & Living</h2>
-              <p class="section-lead">Featured and celebrated by leading publications, architectural innovators, and acoustic connoisseurs worldwide.</p>
-            </div>
-          </noscript>
+      <section class="section-brand-wall" id="trust" aria-label="Brand Partners">
+        <div id="brand-wall-container" class="brand-wall-container reveal-up">
+          <!-- Rendered dynamically by BrandLogoWall component as a single continuous row -->
         </div>
       </section>
+
+      <!-- Film Scene Bridge: Scene 04 to Scene 05 -->
+      <div class="film-scene-bridge" aria-hidden="true"></div>
 
       <!-- SECTION 5: PRODUCT GALLERY / UGC SHOWCASE -->
       <section class="section-ugc" id="ugc-showcase">
@@ -451,7 +606,8 @@
         </div>
 
         <div class="container">
-          <div class="section-header-compact">
+          <div class="section-header-compact reveal-up">
+            <span class="scene-meta-tag">[SCENE 05] REAL PATRONS // UNFILTERED SANCTUARY</span>
             <span class="section-eyebrow">COMMUNITY & MOMENTS</span>
             <h2 class="section-title">In Everyday Living</h2>
             <p class="section-lead">
@@ -459,9 +615,9 @@
             </p>
           </div>
 
-          <div class="ugc-grid" id="ugc-cards-grid">
+          <div class="ugc-grid reveal-wave" id="ugc-cards-grid">
             <!-- Card 1 -->
-            <article class="ugc-card" data-ugc-id="ugc-1" tabindex="0" role="button" aria-label="View Elena's morning routine moment">
+            <article class="ugc-card reveal-left reveal-wave-item" data-ugc-id="ugc-1" tabindex="0" role="button" aria-label="View Elena's morning routine moment">
               <div class="ugc-card-media">
                 <img 
                   src="/images/ugc_morning.jpg" 
@@ -504,7 +660,7 @@
             </article>
 
             <!-- Card 2 -->
-            <article class="ugc-card" data-ugc-id="ugc-2" tabindex="0" role="button" aria-label="View Marcus's studio desk setup moment">
+            <article class="ugc-card reveal-up reveal-wave-item" data-ugc-id="ugc-2" tabindex="0" role="button" aria-label="View Marcus's studio desk setup moment">
               <div class="ugc-card-media">
                 <img 
                   src="/images/ugc_workspace.jpg" 
@@ -547,7 +703,7 @@
             </article>
 
             <!-- Card 3 -->
-            <article class="ugc-card" data-ugc-id="ugc-3" tabindex="0" role="button" aria-label="View Sophia's terrace golden hour moment">
+            <article class="ugc-card reveal-right reveal-wave-item" data-ugc-id="ugc-3" tabindex="0" role="button" aria-label="View Sophia's terrace golden hour moment">
               <div class="ugc-card-media">
                 <img 
                   src="/images/ugc_outdoor.jpg" 
@@ -592,6 +748,9 @@
         </div>
       </section>
 
+      <!-- Film Scene Bridge: Scene 05 to Scene 06 -->
+      <div class="film-scene-bridge" aria-hidden="true"></div>
+
       <!-- SECTION 6: CURATED VISUAL GALLERY (MASONRY) -->
       <section class="section-gallery" id="gallery">
         <!-- Ambient 3D Colorful Studio Lighting -->
@@ -601,7 +760,8 @@
         </div>
 
         <div class="container">
-          <div class="section-header-compact text-center">
+          <div class="section-header-compact text-center reveal-up">
+            <span class="scene-meta-tag">[SCENE 06] 50MM F/1.4 // CURATED ARCHIVE</span>
             <span class="section-eyebrow">CURATED PERSPECTIVES</span>
             <h2 class="section-title">Form, Texture &amp; Spatial Harmony</h2>
             <p class="section-lead">
@@ -609,16 +769,20 @@
             </p>
           </div>
 
-          <div id="gallery-masonry-container" class="gallery-masonry-container">
+          <div id="gallery-masonry-container" class="gallery-masonry-container reveal-wave">
             <!-- Rendered dynamically by GalleryController -->
           </div>
         </div>
       </section>
 
+      <!-- Film Scene Bridge: Scene 06 to Scene 07 -->
+      <div class="film-scene-bridge" aria-hidden="true"></div>
+
       <!-- SECTION 7: TESTIMONIALS -->
       <section class="section-testimonials" id="testimonials">
         <div class="container">
-          <div class="section-header-compact text-center">
+          <div class="section-header-compact text-center reveal-up">
+            <span class="scene-meta-tag">[SCENE 07] PATRON REFLECTIONS // VERIFIED REVIEWS</span>
             <span class="section-eyebrow">VERIFIED EXPERIENCES</span>
             <h2 class="section-title">Reflections From Our Owners</h2>
             <p class="section-lead">
@@ -626,7 +790,7 @@
             </p>
           </div>
 
-          <div id="testimonials-slider-container" class="testimonials-slider-wrapper">
+          <div id="testimonials-slider-container" class="testimonials-slider-wrapper reveal-scale">
             <!-- Dynamically rendered by TestimonialsSlider -->
             <noscript>
               <div class="testimonials-grid">
@@ -649,10 +813,14 @@
         </div>
       </section>
 
+      <!-- Film Scene Bridge: Scene 07 to Scene 08 -->
+      <div class="film-scene-bridge" aria-hidden="true"></div>
+
       <!-- SECTION 7: FAQ ACCORDION -->
       <section class="section-faq" id="faq">
         <div class="container faq-container">
-          <div class="section-header-compact text-center">
+          <div class="section-header-compact text-center reveal-up">
+            <span class="scene-meta-tag">[SCENE 08] STUDIO CONCIERGE // CLEAR SPECIFICATIONS</span>
             <span class="section-eyebrow">CLEAR ANSWERS</span>
             <h2 class="section-title">Frequently Asked Questions</h2>
             <p class="section-lead">
@@ -661,12 +829,12 @@
           </div>
 
           <!-- Rendered dynamically by FaqAccordion -->
-          <div id="faq-accordion-container" class="faq-accordion-wrapper">
+          <div id="faq-accordion-container" class="faq-accordion-wrapper reveal-wave">
             <!-- Dynamic FAQ Items -->
           </div>
 
           <!-- Help Callout Box -->
-          <div class="faq-concierge-card">
+          <div class="faq-concierge-card reveal-up">
             <div class="concierge-content">
               <h3 class="concierge-title">Have a specific or bespoke inquiry?</h3>
               <p class="concierge-text">
@@ -694,8 +862,8 @@
     <!-- SECTION 8: POLISHED FOOTER -->
     <footer class="site-footer">
       <div class="container">
-        <div class="footer-top-row">
-          <div class="footer-brand-col">
+        <div class="footer-top-row reveal-wave">
+          <div class="footer-brand-col reveal-left reveal-wave-item">
             <a href="#" class="brand-logo footer-logo" aria-label="AURA Studio Home">
               <span class="logo-mark">AURA</span>
               <span class="logo-submark">STUDIO</span>
@@ -710,7 +878,7 @@
             </div>
           </div>
 
-          <div class="footer-nav-col">
+          <div class="footer-nav-col reveal-up reveal-wave-item">
             <h4 class="footer-heading">Navigation</h4>
             <ul class="footer-link-list">
               <li><a href="#hero">Overview</a></li>
@@ -718,11 +886,13 @@
               <li><a href="#about">The Philosophy</a></li>
               <li><a href="#trust">Brand Partners</a></li>
               <li><a href="#ugc-showcase">Everyday Moments</a></li>
+              <li><a href="#gallery">Visual Gallery</a></li>
+              <li><a href="#testimonials">Client Reviews</a></li>
               <li><a href="#faq">Questions & Answers</a></li>
             </ul>
           </div>
 
-          <div class="footer-nav-col">
+          <div class="footer-nav-col reveal-up reveal-wave-item">
             <h4 class="footer-heading">Editions & Inquiries</h4>
             <ul class="footer-link-list">
               <li><a href="#lead-form">Travertine Stone Edition</a></li>
@@ -733,7 +903,7 @@
             </ul>
           </div>
 
-          <div class="footer-nav-col">
+          <div class="footer-nav-col reveal-up reveal-wave-item">
             <h4 class="footer-heading">Assurance</h4>
             <ul class="footer-link-list">
               <li><a href="#trust">2-Year Craft Guarantee</a></li>
@@ -744,7 +914,7 @@
           </div>
         </div>
 
-        <div class="footer-bottom-row">
+        <div class="footer-bottom-row reveal-up">
           <p class="footer-copyright">
             © <span id="current-year">2026</span> AURA Studio Design Labs. All rights reserved.
           </p>

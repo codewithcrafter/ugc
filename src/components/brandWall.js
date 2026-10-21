@@ -44,13 +44,7 @@ export class BrandLogoWall {
   }
 
   render() {
-    const { eyebrow, headline, lead, logos = [] } = this.data;
-
-    const eyebrowText = eyebrow || 'TRUSTED BY LEADING BRANDS';
-    const headlineText = headline || 'Recognized Across Design, Sound & Living';
-    const leadText =
-      lead ||
-      'Featured and celebrated by leading publications, architectural innovators, and acoustic connoisseurs worldwide.';
+    const { logos = [] } = this.data;
 
     // Source valid logo list
     const logoList =
@@ -63,30 +57,22 @@ export class BrandLogoWall {
     // Filter to only items that have verified logo image assets
     const validLogos = logoList.filter((item) => Boolean(item && item.logoSrc));
 
-    // Base sequence of cards
+    // Base sequence of unique logos
     const baseCardsHtml = validLogos.map((item) => this.renderCard(item)).join('');
 
-    // Duplicate sequence within each group to ensure flawless coverage on ultrawide screens
-    const groupCardsHtml = baseCardsHtml + baseCardsHtml;
-
+    // Set A and Set B create a seamless, non-confusing 100% infinite marquee loop
     this.container.innerHTML = `
-      <div class="brand-wall-header-wrap container text-center">
-        <span class="section-eyebrow">${eyebrowText}</span>
-        <h2 class="section-title">${headlineText}</h2>
-        <p class="section-lead">${leadText}</p>
-      </div>
-
-      <!-- Exactly ONE Horizontal Edge-to-Edge Moving Logo Row -->
+      <!-- Exactly ONE Horizontal Edge-to-Edge Moving Logo Row (No text or headings) -->
       <div class="logo-wall-viewport" id="logo-wall-viewport">
         <div class="logo-wall-row row-direction-left" id="logo-wall-row" role="region" aria-label="Brand Partners Strip">
           <div class="logo-wall-track" id="logo-wall-track">
             <!-- Set A -->
             <div class="logo-wall-group logo-group-a">
-              ${groupCardsHtml}
+              ${baseCardsHtml}
             </div>
             <!-- Duplicated Set B for Seamless Infinite Loop -->
             <div class="logo-wall-group logo-group-b" aria-hidden="true">
-              ${groupCardsHtml}
+              ${baseCardsHtml}
             </div>
           </div>
         </div>
