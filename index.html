@@ -32,8 +32,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
 
-    <!-- Preload Hero 4K Studio Photography Background for Instant LCP -->
-    <link rel="preload" as="image" href="/images/hero_photography_studio_4k.jpg" fetchpriority="high" />
 
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="/src/style.css" />
@@ -163,26 +161,6 @@
     <main id="main-content">
       <!-- SECTION 1: HERO SECTION (TWO-COLUMN LAYOUT) -->
       <section class="section-hero" id="hero">
-        <!-- Dedicated Parallax HD Photography Background Stage & Dark Cinematic Overlays -->
-        <div class="hero-bg-stage" id="hero-bg-stage" aria-hidden="true">
-          <div class="hero-bg-image-wrapper" id="hero-bg-image-wrapper">
-            <img 
-              src="/images/hero_photography_studio_4k.jpg" 
-              alt="AURA Creative Studio 4K commercial photography setup with cinema camera, studio lighting rigs, and creator product shoot set" 
-              class="hero-bg-img" 
-              id="hero-bg-img"
-              width="3840"
-              height="2160"
-              fetchpriority="high"
-              loading="eager"
-              decoding="async"
-            />
-          </div>
-          <!-- Dark Contrast Gradient Overlays (Text Legibility Scrim, Bottom Seamless Blend, Violet Atmosphere) -->
-          <div class="hero-bg-overlay-scrim" aria-hidden="true"></div>
-          <div class="hero-bg-bottom-blend" aria-hidden="true"></div>
-          <div class="hero-bg-violet-glow" aria-hidden="true"></div>
-        </div>
 
         <!-- Ambient 3D Creative Studio Lighting Mesh -->
         <div class="hero-ambient-lighting" aria-hidden="true">
@@ -755,15 +733,20 @@
         </div>
 
         <div class="footer-bottom-row reveal-up">
-          <p class="footer-copyright">
-            © <span id="current-year">2026</span> AURA Studio Design Labs. All rights reserved.
-          </p>
+          <div class="footer-bottom-left">
+            <a href="#hero" class="back-to-top" id="footer-back-to-top" aria-label="Scroll back to top">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="12" y1="19" x2="12" y2="5"></line>
+                <polyline points="5 12 12 5 19 12"></polyline>
+              </svg>
+              <span>Back to Top</span>
+            </a>
+            <p class="footer-copyright">
+              © <span id="current-year">2026</span> AURA Studio Design Labs. All rights reserved.
+            </p>
+          </div>
           <div class="footer-legal-links">
             <span>Crafted with pure HTML, Vanilla CSS & Modern JS</span>
-            <span class="bullet-sep">•</span>
-            <a href="#hero" class="back-to-top" aria-label="Scroll back to top">
-              Back to Top ↑
-            </a>
           </div>
         </div>
       </div>
@@ -823,6 +806,151 @@
             All AURA Studio audio capsules are manufactured with high-density mineral composites and solid brass hardware. Each unit is individually calibrated before dispatch and covered by our 2-Year Craftsmanship Guarantee against manufacturing defects.
           </p>
         </div>
+      </div>
+    </div>
+
+    <!-- ACCESSIBLE INQUIRY POPUP MODAL -->
+    <div 
+      class="inquiry-modal-overlay" 
+      id="inquiry-modal" 
+      role="dialog" 
+      aria-modal="true" 
+      aria-labelledby="inquiry-modal-title" 
+      hidden
+    >
+      <div class="inquiry-modal-dialog" role="document">
+        <button type="button" class="inquiry-modal-close-btn" id="inquiry-close-btn" aria-label="Close inquiry dialog">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+
+        <div class="inquiry-modal-header">
+          <div class="inquiry-modal-badge">
+            <span class="badge-dot" aria-hidden="true"></span>
+            <span>DIRECT STUDIO INQUIRY</span>
+          </div>
+          <h3 id="inquiry-modal-title" class="inquiry-modal-title">Let's Plan Your Shoot</h3>
+          <p class="inquiry-modal-desc">
+            Discuss your UGC photoshoot, vertical video production, or studio hire with our creative team. We respond within 24 hours with custom concept outlines and casting options.
+          </p>
+        </div>
+
+        <form class="inquiry-modal-form" id="inquiry-modal-form" novalidate>
+          <div class="inquiry-form-group">
+            <label for="inquiry-fullname" class="inquiry-label">
+              Full Name <span class="req-star" aria-hidden="true">*</span>
+            </label>
+            <input 
+              type="text" 
+              id="inquiry-fullname" 
+              name="fullName" 
+              class="inquiry-input" 
+              placeholder="e.g. Elena Vance" 
+              required 
+              autocomplete="name"
+            />
+            <span class="inquiry-error-msg" id="error-inquiry-fullname" role="alert" aria-live="polite"></span>
+          </div>
+
+          <div class="inquiry-form-row">
+            <div class="inquiry-form-group">
+              <label for="inquiry-email" class="inquiry-label">
+                Email Address <span class="req-star" aria-hidden="true">*</span>
+              </label>
+              <input 
+                type="email" 
+                id="inquiry-email" 
+                name="email" 
+                class="inquiry-input" 
+                placeholder="elena@brand.com" 
+                required 
+                autocomplete="email"
+              />
+              <span class="inquiry-error-msg" id="error-inquiry-email" role="alert" aria-live="polite"></span>
+            </div>
+
+            <div class="inquiry-form-group">
+              <label for="inquiry-phone" class="inquiry-label">
+                Phone / WhatsApp <span class="req-star" aria-hidden="true">*</span>
+              </label>
+              <input 
+                type="tel" 
+                id="inquiry-phone" 
+                name="phone" 
+                class="inquiry-input" 
+                placeholder="+1 (555) 729-4820" 
+                required 
+                autocomplete="tel"
+              />
+              <span class="inquiry-error-msg" id="error-inquiry-phone" role="alert" aria-live="polite"></span>
+            </div>
+          </div>
+
+          <div class="inquiry-form-row">
+            <div class="inquiry-form-group">
+              <label for="inquiry-service" class="inquiry-label">
+                Service Required <span class="req-star" aria-hidden="true">*</span>
+              </label>
+              <select id="inquiry-service" name="service" class="inquiry-select" required>
+                <option value="" disabled selected>Select a creative service</option>
+                <option value="UGC Photoshoot">UGC Photoshoot</option>
+                <option value="Vertical Video Production">Vertical Video Production</option>
+                <option value="Product Photography">Product Photography</option>
+                <option value="Studio Rental">Studio Rental</option>
+                <option value="Full Turnkey Production">Full Turnkey Production</option>
+              </select>
+              <span class="inquiry-error-msg" id="error-inquiry-service" role="alert" aria-live="polite"></span>
+            </div>
+
+            <div class="inquiry-form-group">
+              <label for="inquiry-budget" class="inquiry-label">
+                Preferred Budget <span class="opt-label">(Optional)</span>
+              </label>
+              <select id="inquiry-budget" name="budget" class="inquiry-select">
+                <option value="" selected>Select budget range</option>
+                <option value="Under $1,500">Under $1,500</option>
+                <option value="$1,500 – $3,500">$1,500 – $3,500</option>
+                <option value="$3,500 – $7,500">$3,500 – $7,500</option>
+                <option value="$7,500+ / Custom Retainer">$7,500+ / Custom Retainer</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="inquiry-form-group">
+            <label for="inquiry-details" class="inquiry-label">
+              Project Details
+            </label>
+            <textarea 
+              id="inquiry-details" 
+              name="details" 
+              class="inquiry-textarea" 
+              rows="3" 
+              placeholder="Tell us about your brand, deliverables, shooting timeline, or specific creator aesthetics..."
+            ></textarea>
+          </div>
+
+          <div class="inquiry-form-actions">
+            <button type="submit" class="btn btn-primary inquiry-submit-btn" id="inquiry-submit-btn">
+              <span class="btn-text">Submit Inquiry</span>
+              <span class="btn-spinner" aria-hidden="true"></span>
+            </button>
+          </div>
+
+          <div class="inquiry-status-feedback" id="inquiry-status-feedback" role="status" aria-live="polite"></div>
+
+          <div class="inquiry-integration-note" id="inquiry-integration-note">
+            <p class="note-text">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+              <span>Instant Concierge: Inquiries submitted here are validated & recorded locally. For instant live confirmation, connect directly via <a href="https://wa.me/15557294820?text=Hi%20AURA%20Studio!%20I%27d%20like%20to%20plan%20a%20shoot." target="_blank" rel="noopener noreferrer">WhatsApp</a>.</span>
+            </p>
+          </div>
+        </form>
       </div>
     </div>
 

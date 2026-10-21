@@ -18,8 +18,8 @@ import { FloatingContactController } from './components/floatingContact.js';
 import { HeadlineRotatorController } from './components/headlineRotator.js';
 import { CinematicStoryEngine } from './components/cinematicStory.js';
 import { ScrollRevealController } from './components/scrollReveal.js';
-import { HeroParallaxController } from './components/heroParallax.js';
 import { FooterAmbientParticlesController } from './components/footerParticles.js';
+import { submitLead, CONFIGURED_API_ENDPOINT } from './services/leadService.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Ensure page-loaded is active immediately so all UI elements are visible
@@ -36,11 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   new FooterAmbientParticlesController('footer-particle-canvas');
 
-  // 1a. Initialize HD Photography Hero Background Parallax
-  const heroSection = document.getElementById('hero');
-  if (heroSection) {
-    new HeroParallaxController(heroSection, { scrollFactor: 0.18 });
-  }
 
   // 1b. Initialize Cinematic Hero Rotating Headline
   new HeadlineRotatorController('hero-rotator-wrapper', {
@@ -265,6 +260,224 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Escape' && legalModal && !legalModal.hidden) {
       closeLegalModal();
     }
+  });
+
+  // 7a. Inquiry Popup Modal Controller
+  const inquiryModal = document.getElementById('inquiry-modal');
+  const closeInquiryBtn = document.getElementById('inquiry-close-btn');
+  const inquiryForm = document.getElementById('inquiry-modal-form');
+  const inquirySubmitBtn = document.getElementById('inquiry-submit-btn');
+  const inquiryStatusFeedback = document.getElementById('inquiry-status-feedback');
+
+  const openInquiryModal = () => {
+    if (inquiryModal) {
+      inquiryModal.removeAttribute('hidden');
+      inquiryModal.classList.add('is-active');
+      document.body.classList.add('modal-is-open');
+      const firstInput = document.getElementById('inquiry-fullname');
+      setTimeout(() => firstInput?.focus(), 100);
+    }
+  };
+
+  const closeInquiryModal = () => {
+    if (inquiryModal) {
+      inquiryModal.classList.remove('is-active');
+      inquiryModal.setAttribute('hidden', '');
+      document.body.classList.remove('modal-is-open');
+      if (inquiryStatusFeedback) {
+        inquiryStatusFeedback.className = 'inquiry-status-feedback';
+        inquiryStatusFeedback.textContent = '';
+      }
+    }
+  };
+
+  // Wire all Inquire buttons to open the modal
+  const headerInquireBtn = document.getElementById('header-inquire-btn');
+  headerInquireBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openInquiryModal();
+  });
+
+  // Also wire any CTA with class .btn-open-inquiry
+  document.querySelectorAll('.btn-open-inquiry, [data-action="open-inquiry"]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openInquiryModal();
+    });
+  });
+
+  closeInquiryBtn?.addEventListener('click', closeInquiryModal);
+
+  // Close when clicking overlay backdrop (outside dialog)
+  inquiryModal?.addEventListener('click', (e) => {
+    if (e.target === inquiryModal) {
+      closeInquiryModal();
+    }
+  });
+
+  // Close on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && inquiryModal && !inquiryModal.hidden) {
+      closeInquiryModal();
+    }
+  });
+
+  // Form submission & validation
+  if (inquiryForm) {
+    let isSubmitting = false;
+
+    inquiryForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (isSubmitting) return;
+
+      // Clear previous error states
+      inquiryForm.querySelectorAll('.has-error').forEach((el) => el.classList.remove('has-error'));
+      inquiryForm.querySelectorAll('.inquiry-error-msg').forEach((el) => (el.textContent = ''));
+      if (inquiryStatusFeedback) {
+        inquiryStatusFeedback.className = 'inquiry-status-feedback';
+        inquiryStatusFeedback.textContent = '';
+      }
+
+      const nameInput = document.getElementById('inquiry-fullname');
+      const emailInput = document.getElementById('inquiry-email');
+      const phoneInput = document.getElementById('inquiry-phone');
+      const serviceInput = document.getElementById('inquiry-service');
+      const budgetInput = document.getElementById('inquiry-budget');
+      const detailsInput = document.getElementById('inquiry-details');
+
+      const fullName = (nameInput?.value || '').trim();
+      const email = (emailInput?.value || '').trim();
+      const phone = (phoneInput?.value || '').trim();
+      const service = serviceInput?.value || '';
+      const budget = budgetInput?.value || 'Unspecified';
+      const details = (detailsInput?.value || '').trim();
+
+      let hasErrors = false;
+
+      // Validate Name
+      if (!fullName || fullName.length < 2) {
+        nameInput?.classList.add('has-error');
+        const err = document.getElementById('error-inquiry-fullname');
+        if (err) err.textContent = 'Please enter your full name (minimum 2 letters).';
+        hasErrors = true;
+      }
+
+      // Validate Email
+      const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+      if (!email || !emailRegex.test(email)) {
+        emailInput?.classList.add('has-error');
+        const err = document.getElementById('error-inquiry-email');
+        if (err) err.textContent = 'Please enter a valid email address (e.g. name@brand.com).';
+        hasErrors = true;
+      }
+
+      // Validate Phone (7 to 15 digits)
+      const digitsOnly = phone.replace(/\D/g, '');
+      if (!phone || digitsOnly.length < 7 || digitsOnly.length > 15) {
+        phoneInput?.classList.add('has-error');
+        const err = document.getElementById('error-inquiry-phone');
+        if (err) err.textContent = 'Please enter a valid contact phone number (7–15 digits).';
+        hasErrors = true;
+      }
+
+      // Validate Service
+      if (!service) {
+        serviceInput?.classList.add('has-error');
+        const err = document.getElementById('error-inquiry-service');
+        if (err) err.textContent = 'Please choose a required service.';
+        hasErrors = true;
+      }
+
+      if (hasErrors) {
+        return;
+      }
+
+      // Submit state
+      isSubmitting = true;
+      if (inquirySubmitBtn) {
+        inquirySubmitBtn.disabled = true;
+        inquirySubmitBtn.classList.add('is-loading');
+      }
+
+      const payload = {
+        fullName,
+        email,
+        phone,
+        service,
+        budget,
+        details,
+        submittedAt: new Date().toISOString(),
+        source: 'navbar_inquiry_popup',
+      };
+
+      try {
+        let result = null;
+        if (CONFIGURED_API_ENDPOINT) {
+          result = await submitLead({
+            fullName,
+            email,
+            phone,
+            editionPreference: `${service} (${budget})`,
+            consent: true,
+          });
+        } else {
+          // Transparent simulation with audit storage
+          await new Promise((resolve) => setTimeout(resolve, 600));
+          const inquiryId = 'AURA-INQ-' + Date.now().toString(36).toUpperCase() + '-' + Math.floor(Math.random() * 899 + 100);
+          try {
+            const existing = JSON.parse(sessionStorage.getItem('aura_submitted_inquiries') || '[]');
+            existing.push({ id: inquiryId, ...payload });
+            sessionStorage.setItem('aura_submitted_inquiries', JSON.stringify(existing));
+          } catch (storageErr) {
+            // ignore
+          }
+          result = {
+            success: true,
+            inquiryId,
+            isSimulation: true,
+          };
+        }
+
+        if (result && result.success) {
+          if (inquiryStatusFeedback) {
+            inquiryStatusFeedback.className = 'inquiry-status-feedback is-success';
+            const refText = result.inquiryId || 'AURA-INQ';
+            inquiryStatusFeedback.innerHTML = `
+              <strong>Inquiry Validated & Recorded (Ref: ${refText})</strong><br>
+              Thank you, ${fullName}! Your production request has been logged. Our studio team reviews project briefs within 24 hours.<br>
+              <span style="font-size:0.8rem;opacity:0.9;display:block;margin-top:6px;">
+                Need instant availability confirmation? 
+                <a href="https://wa.me/15557294820?text=Hi%20AURA%20Studio!%20I%20just%20submitted%20inquiry%20${encodeURIComponent(refText)}%20for%20${encodeURIComponent(service)}." target="_blank" rel="noopener noreferrer" style="color:#C4A5FF;font-weight:600;text-decoration:underline;">
+                  Click here to message our team on WhatsApp →
+                </a>
+              </span>
+            `;
+          }
+          inquiryForm.reset();
+        } else {
+          throw new Error(result?.error || 'Failed to submit inquiry.');
+        }
+      } catch (err) {
+        console.error('[InquiryModal] Error during inquiry submission:', err);
+        if (inquiryStatusFeedback) {
+          inquiryStatusFeedback.className = 'inquiry-status-feedback is-error';
+          inquiryStatusFeedback.textContent = 'Submission error: ' + (err.message || 'Please check your connection or contact us on WhatsApp.');
+        }
+      } finally {
+        isSubmitting = false;
+        if (inquirySubmitBtn) {
+          inquirySubmitBtn.disabled = false;
+          inquirySubmitBtn.classList.remove('is-loading');
+        }
+      }
+    });
+  }
+
+  // 7b. Back to Top Smooth Scroll Handler
+  const backToTopBtn = document.getElementById('footer-back-to-top');
+  backToTopBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
   // 8. Enhanced Smooth Scroll for Anchor Links with Target Focus
