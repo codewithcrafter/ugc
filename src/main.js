@@ -187,31 +187,43 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 6. Mobile Navigation Drawer Toggle
+  // 6. Mobile Navigation Drawer Toggle & Accessible State Management
   const menuToggle = document.getElementById('mobile-menu-toggle');
   const navDrawer = document.getElementById('mobile-nav-drawer');
 
   if (menuToggle && navDrawer) {
+    const setDrawerState = (isOpen) => {
+      menuToggle.setAttribute('aria-expanded', String(isOpen));
+      menuToggle.classList.toggle('is-active', isOpen);
+      navDrawer.hidden = !isOpen;
+      document.body.classList.toggle('mobile-nav-open', isOpen);
+    };
+
     menuToggle.addEventListener('click', () => {
       const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
-      menuToggle.setAttribute('aria-expanded', String(!isExpanded));
-      navDrawer.hidden = isExpanded;
+      setDrawerState(!isExpanded);
     });
 
     // Close mobile drawer when clicking a navigation link
     const mobileLinks = navDrawer.querySelectorAll('.mobile-nav-link, a');
     mobileLinks.forEach((link) => {
       link.addEventListener('click', () => {
-        menuToggle.setAttribute('aria-expanded', 'false');
-        navDrawer.hidden = true;
+        setDrawerState(false);
       });
     });
 
     // Close when clicking outside
     document.addEventListener('click', (e) => {
       if (!navDrawer.contains(e.target) && !menuToggle.contains(e.target) && !navDrawer.hidden) {
-        menuToggle.setAttribute('aria-expanded', 'false');
-        navDrawer.hidden = true;
+        setDrawerState(false);
+      }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !navDrawer.hidden) {
+        setDrawerState(false);
+        menuToggle.focus();
       }
     });
   }

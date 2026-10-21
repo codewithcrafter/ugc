@@ -955,51 +955,77 @@ body.page-loaded .header-actions {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 6px;
-  width: 44px;
-  height: 44px;
-  padding: 10px;
-  border-radius: 12px;
-  background-color: #FFFFFF;
-  border: 1.5px solid rgba(117, 69, 245, 0.15);
-  box-shadow: var(--shadow-sm);
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  border-radius: 10px;
+  background-color: #14141D !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5) !important;
   transition: all var(--transition-fast);
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
-.mobile-menu-toggle:hover {
-  background-color: var(--bg-surface-subtle);
-  border-color: var(--accent);
+.mobile-menu-toggle:hover,
+.mobile-menu-toggle:focus-visible {
+  background-color: #1A1A26 !important;
+  border-color: rgba(155, 109, 255, 0.5) !important;
 }
 
 .hamburger-bar {
   display: block;
-  width: 100%;
-  height: 2.5px;
-  background-color: var(--text-primary);
+  width: 18px;
+  height: 2px;
+  background-color: #F7F5FC !important;
   border-radius: 2px;
-  transition: transform var(--transition-fast), opacity var(--transition-fast);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+  transform-origin: center;
 }
 
-/* Mobile Nav Drawer */
+/* Open / Active State (Turns into a crisp 'X') */
+.mobile-menu-toggle[aria-expanded="true"] .hamburger-bar:nth-child(1),
+.mobile-menu-toggle.is-active .hamburger-bar:nth-child(1) {
+  transform: translateY(3.5px) rotate(45deg);
+}
+
+.mobile-menu-toggle[aria-expanded="true"] .hamburger-bar:nth-child(2),
+.mobile-menu-toggle.is-active .hamburger-bar:nth-child(2) {
+  transform: translateY(-3.5px) rotate(-45deg);
+}
+
+/* Mobile Nav Drawer — Solid Dark Luxury Theme */
 .mobile-nav-drawer {
   position: fixed;
-  top: var(--header-height);
+  top: var(--header-height, 62px);
   left: 0;
   width: 100%;
-  background-color: rgba(255, 253, 248, 0.98);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-bottom: 2px solid rgba(117, 69, 245, 0.15);
-  padding: 24px 28px 32px;
-  box-shadow: 0 20px 48px -10px rgba(117, 69, 245, 0.15);
-  z-index: 999;
-  animation: mobileDrawerSlide 260ms var(--ease-spring);
+  max-height: calc(100vh - var(--header-height, 62px));
+  overflow-y: auto;
+  background: #0D0D14 !important;
+  background-color: #0D0D14 !important;
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+  padding: 20px 20px 32px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.95), 0 0 40px rgba(155, 109, 255, 0.1) !important;
+  z-index: 9999 !important;
+  animation: mobileDrawerSlide 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-nav-drawer[hidden] {
+  display: none !important;
+}
+
+.mobile-nav-inner {
+  background: transparent !important;
 }
 
 @keyframes mobileDrawerSlide {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-8px);
   }
   to {
     opacity: 1;
@@ -1011,33 +1037,51 @@ body.page-loaded .header-actions {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 24px;
+  gap: 8px;
+  margin-bottom: 22px;
 }
 
 .mobile-nav-link {
   font-family: var(--font-heading);
-  font-size: 1.0625rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #F7F5FC !important;
   display: block;
-  padding: 10px 16px;
+  padding: 12px 16px;
   border-radius: 12px;
-  transition: background-color var(--transition-fast), color var(--transition-fast);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  transition: all 0.2s ease;
 }
 
 .mobile-nav-link:hover,
-.mobile-nav-link:focus-visible {
-  background-color: var(--bg-surface-subtle);
-  color: var(--accent);
+.mobile-nav-link:focus-visible,
+.mobile-nav-link.is-active {
+  background-color: rgba(155, 109, 255, 0.15) !important;
+  border-color: rgba(155, 109, 255, 0.4) !important;
+  color: #C4A5FF !important;
 }
 
 .mobile-nav-contact {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
   padding-top: 18px;
-  border-top: 1px solid rgba(117, 69, 245, 0.12);
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.mobile-nav-contact .btn-whatsapp {
+  background: #25D366 !important;
+  color: #08080C !important;
+  font-weight: 700 !important;
+  justify-content: center;
+}
+
+.mobile-nav-contact .btn-outline {
+  background: #14141D !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #F7F5FC !important;
+  justify-content: center;
 }
 
 /* ==========================================================================
@@ -6890,20 +6934,61 @@ body.lightbox-is-open {
 /* MOBILE LANDSCAPE & SMALL TABLET (max-width: 820px) */
 @media (max-width: 820px) {
   :root {
-    --header-height: 68px;
+    --header-height: 62px;
+  }
+
+  .site-header {
+    height: 62px;
+  }
+
+  .header-container {
+    height: 62px;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  .brand-logo {
+    gap: 8px;
+  }
+
+  .brand-logo .logo-mark {
+    font-size: 1.15rem !important;
+    letter-spacing: 0.08em;
+  }
+
+  .brand-logo .logo-submark {
+    font-size: 0.58rem !important;
+    padding: 2px 7px !important;
+  }
+
+  .header-actions {
+    gap: 8px !important;
   }
 
   .nav-desktop {
     display: none;
   }
 
+  /* Hide secondary WhatsApp pill from crowded top navbar on mobile */
+  .header-whatsapp-btn {
+    display: none !important;
+  }
+
+  .header-inquire-btn {
+    padding: 6px 14px !important;
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    border-radius: var(--radius-full) !important;
+    letter-spacing: 0.02em;
+  }
+
   .mobile-menu-toggle {
-    display: flex;
+    display: flex !important;
   }
 
   .hero-grid {
     grid-template-columns: 1fr;
-    gap: 48px;
+    gap: 40px;
   }
 
   .hero-pitch {
@@ -7077,45 +7162,102 @@ body.lightbox-is-open {
 /* MOBILE COMPACT (max-width: 480px) */
 @media (max-width: 480px) {
   .container {
-    padding-left: 18px;
-    padding-right: 18px;
+    padding-left: 18px !important;
+    padding-right: 18px !important;
   }
 
   .section-hero {
-    padding-top: 32px;
-    padding-bottom: 56px;
+    padding-top: calc(var(--header-height, 62px) + 20px) !important;
+    padding-bottom: 52px !important;
+  }
+
+  .hero-grid {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+    width: 100% !important;
+  }
+
+  .hero-pitch {
+    width: 100% !important;
+    max-width: 100% !important;
+    align-items: flex-start !important;
+    text-align: left !important;
+    min-width: 0 !important;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.7rem !important;
+    padding: 5px 12px !important;
+    margin-bottom: 12px !important;
   }
 
   .hero-title {
-    font-size: 2rem;
+    font-size: clamp(1.75rem, 7.5vw, 2.2rem) !important;
+    line-height: 1.16 !important;
+    letter-spacing: -0.03em !important;
+    margin-bottom: 14px !important;
+    word-break: break-word;
+  }
+
+  .hero-studio-accent-line {
+    margin: 8px 0 16px 0 !important;
+    width: 100% !important;
+    max-width: 220px !important;
   }
 
   .hero-description {
-    font-size: 1rem;
+    font-size: clamp(0.88rem, 3.8vw, 0.98rem) !important;
+    line-height: 1.6 !important;
+    margin-bottom: 22px !important;
+    color: var(--text-secondary) !important;
+    max-width: 100% !important;
   }
 
+  /* Full-width clean vertically stacked CTAs with 44px right gutter clearance for floating buttons */
   .hero-cta-group {
-    flex-direction: column;
-    width: 100%;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    max-width: calc(100% - 44px) !important;
+    gap: 12px !important;
+    margin-bottom: 18px !important;
   }
 
-  .hero-cta-group .btn {
-    width: 100%;
+  .hero-cta-group .btn,
+  .hero-btn-primary,
+  .hero-btn-secondary {
+    width: 100% !important;
+    max-width: 100% !important;
+    justify-content: center !important;
+    padding: 13px 20px !important;
+    font-size: 0.92rem !important;
+    box-sizing: border-box !important;
   }
 
   .hero-contact-row {
-    flex-direction: column;
-    width: 100%;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    max-width: calc(100% - 44px) !important;
+    gap: 10px !important;
+    margin-bottom: 24px !important;
   }
 
   .contact-pill {
-    width: 100%;
+    width: 100% !important;
+    max-width: 100% !important;
+    justify-content: flex-start !important;
+    padding: 10px 14px !important;
+    box-sizing: border-box !important;
   }
 
   .hero-specs-bar {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+    max-width: calc(100% - 44px) !important;
   }
 
   .hero-spec-divider {
@@ -8094,24 +8236,31 @@ body.lightbox-is-open .floating-welcome-popup,
    -------------------------------------------------------------------------- */
 @media (max-width: 640px) {
   .floating-contact-toolbar {
-    right: 14px;
-    top: auto;
-    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-    transform: none;
-    gap: 10px;
+    right: 10px !important;
+    top: auto !important;
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+    transform: none !important;
+    gap: 8px !important;
+    z-index: 990 !important;
   }
 
   .floating-tool-btn {
-    width: 46px;
-    height: 46px;
+    width: 40px !important;
+    height: 40px !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.7) !important;
+  }
+
+  .floating-tool-btn .tool-btn-icon svg {
+    width: 18px !important;
+    height: 18px !important;
   }
 
   .floating-welcome-popup {
-    right: 14px;
-    bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+    right: 10px;
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px));
     top: auto;
     transform: translateY(12px);
-    width: calc(100vw - 28px);
+    width: calc(100vw - 20px);
     max-width: 320px;
   }
 
