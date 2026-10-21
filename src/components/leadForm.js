@@ -30,10 +30,10 @@ export class LeadFormController {
         <div class="lead-card-header">
           <div class="lead-card-pill">
             <span class="pulse-dot" aria-hidden="true"></span>
-            <span>Private Allocation</span>
+            <span>Studio Production</span>
           </div>
-          <h3 class="lead-card-title">Request Product Details</h3>
-          <p class="lead-card-subtitle">Inquire for current batch availability, bespoke finishes, and dispatch timelines.</p>
+          <h3 class="lead-card-title">Book a UGC Photoshoot</h3>
+          <p class="lead-card-subtitle">Inquire for studio availability, creator roster matching, and custom production decks.</p>
         </div>
 
         <form class="lead-form" id="lead-capture-form" novalidate>
@@ -116,10 +116,11 @@ export class LeadFormController {
             <label for="lead-edition" class="form-label">Edition Preference</label>
             <div class="select-wrapper">
               <select id="lead-edition" name="editionPreference" class="form-select">
-                <option value="Studio Travertine Edition (Flagship)">Studio Travertine Edition (Flagship)</option>
-                <option value="Matte Charcoal Edition">Matte Charcoal Edition</option>
-                <option value="Brushed Brass Limited Run">Brushed Brass Limited Run</option>
-                <option value="Dual-Stereo Pair (Set of 2)">Dual-Stereo Pair (Set of 2)</option>
+                <option value="Full-Service UGC Video Shoot (5-10 Assets)">Full-Service UGC Video Shoot (5-10 Assets)</option>
+                <option value="Macro Beauty & Skincare Product Photography">Macro Beauty & Skincare Product Photography</option>
+                <option value="Fashion & Lifestyle UGC Creator Campaign">Fashion & Lifestyle UGC Creator Campaign</option>
+                <option value="Studio BTS & Social-First Editorial Batch">Studio BTS & Social-First Editorial Batch</option>
+                <option value="Custom Monthly Production Retainer">Custom Monthly Production Retainer</option>
               </select>
             </div>
           </div>
@@ -137,7 +138,7 @@ export class LeadFormController {
               />
               <span class="checkbox-custom" aria-hidden="true"></span>
               <span class="checkbox-text">
-                I agree to be contacted with product availability and pricing. We never share your data.
+                I agree to be contacted with production proposals and rates. We respect your confidentiality.
               </span>
             </label>
             <div class="field-error" id="error-consent" aria-live="polite"></div>
@@ -149,7 +150,7 @@ export class LeadFormController {
             class="btn btn-primary btn-block btn-submit" 
             id="lead-submit-btn"
           >
-            <span class="btn-text">Request Details</span>
+            <span class="btn-text">Request Production Details</span>
             <span class="btn-spinner" aria-hidden="true" style="display: none;">
               <svg class="spinner-svg" viewBox="0 0 24 24">
                 <circle class="spinner-path" cx="12" cy="12" r="10" fill="none" stroke-width="3"></circle>

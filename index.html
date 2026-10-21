@@ -5,11 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     
     <!-- SEO & Metadata -->
-    <title>AURA Studio — Ambient Sound Capsule & Acoustic Sanctuary</title>
-    <meta 
-      name="description" 
-      content="A warm, architectural acoustic capsule that blends 360° studio clarity with tactile minimalist design. Hand-finished cast stone, knurled solid brass, and 18h battery." 
-    />
+    <title>AURA Studio — Dark Photography & UGC Production Agency</title>
+    <meta name="description" content="AURA Studio is a premium dark photography and creator-led UGC production agency. High-converting 9:16 vertical videos, macro skincare shoots, fashion campaigns, and turnkey creator studio productions." />
     <meta name="keywords" content="UGC product landing page, minimalist bluetooth speaker, acoustic capsule, premium audio, architectural home decor, studio sound" />
     <meta name="author" content="AURA Studio" />
     <link rel="canonical" href="https://aurastudio.design" />
@@ -34,6 +31,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+
+    <!-- Preload Hero HD Photography Background for Instant LCP -->
+    <link rel="preload" as="image" href="/images/hero_photography_studio_hd.jpg" fetchpriority="high" />
 
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="/src/style.css" />
@@ -62,6 +62,8 @@
   </head>
 
   <body>
+    <!-- Thin Unobtrusive Page Scroll Progress Bar -->
+    <div class="page-scroll-progress-bar" id="page-scroll-progress-bar" aria-hidden="true"></div>
     <!-- Ambient Pastel Light Sweep on Page Load / Reload -->
     <div class="page-load-light-sweep" id="page-load-light-sweep" aria-hidden="true"></div>
 
@@ -108,7 +110,7 @@
           </a>
 
           <!-- Inquire CTA -->
-          <a href="#lead-form" class="btn btn-sm btn-primary header-inquire-btn" id="header-inquire-btn">
+          <a href="#lead-form" class="btn btn-sm btn-primary header-inquire-btn btn-magnetic" id="header-inquire-btn">
             Inquire
           </a>
 
@@ -159,192 +161,29 @@
 
     <!-- Main Content Flow -->
     <main id="main-content">
-      <!-- SECTION 0: SCROLL-TO-START CINEMATIC UGC VIDEO INTRO (SCENE 00) -->
-      <section class="section-ugc-intro" id="ugc-intro" aria-label="AURA Studio Creator Story Intro">
-        <!-- Ambient Luminous Mesh Lighting (Bright Studio Palette) -->
-        <div class="intro-ambient-lighting" aria-hidden="true">
-          <div class="ambient-orb-3d orb-violet intro-orb-1"></div>
-          <div class="ambient-orb-3d orb-lavender intro-orb-2"></div>
-          <div class="ambient-orb-3d orb-coral intro-orb-3"></div>
-          <div class="ambient-orb-3d orb-lime intro-orb-4"></div>
-        </div>
-
-        <div class="ugc-intro-track" id="ugc-intro-track">
-          <div class="container ugc-intro-container">
-
-            <!-- Top Editorial Meta Slate Bar -->
-            <header class="intro-meta-bar" id="intro-meta-bar">
-              <div class="intro-meta-left">
-                <span class="scene-meta-tag intro-scene-tag">
-                  [SCENE 00] PROLOGUE // CREATOR SHOWREEL
-                </span>
-                <span class="intro-meta-live-badge">
-                  <span class="intro-live-dot" aria-hidden="true"></span>
-                  <span id="intro-video-status-badge">24 FPS · 50MM F/1.4 ARCHIVAL</span>
-                </span>
-              </div>
-              <div class="intro-meta-right">
-                <a href="#hero" class="intro-skip-link" id="intro-skip-btn">
-                  <span>Skip to Overview</span>
-                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <polyline points="19 12 12 19 5 12"></polyline>
-                  </svg>
-                </a>
-              </div>
-            </header>
-
-            <!-- Opening Screen: Editorial Typography & Subtle Floating Frames -->
-            <div class="intro-opening-hero" id="intro-opening-hero">
-              <!-- Subtle Floating Photographic Frames (Restrained Film-Inspired Details) -->
-              <aside class="intro-floating-frame frame-left" id="intro-frame-left" aria-hidden="true">
-                <div class="frame-media">
-                  <img src="/images/ugc_morning.jpg" alt="Creator morning ritual" width="110" height="145" loading="eager" />
-                </div>
-                <span class="frame-label">Moment 01 // Ritual</span>
-              </aside>
-
-              <aside class="intro-floating-frame frame-right" id="intro-frame-right" aria-hidden="true">
-                <div class="frame-media">
-                  <img src="/images/ugc_workspace.jpg" alt="Creator tactile workspace" width="110" height="145" loading="eager" />
-                </div>
-                <span class="frame-label">Moment 02 // Tactile</span>
-              </aside>
-
-              <!-- Central Opening Copy -->
-              <div class="intro-hero-copy" id="intro-hero-copy">
-                <div class="intro-eyebrow">
-                  <span class="eyebrow-accent-dot" aria-hidden="true"></span>
-                  <span class="eyebrow-text">AURA STUDIO SHOWREEL</span>
-                </div>
-                <h1 class="intro-headline" id="intro-main-headline">
-                  REAL STORIES. REAL CREATORS.
-                </h1>
-                <p class="intro-subtitle" id="intro-main-subtitle">
-                  AURA Studio — Where authentic content comes to life.
-                </p>
-              </div>
-            </div>
-
-            <!-- Central Video Stage (Emerges as User Scrolls) -->
-            <div class="intro-video-stage" id="intro-video-stage">
-              <div class="ugc-intro-video-card" id="ugc-intro-video-card" tabindex="0" role="region" aria-label="Cinematic UGC video player">
-                
-                <!-- Viewfinder Corner Reticles & Film Metadata -->
-                <div class="viewfinder-overlay" aria-hidden="true">
-                  <div class="vf-bracket vf-tl"></div>
-                  <div class="vf-bracket vf-tr"></div>
-                  <div class="vf-bracket vf-bl"></div>
-                  <div class="vf-bracket vf-br"></div>
-                  <div class="vf-crosshair"></div>
-                  <div class="intro-rec-indicator">
-                    <span class="rec-dot"></span>
-                    <span class="rec-text">REC · 24FPS</span>
-                  </div>
-                </div>
-
-                <!-- HTML5 Video Element with High-Res Poster Frame -->
-                <video
-                  id="ugc-intro-video"
-                  class="intro-video-element"
-                  src="/videos/intro_ugc.mp4"
-                  poster="/images/ugc_reel_1.jpg"
-                  autoplay
-                  muted
-                  playsinline
-                  loop
-                  preload="auto"
-                  aria-label="AURA Studio Creator Story Video"
-                >
-                  <source src="/videos/intro_ugc.mp4" type="video/mp4" />
-                  Your browser does not support HTML5 video.
-                </video>
-
-                <!-- Big Play Button Overlay (when paused or autoplay blocked) -->
-                <div class="intro-video-play-overlay" id="intro-video-play-overlay" aria-hidden="true">
-                  <div class="play-overlay-pill">
-                    <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
-                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                    </svg>
-                    <span>Play Creator Video</span>
-                  </div>
-                </div>
-
-                <!-- Bottom Floating Controls & Caption Bar -->
-                <div class="intro-video-controls-bar">
-                  <div class="intro-video-caption-wrap">
-                    <span class="intro-revealed-caption" id="intro-revealed-caption">
-                      MADE TO FEEL REAL.
-                    </span>
-                  </div>
-
-                  <div class="intro-controls-group">
-                    <button 
-                      type="button" 
-                      class="intro-ctrl-btn" 
-                      id="intro-play-toggle-btn" 
-                      aria-label="Play showreel"
-                    >
-                      <svg class="icon-play" viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
-                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                      </svg>
-                      <svg class="icon-pause" viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="display: none;">
-                        <rect x="6" y="4" width="4" height="16"></rect>
-                        <rect x="14" y="4" width="4" height="16"></rect>
-                      </svg>
-                      <span class="play-btn-text">Play</span>
-                    </button>
-
-                    <button 
-                      type="button" 
-                      class="intro-ctrl-btn" 
-                      id="intro-mute-toggle-btn" 
-                      aria-label="Unmute audio"
-                    >
-                      <svg class="icon-muted" viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
-                        <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
-                        <line x1="23" y1="9" x2="17" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
-                        <line x1="17" y1="9" x2="23" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>
-                      </svg>
-                      <svg class="icon-unmuted" viewBox="0 0 24 24" width="15" height="15" fill="currentColor" style="display: none;">
-                        <path d="M11 5L6 9H2v6h4l5 4V5z"></path>
-                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
-                      </svg>
-                      <span class="mute-btn-text">Muted</span>
-                    </button>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            <!-- Bottom Opening Screen Prompt: SCROLL TO EXPLORE & Progress Bar -->
-            <div class="intro-scroll-prompt-wrap" id="intro-scroll-prompt-wrap">
-              <a href="#hero" class="intro-scroll-prompt" id="intro-scroll-prompt" aria-label="Scroll down to explore showreel">
-                <span class="prompt-text">SCROLL TO EXPLORE</span>
-                <span class="prompt-arrow-circle" aria-hidden="true">
-                  <svg class="prompt-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <polyline points="19 12 12 19 5 12"></polyline>
-                  </svg>
-                </span>
-              </a>
-
-              <!-- Thin Animated Scroll-Progress Track -->
-              <div class="intro-progress-track" aria-hidden="true">
-                <div class="intro-progress-fill" id="intro-scroll-progress-fill"></div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
-      <!-- Film Scene Bridge: Prologue Scene 00 to Scene 01 (Hero) -->
-      <div class="film-scene-bridge" aria-hidden="true"></div>
-
       <!-- SECTION 1: HERO SECTION (TWO-COLUMN LAYOUT) -->
       <section class="section-hero" id="hero">
+        <!-- Dedicated Parallax HD Photography Background Stage & Dark Cinematic Overlays -->
+        <div class="hero-bg-stage" id="hero-bg-stage" aria-hidden="true">
+          <div class="hero-bg-image-wrapper" id="hero-bg-image-wrapper">
+            <img 
+              src="/images/hero_photography_studio_4k.jpg" 
+              alt="AURA Creative Studio 4K commercial photography setup with cinema camera, studio lighting rigs, and creator product shoot set" 
+              class="hero-bg-img" 
+              id="hero-bg-img"
+              width="3840"
+              height="2160"
+              fetchpriority="high"
+              loading="eager"
+              decoding="async"
+            />
+          </div>
+          <!-- Dark Contrast Gradient Overlays (Text Legibility Scrim, Bottom Seamless Blend, Violet Atmosphere) -->
+          <div class="hero-bg-overlay-scrim" aria-hidden="true"></div>
+          <div class="hero-bg-bottom-blend" aria-hidden="true"></div>
+          <div class="hero-bg-violet-glow" aria-hidden="true"></div>
+        </div>
+
         <!-- Ambient 3D Creative Studio Lighting Mesh -->
         <div class="hero-ambient-lighting" aria-hidden="true">
           <div class="ambient-orb-3d orb-violet"></div>
@@ -362,13 +201,13 @@
 
             <div class="hero-eyebrow">
               <span class="eyebrow-accent-dot" aria-hidden="true"></span>
-              <span class="eyebrow-text">MEET YOUR NEW FAVOURITE</span>
+              <span class="eyebrow-text">CREATIVE STUDIO & UGC PRODUCTION</span>
             </div>
 
             <h1 class="hero-title">
-              <span class="hero-line hero-title-prefix">Pure Acoustic Clarity.</span>
+              <span class="hero-line hero-title-prefix">High-Impact Visuals.</span>
               <span class="hero-rotator-wrapper" id="hero-rotator-wrapper" aria-live="polite">
-                <span class="hero-rotator-item is-active title-serif" data-index="0">Crafted for Everyday Serenity.</span>
+                <span class="hero-rotator-item is-active title-serif" data-index="0">Crafted for Cult Brands.</span>
               </span>
             </h1>
 
@@ -378,21 +217,21 @@
             </div>
 
             <p class="hero-description">
-              A warm, architectural acoustic capsule that blends 360° studio clarity with tactile minimalist design. Engineered for creative focus, morning rituals, and mindful living.
+              A full-service dark creative studio crafting bespoke photography, vertical UGC videos, and high-converting social campaigns. Macro beauty, creator sets, and editorial studio production.
             </p>
 
             <!-- Two Main Call-to-Action Buttons -->
             <div class="hero-cta-group">
-              <a href="#lead-form" class="btn btn-primary hero-btn-primary" id="hero-primary-cta">
-                <span>Request Details</span>
+              <a href="#lead-form" class="btn btn-primary hero-btn-primary btn-magnetic" id="hero-primary-cta">
+                <span>Book a Photoshoot</span>
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                   <polyline points="12 5 19 12 12 19"></polyline>
                 </svg>
               </a>
 
-              <a href="#product-slider" class="btn btn-secondary hero-btn-secondary" id="hero-secondary-cta">
-                <span>See It in Action</span>
+              <a href="#product-slider" class="btn btn-secondary hero-btn-secondary btn-magnetic" id="hero-secondary-cta">
+                <span>Explore Showreel</span>
               </a>
             </div>
 
@@ -441,22 +280,21 @@
             <!-- Key Feature Badges -->
             <div class="hero-specs-bar">
               <div class="hero-spec-item">
-                <span class="spec-value">18 Hours</span>
-                <span class="spec-label">Continuous Playtime</span>
+                <span class="spec-value">4K Vertical</span>
+                <span class="spec-label">UGC Video Suite</span>
               </div>
               <div class="hero-spec-divider" aria-hidden="true"></div>
               <div class="hero-spec-item">
-                <span class="spec-value">360° Wave</span>
-                <span class="spec-label">Omnidirectional Sound</span>
+                <span class="spec-value">Studio & Set</span>
+                <span class="spec-label">Cinema Lighting</span>
               </div>
               <div class="hero-spec-divider" aria-hidden="true"></div>
               <div class="hero-spec-item">
-                <span class="spec-value">Cast Mineral</span>
-                <span class="spec-label">Solid Brass Dials</span>
+                <span class="spec-value">Full Turnkey</span>
+                <span class="spec-label">Creator Roster</span>
               </div>
             </div>
           </div>
-
           <!-- RIGHT COLUMN: INQUIRY FORM -->
           <div class="hero-stage-column hero-form-column" id="lead-form">
             <!-- Lead Capture Form with Tactile 3D Depth -->
@@ -478,10 +316,10 @@
         <div class="container reels-intro-container carousel-intro-container">
           <div class="section-header-compact reveal-up">
             <span class="scene-meta-tag">[SCENE 02] 24FPS // 9:16 VERTICAL MOTION REELS</span>
-            <span class="section-eyebrow">COMMUNITY IN MOTION</span>
-            <h2 class="section-title">Real Spaces. Unfiltered Acoustics.</h2>
+            <span class="section-eyebrow">CREATOR PORTFOLIO IN MOTION</span>
+            <h2 class="section-title">Authentic UGC Shoots. High-Converting Content.</h2>
             <p class="section-lead">
-              Watch how architects, interior creators, and morning ritualists experience AURA in their private sanctuaries. Scroll inside the smartphone to explore vertical reels, tap to play or pause, and toggle audio.
+              Explore how our creator roster captures scroll-stopping vertical video in real studio and lifestyle environments. Scroll inside the smartphone to view vertical reels, tap to play or pause, and toggle audio.
             </p>
           </div>
         </div>
@@ -531,20 +369,19 @@
 
           <!-- Right: Narrative & What Makes It Different -->
           <div class="about-text-col reveal-right">
-            <span class="scene-meta-tag">[SCENE 03] TACTILE ACOUSTICS // CAST MINERAL ARCHIVE</span>
-            <span class="section-eyebrow">THE CRAFT & PHILOSOPHY</span>
-            <h2 class="section-title">Sound That Feels Like Part of Your Architecture</h2>
-            
+            <span class="scene-meta-tag">[SCENE 03] PRODUCTION CRAFT // STUDIO & LOCATION ARCHIVE</span>
+            <span class="section-eyebrow">THE STUDIO PHILOSOPHY</span>
+            <h2 class="section-title">Creator-Led Content Engineered to Stop the Scroll</h2>
             <p class="about-lead">
-              Most portable audio is loud, glossy, and visually jarring. We designed AURA Studio to be the opposite: an acoustic presence that calms the senses before you even press play.
+              Most social advertising feels generic, corporate, and instantly forgettable. AURA Studio crafts the exact opposite: authentic UGC photoshoots, vertical videos, and tactile product demonstrations that feel organically integrated into creator feeds.
             </p>
 
             <div class="about-body-text">
               <p>
-                <strong>Who is it for?</strong> Created for architects, writers, and mindful homeowners who seek uncompressed hi-fi audio without synthetic plastic clutter on their surfaces.
+                From specialized macro beauty lighting to full-scale on-location lifestyle sets, we bridge the gap between high-end commercial production value and genuine creator intimacy.
               </p>
               <p>
-                <strong>What problem does it address?</strong> Jarring digital notification fatigue and hollow, tinny sound. AURA delivers rich, omnidirectional 360° warmth with analog-feeling physical controls that invite quiet touch.
+                Every shoot is meticulously planned, cast with charismatic vetted creators, and color-graded to match your brand’s unique editorial aesthetic.
               </p>
             </div>
 
@@ -552,23 +389,23 @@
             <div class="about-specs-grid reveal-wave">
               <div class="spec-card reveal-up reveal-wave-item">
                 <span class="spec-card-num">01</span>
-                <h4 class="spec-card-title">Dual Custom Drivers</h4>
-                <p class="spec-card-desc">48mm full-range neodymium transducers with tuned passive radiators.</p>
+                <h4 class="spec-card-title">4K & 9:16 Vertical Video</h4>
+                <p class="spec-card-desc">High-converting vertical assets filmed on cinema cameras and smartphones.</p>
               </div>
               <div class="spec-card reveal-up reveal-wave-item">
                 <span class="spec-card-num">02</span>
-                <h4 class="spec-card-title">Lossless Bluetooth 5.4</h4>
-                <p class="spec-card-desc">Instant wireless sync and zero-latency USB-C studio connection.</p>
+                <h4 class="spec-card-title">Direct-Response Hooks</h4>
+                <p class="spec-card-desc">Narrative storytelling and hook testing tailored for TikTok, Reels & Meta.</p>
               </div>
               <div class="spec-card reveal-up reveal-wave-item">
                 <span class="spec-card-num">03</span>
-                <h4 class="spec-card-title">Solid Brass Hardware</h4>
-                <p class="spec-card-desc">Every volume dial is machined from solid brass with silky damped friction.</p>
+                <h4 class="spec-card-title">Vetted Creator Talent</h4>
+                <p class="spec-card-desc">Diverse on-camera talent and directors matching your target demographic.</p>
               </div>
               <div class="spec-card reveal-up reveal-wave-item">
                 <span class="spec-card-num">04</span>
-                <h4 class="spec-card-title">18h All-Day Play</h4>
-                <p class="spec-card-desc">High-density battery cell built for weekend getaways and focused study.</p>
+                <h4 class="spec-card-title">7–10 Day Fast Delivery</h4>
+                <p class="spec-card-desc">Ready-to-launch creative delivered swiftly from product delivery to studio.</p>
               </div>
             </div>
 
@@ -761,11 +598,11 @@
 
         <div class="container">
           <div class="section-header-compact text-center reveal-up">
-            <span class="scene-meta-tag">[SCENE 06] 50MM F/1.4 // CURATED ARCHIVE</span>
-            <span class="section-eyebrow">CURATED PERSPECTIVES</span>
-            <h2 class="section-title">Form, Texture &amp; Spatial Harmony</h2>
+            <span class="scene-meta-tag">[SCENE 06] 50MM F/1.4 // EDITORIAL ARCHIVE</span>
+            <span class="section-eyebrow">CURATED PORTFOLIO</span>
+            <h2 class="section-title">Editorial Photoshoots &amp; Visual Production</h2>
             <p class="section-lead">
-              An editorial visual archive exploring the architectural lines, cast-stone materiality, and tactile acoustics of AURA Studio. Click any frame to inspect in fullscreen.
+              An archive of high-resolution studio captures, macro product photography, and vertical creator campaigns crafted for innovative modern brands. Click any frame to inspect in fullscreen.
             </p>
           </div>
 
@@ -782,11 +619,11 @@
       <section class="section-testimonials" id="testimonials">
         <div class="container">
           <div class="section-header-compact text-center reveal-up">
-            <span class="scene-meta-tag">[SCENE 07] PATRON REFLECTIONS // VERIFIED REVIEWS</span>
-            <span class="section-eyebrow">VERIFIED EXPERIENCES</span>
-            <h2 class="section-title">Reflections From Our Owners</h2>
+            <span class="scene-meta-tag">[SCENE 07] BRAND REFLECTIONS // CLIENT EXPERIENCES</span>
+            <span class="section-eyebrow">CLIENT REVIEWS</span>
+            <h2 class="section-title">What Founders &amp; Creative Directors Say</h2>
             <p class="section-lead">
-              Authentic observations from verified patrons who have brought AURA into their private spaces.
+              Authentic reviews from brand partners, marketing leaders, and direct-to-consumer founders who partnered with AURA Studio for their visual content.
             </p>
           </div>
 
@@ -836,14 +673,14 @@
           <!-- Help Callout Box -->
           <div class="faq-concierge-card reveal-up">
             <div class="concierge-content">
-              <h3 class="concierge-title">Have a specific or bespoke inquiry?</h3>
+              <h3 class="concierge-title">Have a specific or bespoke production inquiry?</h3>
               <p class="concierge-text">
-                Our studio concierge is available Monday to Friday to assist with custom finishes, corporate allocations, and acoustic pairing.
+                Our creative directors and studio producers are available Monday through Saturday to assist with tailored creator casting, multi-product shoot schedules, and expedited 7-day delivery.
               </p>
             </div>
             <div class="concierge-actions">
               <a 
-                href="https://wa.me/15557294820?text=Hello%20AURA%20Studio!%20I%20have%20a%20question%20before%20ordering." 
+                href="https://wa.me/15557294820?text=Hello%20AURA%20Studio!%20I%20have%20a%20question%20about%20booking%20a%20photoshoot." 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 class="btn btn-whatsapp"
@@ -860,8 +697,10 @@
     </main>
 
     <!-- SECTION 8: POLISHED FOOTER -->
-    <footer class="site-footer">
-      <div class="container">
+    <footer class="site-footer" id="footer">
+      <!-- Dedicated Continuous Ambient Particle Animation Canvas (Behind content, pointer-events: none) -->
+      <canvas id="footer-particle-canvas" class="footer-particle-canvas" aria-hidden="true"></canvas>
+      <div class="container footer-content-container">
         <div class="footer-top-row reveal-wave">
           <div class="footer-brand-col reveal-left reveal-wave-item">
             <a href="#" class="brand-logo footer-logo" aria-label="AURA Studio Home">
@@ -869,12 +708,12 @@
               <span class="logo-submark">STUDIO</span>
             </a>
             <p class="footer-manifesto">
-              Quiet luxury acoustics crafted for intentional spaces. Hand-finished cast stone, solid brass, and 360° omnidirectional sound.
+              A full-service dark creative studio crafting bespoke photography, vertical UGC videos, and high-converting social campaigns for cult brands.
             </p>
             <div class="footer-contact-details">
               <p>Direct: <a href="tel:+15557294820">+1 (555) 729-4820</a></p>
-              <p>Email: <a href="mailto:inquiries@aurastudio.design">inquiries@aurastudio.design</a></p>
-              <p>WhatsApp: <a href="https://wa.me/15557294820" target="_blank" rel="noopener noreferrer">Message Concierge</a></p>
+              <p>Email: <a href="mailto:production@aurastudio.design">inquiries@aurastudio.design</a></p>
+              <p>WhatsApp: <a href="https://wa.me/15557294820" target="_blank" rel="noopener noreferrer">Message Production Concierge</a></p>
             </div>
           </div>
 
@@ -893,21 +732,22 @@
           </div>
 
           <div class="footer-nav-col reveal-up reveal-wave-item">
-            <h4 class="footer-heading">Editions & Inquiries</h4>
+            <h4 class="footer-heading">Studio Services</h4>
             <ul class="footer-link-list">
-              <li><a href="#lead-form">Travertine Stone Edition</a></li>
-              <li><a href="#lead-form">Matte Charcoal Edition</a></li>
-              <li><a href="#lead-form">Brushed Brass Limited Run</a></li>
-              <li><a href="#lead-form">Dual-Sync Stereo Pair</a></li>
-              <li><a href="#lead-form">Corporate & Interior Gifting</a></li>
+              <li><a href="#lead-form">Macro Beauty & Cosmetics</a></li>
+              <li><a href="#lead-form">Fashion & Lifestyle UGC</a></li>
+              <li><a href="#lead-form">9:16 Direct-Response Video</a></li>
+              <li><a href="#lead-form">Creator Casting & Whitelisting</a></li>
+              <li><a href="#lead-form">Monthly Creative Retainers</a></li>
             </ul>
           </div>
 
           <div class="footer-nav-col reveal-up reveal-wave-item">
-            <h4 class="footer-heading">Assurance</h4>
+            <h4 class="footer-heading">Studio Guarantees</h4>
             <ul class="footer-link-list">
-              <li><a href="#trust">2-Year Craft Guarantee</a></li>
-              <li><a href="#faq">Plastic-Free Packaging</a></li>
+              <li><a href="#faq">Full Commercial Usage Rights</a></li>
+              <li><a href="#faq">7–10 Day Fast Turnaround</a></li>
+              <li><a href="#faq">Vetted Top 1% Creators</a></li>
               <li><button type="button" class="footer-text-btn" id="open-privacy-btn">Privacy Policy</button></li>
               <li><button type="button" class="footer-text-btn" id="open-terms-btn">Terms of Service</button></li>
             </ul>

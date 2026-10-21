@@ -5,6 +5,7 @@
  */
 
 import { productConfig } from './config.js';
+import { MouseInteractionsController } from './components/mouseInteractions.js';
 import { SmartphoneReelsFeed, ProductSlider } from './components/slider.js';
 import { LeadFormController } from './components/leadForm.js';
 import { ImageStackController } from './components/imageStack.js';
@@ -15,9 +16,10 @@ import { GalleryController } from './components/gallery.js';
 import { TestimonialsSlider } from './components/testimonialsSlider.js';
 import { FloatingContactController } from './components/floatingContact.js';
 import { HeadlineRotatorController } from './components/headlineRotator.js';
-import { UgcIntroController } from './components/ugcIntro.js';
 import { CinematicStoryEngine } from './components/cinematicStory.js';
 import { ScrollRevealController } from './components/scrollReveal.js';
+import { HeroParallaxController } from './components/heroParallax.js';
+import { FooterAmbientParticlesController } from './components/footerParticles.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Ensure page-loaded is active immediately so all UI elements are visible
@@ -27,27 +29,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const scrollReveal = new ScrollRevealController();
   scrollReveal.revealAllImmediately();
 
-  // 0. Initialize Cinematic Scroll-Driven UGC Video Intro (Scene 00)
-  if (productConfig.ugcIntro && productConfig.ugcIntro.enabled !== false) {
-    new UgcIntroController({
-      sectionId: 'ugc-intro',
-      config: productConfig.ugcIntro,
-    });
-  }
-
-  // 1. Initialize Dynamic Year in Footer
+  // 1. Initialize Dynamic Year in Footer & Continuous Ambient Particle Animation
   const yearEl = document.getElementById('current-year');
   if (yearEl) {
     yearEl.textContent = new Date().getFullYear();
+  }
+  new FooterAmbientParticlesController('footer-particle-canvas');
+
+  // 1a. Initialize HD Photography Hero Background Parallax
+  const heroSection = document.getElementById('hero');
+  if (heroSection) {
+    new HeroParallaxController(heroSection, { scrollFactor: 0.18 });
   }
 
   // 1b. Initialize Cinematic Hero Rotating Headline
   new HeadlineRotatorController('hero-rotator-wrapper', {
     phrases: [
-      'Crafted for Everyday Serenity.',
-      'Designed for Deeper Focus.',
-      'Made for Modern Living.',
-      'Sound Meets Stillness.',
+      'Crafted for Cult Brands.',
+      'Macro Beauty & Skincare Shoots.',
+      'Fashion & Lifestyle UGC.',
+      'High-Converting 9:16 Video.',
     ],
     interval: 3500,
   });
@@ -104,6 +105,42 @@ document.addEventListener('DOMContentLoaded', () => {
   // 10. Master Cinematic Storytelling & Interactive Film Engine
   const cinematicEngine = new CinematicStoryEngine();
   cinematicEngine.refresh();
+
+  // A. Initialize Master Mouse Interactions Suite (Custom Cursor, Spotlight, 3D Tilt, Magnetic, Parallax)
+  new MouseInteractionsController();
+
+  // B. Thin Page Scroll Progress Bar
+  const progressBar = document.getElementById('page-scroll-progress-bar');
+  if (progressBar) {
+    const updateProgress = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const progress = docHeight > 0 ? Math.min(1, Math.max(0, scrollTop / docHeight)) : 0;
+      progressBar.style.transform = 'scaleX(' + progress + ')';
+    };
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    updateProgress();
+  }
+
+  // C. Video Preview Hover Interactions
+  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    const previewCards = document.querySelectorAll('.phone-reel-card');
+    previewCards.forEach((card) => {
+      const video = card.querySelector('video');
+      if (!video) return;
+      card.addEventListener('mouseenter', () => {
+        if (video.paused) {
+          video.play().catch(() => {});
+        }
+      });
+      card.addEventListener('mouseleave', () => {
+        if (!video.paused && !card.classList.contains('is-sticky-playing')) {
+          video.pause();
+        }
+      });
+    });
+  }
+
 
   // 11. Initialize UGC Lightbox Modal
   const ugcModalEl = document.getElementById('ugc-modal');
@@ -245,6 +282,63 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+
+  // 9. Active Navigation Section Spy & Scrolled Header Effect
+  const headerEl = document.getElementById('site-header');
+  const desktopNavLinks = document.querySelectorAll('.nav-desktop .nav-link');
+  const mobileNavLinks = document.querySelectorAll('.mobile-nav-drawer .mobile-nav-link');
+  const sectionsToTrack = [
+    document.querySelector('#product-slider'),
+    document.querySelector('#about'),
+    document.querySelector('#trust'),
+    document.querySelector('#ugc-showcase'),
+    document.querySelector('#gallery'),
+    document.querySelector('#testimonials'),
+    document.querySelector('#faq'),
+  ].filter(Boolean);
+
+  const handleScrollState = () => {
+    const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+
+    // Header frosted glass state
+    if (headerEl) {
+      if (scrollY > 28) {
+        headerEl.classList.add('is-scrolled');
+      } else {
+        headerEl.classList.remove('is-scrolled');
+      }
+    }
+
+    // Active Section Spy
+    const headerHeight = headerEl ? headerEl.offsetHeight : 76;
+    const probeY = scrollY + headerHeight + 80;
+    let activeSectionId = '';
+
+    for (let i = sectionsToTrack.length - 1; i >= 0; i--) {
+      const sec = sectionsToTrack[i];
+      if (probeY >= sec.offsetTop) {
+        activeSectionId = sec.getAttribute('id');
+        break;
+      }
+    }
+
+    const updateLinkGroup = (links) => {
+      links.forEach((link) => {
+        const href = link.getAttribute('href');
+        if (activeSectionId && href === `#${activeSectionId}`) {
+          link.classList.add('is-active');
+        } else {
+          link.classList.remove('is-active');
+        }
+      });
+    };
+
+    updateLinkGroup(desktopNavLinks);
+    updateLinkGroup(mobileNavLinks);
+  };
+
+  window.addEventListener('scroll', handleScrollState, { passive: true });
+  handleScrollState();
 
   console.info(
     `[AURA Studio] Landing Page initialized successfully. Brand: ${productConfig.brand.name}.`

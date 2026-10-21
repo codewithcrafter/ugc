@@ -54,7 +54,6 @@ export class CinematicStoryEngine {
     this.currentSceneLabel = '';
 
     this.scenes = [
-      { id: 'ugc-intro', label: 'SCENE 00 // SHOWREEL PROLOGUE' },
       { id: 'hero', label: 'SCENE 01 // PROLOGUE & ALLOCATION' },
       { id: 'product-slider', label: 'SCENE 02 // REELS IN MOTION' },
       { id: 'about', label: 'SCENE 03 // CRAFT & PHILOSOPHY' },
@@ -128,87 +127,163 @@ export class CinematicStoryEngine {
    * - Floating frames receive subtle depth transition
    * - Cleans up all inline transforms/opacities on complete for perfect safety
    */
+  /**
+   * CINEMATIC OPENING SEQUENCE (~1.2s)
+   * On initial page load, animates the Hero section with coordinated, elegant reveals:
+   * - Navigation slides down smoothly
+   * - Hero Eyebrow badge reveals with accent dot pulse
+   * - Headline prefix & dynamic rotator items reveal with upward mask glide
+   * - Studio architectural accent line draws out horizontally with luminous glow
+   * - Hero description unfolds
+   * - Action CTAs enter with magnetic aura and subtle scale
+   * - Direct WhatsApp & Phone contact pills cascade
+   * - Desktop inquiry form card arrives with 3D perspective depth
+   * - Hero specs bar items stagger into place
+   * - Ambient lighting orbs breathe in
+   */
   playCinematicOpeningSequence() {
     if (this.prefersReducedMotion) return;
 
-    const nav = document.getElementById('site-nav') || document.querySelector('.site-nav');
-    const introMeta = document.getElementById('intro-meta-bar');
-    const introHeadline = document.getElementById('intro-main-headline');
-    const introSubtitle = document.getElementById('intro-main-subtitle');
-    const introPrompt = document.getElementById('intro-scroll-prompt-wrap');
-    const introFrames = document.querySelectorAll('#intro-frame-left, #intro-frame-right');
+    const nav = document.getElementById('site-header');
+    const heroSection = document.getElementById('hero');
+    if (!heroSection) return;
+
+    const eyebrow = heroSection.querySelector('.hero-eyebrow');
+    const titlePrefix = heroSection.querySelector('.hero-title-prefix');
+    const rotator = heroSection.querySelector('#hero-rotator-wrapper');
+    const accentLine = heroSection.querySelector('.hero-studio-accent-line');
+    const desc = heroSection.querySelector('.hero-description');
+    const ctaPrimary = heroSection.querySelector('#hero-primary-cta');
+    const ctaSecondary = heroSection.querySelector('#hero-secondary-cta');
+    const contactRow = heroSection.querySelector('.hero-contact-row');
+    const specs = heroSection.querySelector('.hero-specs-bar');
+    const leadCard = heroSection.querySelector('.lead-card');
+    const orbs = heroSection.querySelectorAll('.ambient-orb-3d');
 
     const openTl = gsap.timeline({
       defaults: { ease: 'power3.out' },
       onComplete: () => {
-        // Guarantee all styles are cleanly cleared/reset so no lingering inline constraints
-        const resetEls = [nav, introMeta, introHeadline, introSubtitle, introPrompt, ...introFrames].filter(Boolean);
-        gsap.set(resetEls, {
-          clearProps: 'transform,opacity,filter',
-        });
+        gsap.set(
+          [nav, eyebrow, titlePrefix, rotator, accentLine, desc, ctaPrimary, ctaSecondary, contactRow, specs, leadCard].filter(Boolean),
+          { clearProps: 'transform,opacity,filter' }
+        );
       },
     });
 
-    // 1. Navigation slides down smoothly (0.0 -> 0.8s)
+    // 1. Navigation slides down smoothly
     if (nav) {
-      openTl.from(nav, {
-        y: -24,
-        opacity: 0.85,
-        duration: 0.8,
-        ease: 'power2.out',
-      }, 0.0);
+      openTl.fromTo(
+        nav,
+        { y: -22, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.8, ease: 'power2.out' },
+        0.0
+      );
     }
 
-    // 2. Intro meta bar (0.1 -> 0.7s)
-    if (introMeta) {
-      openTl.from(introMeta, {
-        y: -14,
-        opacity: 0,
-        duration: 0.7,
-        ease: 'power2.out',
-      }, 0.1);
+    // 2. Eyebrow badge reveals with dot pulse
+    if (eyebrow) {
+      openTl.fromTo(
+        eyebrow,
+        { y: 18, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.7, ease: 'power3.out' },
+        0.1
+      );
     }
 
-    // 3. Intro heading reveals through a refined mask / upward glide (0.15 -> 1.05s)
-    if (introHeadline) {
-      openTl.from(introHeadline, {
-        y: 30,
-        opacity: 0,
-        duration: 0.9,
-        ease: 'power3.out',
-      }, 0.15);
+    // 3. Staggered Hero Title Reveal
+    if (titlePrefix) {
+      openTl.fromTo(
+        titlePrefix,
+        { y: 32, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.85, ease: 'power3.out' },
+        0.18
+      );
+    }
+    if (rotator) {
+      openTl.fromTo(
+        rotator,
+        { y: 32, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.85, ease: 'power3.out' },
+        0.28
+      );
     }
 
-    // 4. Intro subtitle (0.25 -> 1.05s)
-    if (introSubtitle) {
-      openTl.from(introSubtitle, {
-        y: 18,
-        opacity: 0,
-        duration: 0.8,
-        ease: 'power3.out',
-      }, 0.25);
+    // 4. Studio architectural accent line draws out horizontally with glow
+    if (accentLine) {
+      openTl.fromTo(
+        accentLine,
+        { scaleX: 0, opacity: 0 },
+        { scaleX: 1, opacity: 1, duration: 0.85, transformOrigin: 'left center', ease: 'power2.inOut' },
+        0.36
+      );
     }
 
-    // 5. Ambient floating creator frames (0.3 -> 1.2s)
-    if (introFrames && introFrames.length) {
-      openTl.from(introFrames, {
-        scale: 0.92,
-        opacity: 0,
-        y: 16,
-        duration: 0.9,
-        stagger: 0.1,
-        ease: 'power2.out',
-      }, 0.3);
+    // 5. Description text unfolds
+    if (desc) {
+      openTl.fromTo(
+        desc,
+        { y: 20, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.75, ease: 'power3.out' },
+        0.44
+      );
     }
 
-    // 6. Scroll prompt appears (0.45 -> 1.15s)
-    if (introPrompt) {
-      openTl.from(introPrompt, {
-        y: 16,
-        opacity: 0,
-        duration: 0.7,
-        ease: 'power2.out',
-      }, 0.45);
+    // 6. Action CTAs reveal with magnetic aura
+    if (ctaPrimary) {
+      openTl.fromTo(
+        ctaPrimary,
+        { y: 18, opacity: 0, scale: 0.96 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.65, ease: 'power2.out' },
+        0.52
+      );
+    }
+    if (ctaSecondary) {
+      openTl.fromTo(
+        ctaSecondary,
+        { y: 18, opacity: 0, scale: 0.96 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.65, ease: 'power2.out' },
+        0.58
+      );
+    }
+
+    // 7. Contact pills
+    if (contactRow) {
+      openTl.fromTo(
+        contactRow,
+        { y: 15, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out' },
+        0.64
+      );
+    }
+
+    // 8. Lead card on desktop arrives with subtle 3D perspective depth
+    if (leadCard && !this.isMobile) {
+      openTl.fromTo(
+        leadCard,
+        { x: 38, opacity: 0, rotationY: -3.5, transformPerspective: 1200 },
+        { x: 0, opacity: 1, rotationY: 0, duration: 0.9, ease: 'power3.out' },
+        0.3
+      );
+    }
+
+    // 9. Specs items cascade
+    if (specs) {
+      openTl.fromTo(
+        specs,
+        { y: 16, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.6, ease: 'power2.out' },
+        0.72
+      );
+    }
+
+    // 10. Ambient orbs breathe into position
+    if (orbs.length) {
+      openTl.fromTo(
+        orbs,
+        { scale: 0.8, opacity: 0 },
+        { scale: 1, opacity: 0.65, duration: 1.2, stagger: 0.1, ease: 'power2.out' },
+        0.1
+      );
     }
   }
 
@@ -280,53 +355,6 @@ export class CinematicStoryEngine {
     const orbs = heroSection.querySelectorAll('.ambient-orb-3d');
     const specsBar = heroSection.querySelector('.hero-specs-bar');
 
-    // One-shot cinematic entrance for Hero elements when Hero enters view
-    ScrollTrigger.create({
-      trigger: heroSection,
-      start: 'top 85%',
-      once: true,
-      onEnter: () => {
-        if (this.prefersReducedMotion) return;
-
-        const eyebrow = heroSection.querySelector('.hero-eyebrow');
-        const titlePrefix = heroSection.querySelector('.hero-title-prefix');
-        const rotator = heroSection.querySelector('#hero-rotator-wrapper');
-        const accentLine = heroSection.querySelector('.hero-studio-accent-line');
-        const desc = heroSection.querySelector('.hero-description');
-        const ctaGroup = heroSection.querySelector('.hero-cta-group');
-        const contactRow = heroSection.querySelector('.hero-contact-row');
-        const leadFormWrap = heroSection.querySelector('.hero-form-column, #lead-form-container');
-        const specs = heroSection.querySelector('.hero-specs-bar');
-
-        const entranceTl = gsap.timeline({
-          defaults: { ease: 'power3.out' },
-          onComplete: () => {
-            gsap.set(
-              [eyebrow, titlePrefix, rotator, accentLine, desc, ctaGroup, contactRow, leadFormWrap, specs].filter(Boolean),
-              { clearProps: 'transform,opacity' }
-            );
-          },
-        });
-
-        if (eyebrow) entranceTl.from(eyebrow, { y: 16, opacity: 0, duration: 0.6 }, 0.0);
-        if (titlePrefix) entranceTl.from(titlePrefix, { y: 22, opacity: 0, duration: 0.7 }, 0.08);
-        if (rotator) entranceTl.from(rotator, { y: 22, opacity: 0, duration: 0.7 }, 0.16);
-        if (accentLine) entranceTl.from(accentLine, { scaleX: 0, opacity: 0, transformOrigin: 'left center', duration: 0.75 }, 0.22);
-        if (desc) entranceTl.from(desc, { y: 18, opacity: 0, duration: 0.7 }, 0.28);
-        if (ctaGroup) entranceTl.from(ctaGroup, { y: 16, opacity: 0, duration: 0.65 }, 0.36);
-        if (contactRow) entranceTl.from(contactRow, { y: 14, opacity: 0, duration: 0.6 }, 0.44);
-        if (leadFormWrap && !this.isMobile) {
-          entranceTl.from(leadFormWrap, {
-            x: 36,
-            opacity: 0.85,
-            duration: 0.85,
-            ease: 'power2.out',
-          }, 0.22);
-        }
-        if (specs) entranceTl.from(specs, { y: 16, opacity: 0, duration: 0.65 }, 0.52);
-      },
-    });
-
     // Create scrubbed multiplane camera timeline as user scrolls through Hero
     const heroTl = gsap.timeline({
       scrollTrigger: {
@@ -342,7 +370,7 @@ export class CinematicStoryEngine {
       heroTl.to(
         pitchCol,
         {
-          y: -45,
+          y: -55,
           ease: 'none',
         },
         0
@@ -353,9 +381,9 @@ export class CinematicStoryEngine {
       heroTl.to(
         leadCard,
         {
-          y: -25,
-          rotationX: 1.8,
-          rotationY: -1.8,
+          y: -30,
+          rotationX: 2.0,
+          rotationY: -2.0,
           transformPerspective: 1100,
           ease: 'none',
         },
@@ -367,7 +395,7 @@ export class CinematicStoryEngine {
       heroTl.to(
         specsBar,
         {
-          y: -15,
+          y: -20,
           ease: 'none',
         },
         0
@@ -376,7 +404,7 @@ export class CinematicStoryEngine {
 
     if (orbs.length) {
       orbs.forEach((orb, i) => {
-        const speed = ((i % 3) + 1) * 35;
+        const speed = ((i % 3) + 1) * 42;
         heroTl.to(
           orb,
           {
@@ -392,8 +420,9 @@ export class CinematicStoryEngine {
   }
 
   /**
-   * 3. SCENE 02: SMARTPHONE UGC REELS FEED CAMERA DOLLY
-   * The phone frame dollies in from perspective depth into crisp focus, then recedes
+   * 3. SCENE 02: PREMIUM CENTERPIECE ANIMATION & SMARTPHONE REELS CAMERA DOLLY
+   * The smartphone mockup centerpiece dollies in from perspective depth into crisp focus,
+   * surrounded by floating light streaks, purple/lavender energy halo, and motes.
    */
   setupScene2ReelsTimeline() {
     const sliderSection = document.getElementById('product-slider');
@@ -401,7 +430,12 @@ export class CinematicStoryEngine {
 
     const phoneWrap = sliderSection.querySelector('.reels-phone-showcase-wrap') ||
       sliderSection.querySelector('#product-slider-container');
+    const frame = sliderSection.querySelector('.smartphone-device-frame');
     const header = sliderSection.querySelector('.section-header-compact');
+    const auraStage = sliderSection.querySelector('.centerpiece-aura-stage');
+    const energyHalo = sliderSection.querySelector('.centerpiece-energy-halo');
+    const streaks = sliderSection.querySelectorAll('.centerpiece-light-streaks .streak');
+    const motes = sliderSection.querySelectorAll('.centerpiece-floating-motes .mote');
 
     if (!phoneWrap) return;
 
@@ -410,7 +444,7 @@ export class CinematicStoryEngine {
         trigger: sliderSection,
         start: 'top 85%',
         end: 'bottom 15%',
-        scrub: 0.6,
+        scrub: 0.7,
         invalidateOnRefresh: true,
       },
     });
@@ -419,36 +453,27 @@ export class CinematicStoryEngine {
     if (header) {
       reelsTl.fromTo(
         header,
-        { y: 20 },
-        { y: 0, duration: 0.4, ease: 'power2.out' },
+        { y: 25, opacity: 0.8 },
+        { y: 0, opacity: 1, duration: 0.35, ease: 'power2.out' },
         0
       );
     }
 
-    // Inner reel media settle
-    const reelImages = sliderSection.querySelectorAll('.reels-media-wrap img, .reel-slide-media img, .phone-screen-viewport img');
-    if (reelImages.length) {
+    // Centerpiece Smartphone Dolly-In, 3D Scale & Rotation
+    if (!this.isMobile && frame) {
       reelsTl.fromTo(
-        reelImages,
-        { scale: 1.05 },
-        { scale: 1.0, ease: 'none', duration: 0.5 },
-        0.05
-      );
-    }
-
-    // Phone frame dolly-in to full center focus, then gentle cut
-    if (!this.isMobile) {
-      reelsTl.fromTo(
-        phoneWrap,
+        frame,
         {
-          scale: 0.95,
-          rotationX: 3,
-          y: 40,
+          scale: 0.88,
+          rotationX: 8,
+          rotationY: -4,
+          y: 75,
           transformPerspective: 1400,
         },
         {
-          scale: 1.0,
+          scale: 1.05,
           rotationX: 0,
+          rotationY: 0,
           y: 0,
           duration: 0.5,
           ease: 'power2.out',
@@ -456,16 +481,70 @@ export class CinematicStoryEngine {
         0.05
       );
 
-      // Recede into next scene as user continues scroll
+      // Transition smoothly into Scene 03 as user continues scrolling
       reelsTl.to(
-        phoneWrap,
+        frame,
         {
-          scale: 0.98,
-          y: -15,
+          scale: 0.97,
+          rotationX: -4,
+          rotationY: 3,
+          y: -35,
           duration: 0.45,
           ease: 'power1.in',
         },
         0.55
+      );
+    }
+
+    // Atmospheric Centerpiece Energy Halo scale & radiance
+    if (energyHalo) {
+      reelsTl.fromTo(
+        energyHalo,
+        { scale: 0.75, opacity: 0.4 },
+        { scale: 1.18, opacity: 0.95, duration: 0.5, ease: 'power2.out' },
+        0.05
+      );
+      reelsTl.to(
+        energyHalo,
+        { scale: 0.92, opacity: 0.5, duration: 0.45, ease: 'power1.in' },
+        0.55
+      );
+    }
+
+    // Anamorphic Light Streaks sweep across with scroll scrub
+    if (streaks.length) {
+      streaks.forEach((streak, i) => {
+        const dir = i % 2 === 0 ? 1 : -1;
+        reelsTl.fromTo(
+          streak,
+          { x: -50 * dir, opacity: 0.3 },
+          { x: 50 * dir, opacity: 0.85, duration: 0.5, ease: 'none' },
+          0.05
+        );
+      });
+    }
+
+    // Floating motes multiplane vertical drift
+    if (motes.length) {
+      motes.forEach((mote, i) => {
+        const driftDist = ((i % 3) + 1) * 30;
+        reelsTl.fromTo(
+          mote,
+          { y: driftDist },
+          { y: -driftDist, duration: 1.0, ease: 'none' },
+          0
+        );
+      });
+    }
+
+    // Inner reel media aperture depth settle
+    const reelImages = sliderSection.querySelectorAll('.reels-media-wrap img, .reel-slide-media img, .phone-screen-viewport img');
+    if (reelImages.length) {
+      reelsTl.fromTo(
+        reelImages,
+        { scale: 1.06 },
+        { scale: 1.0, ease: 'none', duration: 0.5 },
+        0.05
       );
     }
 
@@ -509,9 +588,10 @@ export class CinematicStoryEngine {
       aboutTl.to(
         cards[0],
         {
-          x: -18,
-          y: -14,
-          rotationZ: -2.8,
+          x: -28,
+          y: -20,
+          rotationZ: -4.2,
+          rotationY: 4,
           duration: 0.5,
           ease: 'power2.out',
         },
@@ -520,9 +600,10 @@ export class CinematicStoryEngine {
       aboutTl.to(
         cards[1],
         {
-          x: 18,
-          y: 10,
-          rotationZ: 3.2,
+          x: 28,
+          y: 16,
+          rotationZ: 4.8,
+          rotationY: -4,
           duration: 0.5,
           ease: 'power2.out',
         },
@@ -531,9 +612,9 @@ export class CinematicStoryEngine {
       aboutTl.to(
         cards[2],
         {
-          x: -8,
-          y: 22,
-          rotationZ: 0.8,
+          x: -12,
+          y: 30,
+          rotationZ: 1.2,
           duration: 0.5,
           ease: 'power2.out',
         },
@@ -728,6 +809,13 @@ export class CinematicStoryEngine {
             0
           );
         }
+
+        ScrollTrigger.create({
+          trigger: card,
+          start: 'top 88%',
+          once: true,
+          onEnter: () => card.classList.add('is-revealed'),
+        });
       });
     }
 
@@ -932,6 +1020,18 @@ export class CinematicStoryEngine {
       };
 
       const onMouseMove = (e) => {
+        // If hovering over interactive controls inside lead-card or an input is focused, keep stable and flat
+        if (card.classList.contains('lead-card')) {
+          const isInteractiveChild = e.target.closest('input, select, textarea, button, label, .checkbox-label, .form-group');
+          if (isInteractiveChild || card.contains(document.activeElement)) {
+            targetTiltX = 0;
+            targetTiltY = 0;
+            card.classList.remove('is-tilting');
+            card.style.transform = 'perspective(1100px) rotateX(0deg) rotateY(0deg) translateZ(0)';
+            return;
+          }
+        }
+
         const rect = card.getBoundingClientRect();
         const normX = (e.clientX - rect.left) / rect.width;
         const normY = (e.clientY - rect.top) / rect.height;
@@ -1119,10 +1219,7 @@ export class CinematicStoryEngine {
     this.timelines = [];
 
     ScrollTrigger.getAll().forEach((st) => {
-      // Don't kill ugc-intro trigger, only our own
-      if (st.vars.trigger !== document.getElementById('ugc-intro')) {
-        st.kill();
-      }
+      st.kill();
     });
 
     this.boundListeners.forEach(({ el, type, fn }) => {

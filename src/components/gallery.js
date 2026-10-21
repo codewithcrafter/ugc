@@ -191,7 +191,7 @@ export class GalleryLightboxController {
 
             <button 
               type="button" 
-              class="lightbox-btn-icon lightbox-btn-close" 
+              class="lightbox-btn-icon lightbox-btn-close lightbox-close" 
               id="lb-close-btn" 
               aria-label="Close fullscreen gallery" 
               title="Close (Esc)"
@@ -258,19 +258,19 @@ export class GalleryLightboxController {
               <div class="lightbox-meta-grid">
                 <div class="meta-pill">
                   <span class="meta-pill-label">Category</span>
-                  <span class="meta-pill-value" id="lb-tag-value">Perspective</span>
+                  <span class="meta-pill-value" id="lb-tag-value">Editorial Production</span>
                 </div>
                 <div class="meta-pill">
-                  <span class="meta-pill-label">Enclosure</span>
-                  <span class="meta-pill-value">Travertine Stone</span>
+                  <span class="meta-pill-label">Format</span>
+                  <span class="meta-pill-value">4K & 9:16 Vertical</span>
                 </div>
                 <div class="meta-pill">
-                  <span class="meta-pill-label">Control</span>
-                  <span class="meta-pill-value">Machined Solid Brass</span>
+                  <span class="meta-pill-label">Lighting</span>
+                  <span class="meta-pill-value">Studio Softbox Rig</span>
                 </div>
                 <div class="meta-pill">
-                  <span class="meta-pill-label">Acoustics</span>
-                  <span class="meta-pill-value">Dual 48mm 360° Neodymium</span>
+                  <span class="meta-pill-label">Talent</span>
+                  <span class="meta-pill-value">Vetted UGC Creator</span>
                 </div>
               </div>
             </div>

@@ -263,11 +263,27 @@ export class SmartphoneReelsFeed {
     this.container.innerHTML = `
       <div class="smartphone-showcase-stage" id="smartphone-stage">
         
-        <!-- Soft Pastel Ambient Backlight Aura (Violet, Pink, Sky Blue) -->
-        <div class="smartphone-ambient-aura" aria-hidden="true">
-          <div class="aura-glow-orb orb-violet"></div>
-          <div class="aura-glow-orb orb-pink"></div>
-          <div class="aura-glow-orb orb-sky"></div>
+        <!-- Premium Centerpiece Ambient Aura, Energy Halo & Cinematic Light Streaks -->
+        <div class="centerpiece-aura-stage" id="centerpiece-aura-stage" aria-hidden="true">
+          <div class="centerpiece-energy-halo"></div>
+          <div class="centerpiece-light-streaks">
+            <span class="streak streak-1"></span>
+            <span class="streak streak-2"></span>
+            <span class="streak streak-3"></span>
+          </div>
+          <div class="centerpiece-floating-motes">
+            <span class="mote mote-1"></span>
+            <span class="mote mote-2"></span>
+            <span class="mote mote-3"></span>
+            <span class="mote mote-4"></span>
+            <span class="mote mote-5"></span>
+            <span class="mote mote-6"></span>
+          </div>
+          <div class="smartphone-ambient-aura">
+            <div class="aura-glow-orb orb-violet"></div>
+            <div class="aura-glow-orb orb-pink"></div>
+            <div class="aura-glow-orb orb-lavender"></div>
+          </div>
         </div>
 
         <!-- Phone Hardware Mockup -->

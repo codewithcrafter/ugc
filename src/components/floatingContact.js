@@ -330,6 +330,19 @@ export class FloatingContactController {
       this.dismissWelcomePopup();
     });
 
+    // Dismiss welcome popup whenever user interacts with or focuses the lead form
+    const leadFormEl = document.getElementById('lead-form');
+    if (leadFormEl) {
+      leadFormEl.addEventListener('focusin', () => {
+        this.dismissWelcomePopup();
+      });
+      leadFormEl.addEventListener('mouseenter', () => {
+        if (this.welcomePopup && this.welcomePopup.classList.contains('is-visible')) {
+          this.dismissWelcomePopup();
+        }
+      });
+    }
+
     // 4. Input Form Submission
     this.inputForm?.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -386,7 +399,16 @@ export class FloatingContactController {
 
   showWelcomePopup() {
     if (!this.welcomePopup) return;
+
+    // Do not show if user is actively focused on or hovering the lead capture form
+    const leadFormEl = document.getElementById('lead-form');
+    const activeEl = document.activeElement;
+    if (leadFormEl && activeEl && leadFormEl.contains(activeEl)) {
+      return;
+    }
+
     this.welcomePopup.removeAttribute('hidden');
+    this.welcomePopup.style.pointerEvents = 'auto';
     void this.welcomePopup.offsetWidth; // Force reflow
     this.welcomePopup.classList.add('is-visible');
 
@@ -400,11 +422,9 @@ export class FloatingContactController {
     if (!this.welcomePopup) return;
 
     this.welcomePopup.classList.remove('is-visible');
+    this.welcomePopup.style.pointerEvents = 'none';
+    this.welcomePopup.setAttribute('hidden', '');
     sessionStorage.setItem(this.welcomeConfig.sessionStorageKey, 'true');
-
-    setTimeout(() => {
-      this.welcomePopup.setAttribute('hidden', '');
-    }, 250);
 
     if (this.welcomeTimer) {
       clearTimeout(this.welcomeTimer);
@@ -463,6 +483,7 @@ export class FloatingContactController {
 
     // Display panel
     this.chatPanel.removeAttribute('hidden');
+    this.chatPanel.style.pointerEvents = 'auto';
     void this.chatPanel.offsetWidth;
     this.chatPanel.classList.add('is-open');
 
@@ -487,8 +508,11 @@ export class FloatingContactController {
     }
 
     this.chatPanel.classList.remove('is-open');
+    this.chatPanel.style.pointerEvents = 'none';
     setTimeout(() => {
-      this.chatPanel.setAttribute('hidden', '');
+      if (!this.isChatOpen) {
+        this.chatPanel.setAttribute('hidden', '');
+      }
     }, 260);
 
     // Return focus to toggle button

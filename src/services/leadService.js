@@ -41,13 +41,13 @@ export function validateLead(formData) {
   }
 
   // Validate Phone
-  // Allows optional '+', digits, spaces, parentheses, dashes; requires at least 7 digits
+  // Allows optional '+', digits, spaces, parentheses, dashes, dots; requires 7 to 15 digits
   const phoneDigitsOnly = phone.replace(/\D/g, '');
-  const phonePattern = /^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]*$/;
+  const phonePattern = /^[+]?[\d\s().-]{7,25}$/;
   if (!phone) {
     errors.phone = 'Please enter your phone number.';
   } else if (!phonePattern.test(phone) || phoneDigitsOnly.length < 7 || phoneDigitsOnly.length > 15) {
-    errors.phone = 'Please enter a valid phone number (at least 7 to 15 digits).';
+    errors.phone = 'Please enter a valid phone number (7 to 15 digits).';
   }
 
   // Validate Consent
