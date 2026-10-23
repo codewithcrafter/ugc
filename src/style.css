@@ -4665,372 +4665,150 @@ BELOW-PHONE CONTROLS (Counter + Dots + Keys Hint)
    9. SECTION 3: ABOUT THE PRODUCT / BRAND (CREATIVE CRAFT & STUDIO PHILOSOPHY)
    -------------------------------------------------------------------------- */
 .section-about {
-  padding-top: clamp(80px, 8vw, 128px);
-  padding-bottom: clamp(80px, 8vw, 128px);
+  padding-top: clamp(80px, 8vw, 120px);
+  padding-bottom: clamp(80px, 8vw, 120px);
   background-color: #08080C;
+  background-image: radial-gradient(circle at 18% 28%, rgba(155, 109, 255, 0.045) 0%, transparent 60%);
   position: relative;
   overflow: hidden;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-/* Widescreen balanced container: 88-92% on large desktop with max 1440px */
+/* Widescreen balanced container: 88-92% on large desktop with max 1380px */
 .section-about .container {
-  width: min(92%, 1440px);
-  max-width: 1440px;
+  width: min(92%, 1380px);
+  max-width: 1380px;
   margin-left: auto;
   margin-right: auto;
-  padding-left: clamp(20px, 3.5vw, 48px);
-  padding-right: clamp(20px, 3.5vw, 48px);
+  padding-left: clamp(18px, 3vw, 40px);
+  padding-right: clamp(18px, 3vw, 40px);
 }
 
-/* Balanced 48% Images / 52% Content Grid with aligned vertical centers */
+/* Balanced Two-Column Composition: 50% Visual Showcase / 50% Editorial Hierarchy */
 .about-grid {
   display: grid;
-  grid-template-columns: minmax(0, 48%) minmax(0, 52%);
-  gap: clamp(36px, 4.5vw, 72px);
+  grid-template-columns: minmax(0, 50%) minmax(0, 50%);
+  gap: clamp(36px, 4.5vw, 68px);
   align-items: center;
   position: relative;
   width: 100%;
 }
 
-.about-image-card {
-  position: relative;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6);
-}
-
-.about-img {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-}
-
-.about-floating-badge {
-  position: absolute;
-  bottom: 24px;
-  left: 24px;
-  background: rgba(20, 20, 29, 0.92);
-  backdrop-filter: blur(14px);
-  padding: 14px 22px;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6);
-  max-width: 320px;
-}
-
-.badge-title {
-  display: block;
-  font-family: var(--font-heading);
-  font-size: 0.9375rem;
-  font-weight: 700;
-  color: #F7F5FC;
-  margin-bottom: 2px;
-}
-
-.badge-sub {
-  font-size: 0.75rem;
-  color: #A5A2B3;
-}
-
 /* --------------------------------------------------------------------------
-   LEFT COLUMN: ENLARGED EDITORIAL IMAGE STACK DECK
+   LEFT COLUMN: PREMIUM UGC PHOTOGRAPHY SHOWCASE
    -------------------------------------------------------------------------- */
 .about-visual-col {
   position: relative;
   width: 100%;
-  perspective: 1400px;
+  display: flex;
+  flex-direction: column;
 }
 
-.image-stack-wrapper {
-  position: relative;
+.about-showcase-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
   width: 100%;
-  user-select: none;
-  -webkit-user-select: none;
 }
 
-.image-stack-viewport {
+/* Base Photo Card */
+.about-photo-card {
   position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #111118;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.65);
+  transition: border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.about-photo-card:hover {
+  border-color: rgba(155, 109, 255, 0.32);
+  box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.8), 0 0 24px rgba(155, 109, 255, 0.08);
+}
+
+/* Dominant Main Photograph */
+.about-photo-main {
   width: 100%;
-  padding-top: 24px;
-  padding-bottom: 8px;
-  perspective: 1400px;
-  cursor: grab;
-  outline: none;
+  aspect-ratio: 16 / 10;
 }
 
-.image-stack-viewport:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 4px;
-  border-radius: var(--radius-lg);
+/* Two Supporting Secondary Photographs */
+.about-photo-subgrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  width: 100%;
 }
 
-.image-stack-viewport.is-dragging {
-  cursor: grabbing;
-}
-
-/* Large, prominent deck container (16:11 aspect ratio for strong photography presence) */
-.image-stack-deck {
-  position: relative;
+.about-photo-sub {
   width: 100%;
   aspect-ratio: 16 / 11;
-  margin: 0;
-  transform-style: preserve-3d;
 }
 
-/* Individual Layer Cards */
-.image-stack-card {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.85), 0 4px 18px rgba(155, 109, 255, 0.12);
-  transform-origin: center bottom;
-  will-change: transform, opacity;
-  background-color: #14141D;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  cursor: grab;
-  touch-action: pan-y;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
-}
-
-.image-stack-viewport.is-dragging .image-stack-card {
-  cursor: grabbing;
-}
-
-.image-stack-card:hover {
-  border-color: rgba(155, 109, 255, 0.35);
-}
-
-.card-media-wrapper {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-.stack-card-img {
+/* Image Elements with Subtle Smooth Hover Zoom */
+.about-photo-card .showcase-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   object-position: center;
   display: block;
-  pointer-events: none;
-  border-radius: inherit;
-  filter: brightness(0.96) contrast(1.05);
+  filter: brightness(0.97) contrast(1.03);
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
 }
 
-.stack-card-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg,
-      rgba(8, 8, 12, 0) 50%,
-      rgba(8, 8, 12, 0.6) 100%);
-  pointer-events: none;
-  border-radius: inherit;
-}
-
-/* Dark Glass Floating Badge on Image Cards */
-.stack-floating-badge {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: rgba(20, 20, 29, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  padding: 10px 18px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65);
-  max-width: calc(100% - 40px);
-  pointer-events: none;
-}
-
-.badge-accent-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(155, 109, 255, 0.25), 0 0 10px var(--accent);
-  flex-shrink: 0;
-}
-
-.badge-text-wrap {
-  display: flex;
-  flex-direction: column;
-}
-
-.stack-badge-title {
-  font-family: var(--font-heading);
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: #F7F5FC;
-  line-height: 1.25;
-}
-
-.stack-badge-sub {
-  font-size: 0.74rem;
-  color: #A5A2B3;
-  line-height: 1.25;
-}
-
-/* Drag Interaction Hint Pill */
-.stack-drag-hint {
-  position: absolute;
-  top: 36px;
-  right: 20px;
-  z-index: 10;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(20, 20, 29, 0.88);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: #E2E0EC;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 5px 12px;
-  border-radius: var(--radius-full);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-
-/* Stack Controls: Counter, Dots, and Dark Buttons */
-.image-stack-controls {
-  margin-top: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.stack-counter {
-  font-family: var(--font-heading);
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #A5A2B3;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  letter-spacing: 0.05em;
-}
-
-.counter-current {
-  color: #C4A5FF;
-  font-weight: 700;
-}
-
-.counter-sep {
-  opacity: 0.4;
-}
-
-.counter-total {
-  opacity: 0.65;
-}
-
-.stack-dots {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.stack-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radius-full);
-  background-color: rgba(255, 255, 255, 0.18);
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.stack-dot:hover {
-  background-color: #9B6DFF;
-  transform: scale(1.2);
-}
-
-.stack-dot.is-active {
-  width: 24px;
-  background-color: #9B6DFF;
-  box-shadow: 0 0 10px rgba(155, 109, 255, 0.45);
-}
-
-.stack-arrows {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.stack-arrow-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #14141D;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: #F7F5FC;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-  transition: all var(--transition-fast);
-}
-
-.stack-arrow-btn:hover {
-  background-color: #9B6DFF;
-  border-color: #9B6DFF;
-  color: #FFFFFF;
-  box-shadow: 0 6px 18px rgba(155, 109, 255, 0.45);
-  transform: scale(1.08);
-}
-
-.stack-arrow-btn:active {
-  transform: scale(0.96);
+.about-photo-card:hover .showcase-img {
+  transform: scale(1.03);
+  filter: brightness(1.02) contrast(1.04);
 }
 
 /* --------------------------------------------------------------------------
-   RIGHT COLUMN: NARRATIVE CONTENT & 4 DARK INFORMATION CARDS
+   RIGHT COLUMN: CLEAR CONTENT HIERARCHY & STUDIO NARRATIVE
    -------------------------------------------------------------------------- */
 .about-text-col {
   display: flex;
   flex-direction: column;
   width: 100%;
-}
-
-.about-text-col .scene-meta-tag {
-  margin-bottom: 8px;
-  display: inline-block;
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  color: #A5A2B3;
-  font-family: monospace;
+  max-width: 580px;
 }
 
 .about-text-col .section-eyebrow {
-  margin-bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-heading);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #C4A5FF;
+  margin-bottom: 14px;
   align-self: flex-start;
 }
 
+.about-text-col .section-eyebrow::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
 .about-text-col .section-title {
-  font-size: clamp(2rem, 2.6vw + 0.4rem, 2.85rem);
-  line-height: 1.15;
-  margin-bottom: 16px;
-  color: #F7F5FC;
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 2.4vw + 0.3rem, 2.75rem);
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+  color: #FFFFFF;
+  margin-bottom: 18px;
   text-wrap: balance;
 }
 
 .about-lead {
-  font-size: 1.12rem;
+  font-size: 1.08rem;
   color: #E2E0EC;
   line-height: 1.62;
   margin-bottom: 16px;
@@ -5050,85 +4828,58 @@ BELOW-PHONE CONTROLS (Counter + Dots + Keys Hint)
   color: #F7F5FC;
 }
 
-/* Four Small Information Cards Grid */
+/* Value Highlights Grid */
 .about-specs-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-  margin-bottom: 26px;
+  gap: 12px;
+  margin-bottom: 28px;
   width: 100%;
 }
 
-/* Premium Dark Card Style */
 .spec-card {
-  background: #14141D;
-  background-image: linear-gradient(145deg, rgba(26, 26, 38, 0.6) 0%, rgba(18, 18, 26, 0.8) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  padding: 18px 20px;
-  border-radius: 16px;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
-  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
-  position: relative;
-  overflow: hidden;
+  background: #111118;
+  background-image: linear-gradient(145deg, rgba(24, 24, 34, 0.5) 0%, rgba(16, 16, 24, 0.75) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px 18px;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  transition: border-color 0.25s ease, transform 0.25s ease;
 }
 
 .spec-card:hover {
+  border-color: rgba(155, 109, 255, 0.28);
   transform: translateY(-2px);
-  border-color: rgba(155, 109, 255, 0.45);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6), 0 0 18px rgba(155, 109, 255, 0.14);
 }
 
 .spec-card-num {
-  font-family: var(--font-heading);
-  font-size: 0.78rem;
+  font-family: monospace;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   margin-bottom: 8px;
   display: inline-block;
-  padding: 3px 9px;
+  padding: 3px 8px;
   border-radius: 6px;
-  color: #C4A5FF !important;
-  background: rgba(155, 109, 255, 0.14) !important;
-  border: 1px solid rgba(155, 109, 255, 0.25) !important;
-}
-
-.spec-card:nth-child(1) .spec-card-num {
-  color: #C4A5FF !important;
-  background: rgba(155, 109, 255, 0.14) !important;
-  border-color: rgba(155, 109, 255, 0.3) !important;
-}
-
-.spec-card:nth-child(2) .spec-card-num {
-  color: #FF5DAA !important;
-  background: rgba(255, 93, 170, 0.14) !important;
-  border-color: rgba(255, 93, 170, 0.3) !important;
-}
-
-.spec-card:nth-child(3) .spec-card-num {
-  color: #38BDF8 !important;
-  background: rgba(56, 189, 248, 0.14) !important;
-  border-color: rgba(56, 189, 248, 0.3) !important;
-}
-
-.spec-card:nth-child(4) .spec-card-num {
-  color: #C4A5FF !important;
-  background: rgba(196, 165, 255, 0.14) !important;
-  border-color: rgba(196, 165, 255, 0.3) !important;
+  color: #C4A5FF;
+  background: rgba(155, 109, 255, 0.12);
+  border: 1px solid rgba(155, 109, 255, 0.22);
 }
 
 .spec-card-title {
-  font-size: 1rem;
+  font-family: var(--font-heading);
+  font-size: 0.9375rem;
   font-weight: 700;
-  color: #F7F5FC !important;
-  margin-bottom: 5px;
-  letter-spacing: -0.01em;
-  line-height: 1.25;
+  color: #F7F5FC;
+  line-height: 1.3;
+  margin-bottom: 4px;
 }
 
 .spec-card-desc {
-  font-size: 0.85rem;
-  color: #A5A2B3 !important;
-  line-height: 1.52;
+  font-size: 0.8125rem;
+  color: #A5A2B3;
+  line-height: 1.5;
+  margin: 0;
 }
 
 .about-action {
@@ -9753,48 +9504,14 @@ body.lightbox-is-open .floating-welcome-popup,
   transform: translateZ(68px);
 }
 
-/* 2. About Section Image Stack 3D Depth */
+/* 2. About Section Studio Philosophy Showcase */
 .section-about {
   position: relative;
   overflow: hidden;
 }
 
 .about-visual-col {
-  perspective: 1400px;
-  transform-style: preserve-3d;
-}
-
-.image-stack-wrapper {
-  perspective: 1400px;
-  transform-style: preserve-3d;
-}
-
-.image-stack-deck {
-  perspective: 1400px;
-  transform-style: preserve-3d;
-  opacity: 1;
-  transform: none;
-  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.image-stack-deck.is-stack-revealed {
-  opacity: 1;
-  transform: none;
-}
-
-.image-stack-card {
-  transform-style: preserve-3d;
-  will-change: transform;
-}
-
-.about-floating-badge {
-  transform: translateZ(32px);
-  box-shadow:
-    0 18px 40px -6px rgba(117, 69, 245, 0.2),
-    0 6px 16px rgba(26, 25, 24, 0.05);
-  border: 1px solid rgba(233, 223, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  position: relative;
 }
 
 /* 3. Genuine 3D Smartphone Reels Presentation */
@@ -11603,8 +11320,6 @@ body::after {
 }
 
 /* E. Image Parallax */
-.about-visual-col,
-.image-stack-wrapper,
 .hero-stage-column {
   transform: translate3d(var(--parallax-offset-x, 0px), var(--parallax-offset-y, 0px), 0);
   transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);

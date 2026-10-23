@@ -64,11 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
     new SmartphoneReelsFeed(sliderContainer, reelsData);
   }
 
-  // 4. Initialize Interactive Overlapping Image Stack ("The Craft & Philosophy")
-  const stackContainer = document.getElementById('about-image-stack-container');
-  if (stackContainer && productConfig.about && productConfig.about.images) {
-    new ImageStackController(stackContainer, productConfig.about.images);
-  }
+  // 4. Studio Philosophy: UGC Photography Showcase is rendered statically in semantic HTML for optimal performance
 
   // 5. Initialize Moving Brand Logo Wall ("TRUSTED BY LEADING BRANDS")
   const brandWallContainer = document.getElementById('brand-wall-container');

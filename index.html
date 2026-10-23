@@ -313,41 +313,55 @@
       <!-- Film Scene Bridge: Scene 02 to Scene 03 -->
       <div class="film-scene-bridge" aria-hidden="true"></div>
 
-      <!-- SECTION 3: ABOUT THE PRODUCT / BRAND -->
-      <section class="section-about" id="about">
-        <!-- Ambient 3D Colorful Studio Lighting -->
-        <div class="section-ambient-lighting" aria-hidden="true">
-          <div class="ambient-orb-3d orb-lavender"></div>
-          <div class="ambient-orb-3d orb-coral-soft"></div>
-        </div>
-
+      <!-- SECTION 3: THE STUDIO PHILOSOPHY / UGC SHOWCASE -->
+      <section class="section-about" id="about" aria-label="Studio Philosophy and UGC Photography Showcase">
         <div class="container about-grid">
-          <!-- Left: Editorial Visual (Interactive Overlapping Image Stack) -->
-          <div class="about-visual-col reveal-left reveal-mask">
-            <div id="about-image-stack-container" class="image-stack-wrapper">
-              <!-- Rendered dynamically by ImageStackController -->
-              <noscript>
-                <div class="about-image-card">
+          <!-- Left Column: Premium UGC Photography Showcase -->
+          <div class="about-visual-col">
+            <div class="about-showcase-gallery">
+              <!-- Dominant Main Image: Real Creator Filming in Professional Studio -->
+              <div class="about-photo-card about-photo-main">
+                <img 
+                  src="/images/ugc_studio_shoot.jpg" 
+                  alt="AURA Studio creator filming beauty product on vertical cinema camera rig with softbox lighting" 
+                  class="showcase-img" 
+                  loading="lazy" 
+                  width="960" 
+                  height="600"
+                />
+              </div>
+
+              <!-- Two Smaller Supporting Images -->
+              <div class="about-photo-subgrid">
+                <!-- Supporting 1: Product Close-Up -->
+                <div class="about-photo-card about-photo-sub">
                   <img 
-                    src="/images/about_brand.jpg" 
-                    alt="AURA Studio acoustic capsule speaker harmoniously placed on a timber shelf in a calm interior" 
-                    class="about-img" 
+                    src="/images/ugc_beauty_macro.jpg" 
+                    alt="Macro product close-up with dewy lighting and luxury skincare serum bottle" 
+                    class="showcase-img" 
                     loading="lazy" 
-                    width="800" 
-                    height="600"
+                    width="460" 
+                    height="310"
                   />
-                  <div class="about-floating-badge">
-                    <span class="badge-title">Hand-Assembled</span>
-                    <span class="badge-sub">Cast stone enclosure with zero resonance</span>
-                  </div>
                 </div>
-              </noscript>
+
+                <!-- Supporting 2: Behind-The-Scenes Filming -->
+                <div class="about-photo-card about-photo-sub">
+                  <img 
+                    src="/images/ugc_creator_bts.jpg" 
+                    alt="Behind-the-scenes vertical video production with camera gimbal and ring light" 
+                    class="showcase-img" 
+                    loading="lazy" 
+                    width="460" 
+                    height="310"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Right: Narrative & What Makes It Different -->
-          <div class="about-text-col reveal-right">
-            <span class="scene-meta-tag">[SCENE 03] PRODUCTION CRAFT // STUDIO & LOCATION ARCHIVE</span>
+          <!-- Right Column: Clear Content Hierarchy & Studio Narrative -->
+          <div class="about-text-col">
             <span class="section-eyebrow">THE STUDIO PHILOSOPHY</span>
             <h2 class="section-title">Creator-Led Content Engineered to Stop the Scroll</h2>
             <p class="about-lead">
@@ -364,36 +378,37 @@
             </div>
 
             <!-- Value Highlights Grid -->
-            <div class="about-specs-grid reveal-wave">
-              <div class="spec-card reveal-up reveal-wave-item">
+            <div class="about-specs-grid">
+              <div class="spec-card">
                 <span class="spec-card-num">01</span>
-                <h4 class="spec-card-title">4K & 9:16 Vertical Video</h4>
+                <h4 class="spec-card-title">4K &amp; 9:16 Vertical Video</h4>
                 <p class="spec-card-desc">High-converting vertical assets filmed on cinema cameras and smartphones.</p>
               </div>
-              <div class="spec-card reveal-up reveal-wave-item">
+              <div class="spec-card">
                 <span class="spec-card-num">02</span>
                 <h4 class="spec-card-title">Direct-Response Hooks</h4>
-                <p class="spec-card-desc">Narrative storytelling and hook testing tailored for TikTok, Reels & Meta.</p>
+                <p class="spec-card-desc">Narrative storytelling and hook testing tailored for TikTok, Reels &amp; Meta.</p>
               </div>
-              <div class="spec-card reveal-up reveal-wave-item">
+              <div class="spec-card">
                 <span class="spec-card-num">03</span>
                 <h4 class="spec-card-title">Vetted Creator Talent</h4>
                 <p class="spec-card-desc">Diverse on-camera talent and directors matching your target demographic.</p>
               </div>
-              <div class="spec-card reveal-up reveal-wave-item">
+              <div class="spec-card">
                 <span class="spec-card-num">04</span>
                 <h4 class="spec-card-title">7–10 Day Fast Delivery</h4>
                 <p class="spec-card-desc">Ready-to-launch creative delivered swiftly from product delivery to studio.</p>
               </div>
             </div>
 
-            <div class="about-action reveal-up">
-              <a href="#lead-form" class="btn btn-primary">
-                <span>Inquire About Availability</span>
+            <div class="about-action">
+              <button type="button" class="btn btn-primary btn-open-inquiry" data-action="open-inquiry" id="about-primary-cta">
+                <span>Book a Photoshoot</span>
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <polyline points="9 18 15 12 9 6"></polyline>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
                 </svg>
-              </a>
+              </button>
             </div>
           </div>
         </div>

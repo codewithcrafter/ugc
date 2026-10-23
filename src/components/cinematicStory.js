@@ -28,12 +28,22 @@
  */
 
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger.js';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export class CinematicStoryEngine {
   constructor(options = {}) {
+    // Prevent duplicate engine instances
+    if (typeof window !== 'undefined' && window.__cinematicStoryEngineInstance) {
+      try {
+        window.__cinematicStoryEngineInstance.destroy();
+      } catch (_) {}
+    }
+    if (typeof window !== 'undefined') {
+      window.__cinematicStoryEngineInstance = this;
+    }
+
     this.options = Object.assign(
       {
         enableIndicator: true,
@@ -49,9 +59,11 @@ export class CinematicStoryEngine {
     this.isMobile = window.matchMedia('(max-width: 768px)').matches;
 
     this.timelines = [];
+    this.scrollTriggers = [];
     this.boundListeners = [];
     this.indicatorEl = null;
     this.currentSceneLabel = '';
+    this.isInitialized = false;
 
     this.scenes = [
       { id: 'hero', label: 'SCENE 01 // PROLOGUE & ALLOCATION' },
@@ -68,6 +80,8 @@ export class CinematicStoryEngine {
   }
 
   init() {
+    if (this.isInitialized) return;
+    this.isInitialized = true;
     // 0. Ensure all elements on the page are marked revealed and visible immediately
     this.revealAllContentSafely();
 
@@ -113,9 +127,11 @@ export class CinematicStoryEngine {
     this.bindGlobalEvents();
 
     // Refresh ScrollTrigger after fonts and assets load
-    window.addEventListener('load', () => {
+    const onLoadRefresh = () => {
       ScrollTrigger.refresh();
-    });
+    };
+    window.addEventListener('load', onLoadRefresh);
+    this.boundListeners.push({ el: window, type: 'load', fn: onLoadRefresh });
   }
 
   /**
@@ -169,6 +185,7 @@ export class CinematicStoryEngine {
         );
       },
     });
+    this.timelines.push(openTl);
 
     // 1. Navigation slides down smoothly
     if (nav) {
@@ -332,13 +349,14 @@ export class CinematicStoryEngine {
       const sectionEl = document.getElementById(scene.id);
       if (!sectionEl) return;
 
-      ScrollTrigger.create({
+      const st = ScrollTrigger.create({
         trigger: sectionEl,
         start: 'top 55%',
         end: 'bottom 45%',
         onEnter: () => this.updateSceneIndicator(scene.label),
         onEnterBack: () => this.updateSceneIndicator(scene.label),
       });
+      this.scrollTriggers.push(st);
     });
   }
 
@@ -552,100 +570,53 @@ export class CinematicStoryEngine {
   }
 
   /**
-   * 4. SCENE 03: CRAFT & PHILOSOPHY WITH 3D IMAGE STACK DECK
-   * Interactive cards fan out through physical perspective depth
+   * 4. SCENE 03: THE STUDIO PHILOSOPHY & UGC PHOTOGRAPHY SHOWCASE
+   * Smooth, gentle viewport entry reveal with opacity and vertical translation.
+   * Avoids pinned sections or complicated scroll transforms for rock-solid stability.
    */
   setupScene3AboutTimeline() {
     const aboutSection = document.getElementById('about');
     if (!aboutSection) return;
 
-    const stackDeck = aboutSection.querySelector('#image-stack-deck');
-    const cards = aboutSection.querySelectorAll('.image-stack-card');
-    const specItems = aboutSection.querySelectorAll('.about-spec-item, .spec-card');
-    const header = aboutSection.querySelector('.section-header-compact, .about-header');
+    if (this.prefersReducedMotion) return;
+
+    const visualCol = aboutSection.querySelector('.about-visual-col');
+    const textCol = aboutSection.querySelector('.about-text-col');
+    const specCards = aboutSection.querySelectorAll('.spec-card');
 
     const aboutTl = gsap.timeline({
       scrollTrigger: {
         trigger: aboutSection,
-        start: 'top 80%',
-        end: 'bottom 20%',
-        scrub: 0.6,
-        invalidateOnRefresh: true,
+        start: 'top 82%',
+        toggleActions: 'play none none none',
+        once: true,
       },
     });
 
-    if (header) {
+    if (visualCol) {
       aboutTl.fromTo(
-        header,
-        { y: 20 },
-        { y: 0, duration: 0.4, ease: 'power2.out' },
+        visualCol,
+        { opacity: 0, y: 26 },
+        { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' },
         0
       );
     }
 
-    // 3D Physical Fanning of Deck Cards on Scroll
-    if (cards.length >= 3 && !this.isMobile) {
-      aboutTl.to(
-        cards[0],
-        {
-          x: -28,
-          y: -20,
-          rotationZ: -4.2,
-          rotationY: 4,
-          duration: 0.5,
-          ease: 'power2.out',
-        },
-        0.1
+    if (textCol) {
+      aboutTl.fromTo(
+        textCol,
+        { opacity: 0, y: 22 },
+        { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' },
+        0.12
       );
-      aboutTl.to(
-        cards[1],
-        {
-          x: 28,
-          y: 16,
-          rotationZ: 4.8,
-          rotationY: -4,
-          duration: 0.5,
-          ease: 'power2.out',
-        },
-        0.1
-      );
-      aboutTl.to(
-        cards[2],
-        {
-          x: -12,
-          y: 30,
-          rotationZ: 1.2,
-          duration: 0.5,
-          ease: 'power2.out',
-        },
-        0.1
-      );
-
-      const stackImgs = aboutSection.querySelectorAll('.image-stack-card img');
-      if (stackImgs.length) {
-        aboutTl.fromTo(
-          stackImgs,
-          { scale: 1.05 },
-          { scale: 1.0, ease: 'none', duration: 0.5 },
-          0.1
-        );
-      }
     }
 
-    // Staggered perspective arrival of specification features
-    if (specItems.length) {
+    if (specCards.length) {
       aboutTl.fromTo(
-        specItems,
-        {
-          y: 20,
-        },
-        {
-          y: 0,
-          stagger: 0.08,
-          duration: 0.5,
-          ease: 'power2.out',
-        },
-        0.15
+        specCards,
+        { opacity: 0, y: 16 },
+        { opacity: 1, y: 0, duration: 0.55, stagger: 0.08, ease: 'power2.out' },
+        0.28
       );
     }
 
@@ -665,7 +636,7 @@ export class CinematicStoryEngine {
     if (!track) return;
 
     if (header) {
-      ScrollTrigger.create({
+      const stHeader = ScrollTrigger.create({
         trigger: trustSection,
         start: 'top 85%',
         end: 'top 55%',
@@ -674,10 +645,11 @@ export class CinematicStoryEngine {
           gsap.set(header, { y: (1 - self.progress) * 16 });
         },
       });
+      this.scrollTriggers.push(stHeader);
     }
 
     // Use ScrollTrigger to observe scroll velocity and subtly translate track
-    ScrollTrigger.create({
+    const stTrack = ScrollTrigger.create({
       trigger: trustSection,
       start: 'top bottom',
       end: 'bottom top',
@@ -694,6 +666,7 @@ export class CinematicStoryEngine {
         });
       },
     });
+    this.scrollTriggers.push(stTrack);
   }
 
   /**
@@ -1097,6 +1070,9 @@ export class CinematicStoryEngine {
     );
 
     magneticTargets.forEach((btn) => {
+      if (btn.dataset.cinematicMagneticBound) return;
+      btn.dataset.cinematicMagneticBound = 'true';
+
       const onMouseMove = (e) => {
         const rect = btn.getBoundingClientRect();
         const deltaX = (e.clientX - (rect.left + rect.width / 2)) * 0.18;
@@ -1202,12 +1178,14 @@ export class CinematicStoryEngine {
   bindGlobalEvents() {
     try {
       const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-      mediaQuery.addEventListener('change', (e) => {
+      const onReducedMotionChange = (e) => {
         if (e.matches) {
           this.revealAllImmediately();
           this.destroy();
         }
-      });
+      };
+      mediaQuery.addEventListener('change', onReducedMotionChange);
+      this.boundListeners.push({ el: mediaQuery, type: 'change', fn: onReducedMotionChange });
     } catch (_) {}
   }
 
@@ -1218,17 +1196,35 @@ export class CinematicStoryEngine {
     });
     this.timelines = [];
 
+    this.scrollTriggers.forEach((st) => {
+      st.kill();
+    });
+    this.scrollTriggers = [];
+
     ScrollTrigger.getAll().forEach((st) => {
       st.kill();
     });
 
     this.boundListeners.forEach(({ el, type, fn }) => {
-      el.removeEventListener(type, fn);
+      if (el && typeof el.removeEventListener === 'function') {
+        el.removeEventListener(type, fn);
+      }
+      if (el && el.dataset) {
+        delete el.dataset.cinematicTiltBound;
+        delete el.dataset.cinematicMagneticBound;
+      }
     });
     this.boundListeners = [];
 
     if (this.indicatorEl && this.indicatorEl.parentNode) {
       this.indicatorEl.parentNode.removeChild(this.indicatorEl);
+      this.indicatorEl = null;
     }
+
+    if (typeof window !== 'undefined' && window.__cinematicStoryEngineInstance === this) {
+      window.__cinematicStoryEngineInstance = null;
+    }
+
+    this.isInitialized = false;
   }
 }
