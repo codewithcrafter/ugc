@@ -75,9 +75,9 @@ export class UgcModalController {
             </blockquote>
 
             <div class="ugc-modal-features">
-              <span class="feature-tag">Organic Acoustic Vibe</span>
-              <span class="feature-tag">18h Battery</span>
-              <span class="feature-tag">Cast Stone Composite</span>
+              <span class="feature-tag">UGC Video</span>
+              <span class="feature-tag">Product Photoshoot</span>
+              <span class="feature-tag">Delhi</span>
             </div>
 
             <div class="ugc-modal-actions">
@@ -86,7 +86,7 @@ export class UgcModalController {
                 class="btn btn-primary btn-block modal-cta-btn" 
                 id="modal-inquire-btn"
               >
-                Inquire About This Edition
+                Book a Photoshoot
               </a>
             </div>
           </div>

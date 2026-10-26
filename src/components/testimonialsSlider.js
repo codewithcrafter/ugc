@@ -131,34 +131,16 @@ export class TestimonialsSlider {
           <!-- Decorative Watermark Quote Glyph -->
           <div class="testimonial-watermark" aria-hidden="true">“</div>
 
-          <div class="stars-row">
-            <div class="stars-group" aria-label="5 out of 5 stars">
-              <span class="star-symbol">★★★★★</span>
-            </div>
-            <span class="verified-pill">
-              <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor" aria-hidden="true">
-                <path d="M13.485 1.431a1.473 1.473 0 0 1 2.104 2.062l-7.84 8.685a1.473 1.473 0 0 1-2.126.02L1.442 8.017a1.473 1.473 0 0 1 2.083-2.083l3.14 3.14 6.82-7.643z"/>
-              </svg>
-              <span>Verified Order</span>
-            </span>
-          </div>
-
           <blockquote class="testimonial-quote">
-            “${item.quote.replace(/^[“"]|[”"]$/g, '')}”
+            ${item.quote}
           </blockquote>
 
           <div class="testimonial-author">
             <div class="author-avatar-badge">${initials}</div>
             <div class="author-details">
               <div class="author-top-line">
-                <strong class="author-name">${item.name}</strong>
-                ${item.location ? `<span class="author-city">• ${item.location}</span>` : ''}
+                <strong class="author-name">— ${item.name}</strong>
               </div>
-              <div class="author-sub-line">
-                <span class="author-role">${item.role || 'Patron'}</span>
-                ${item.edition ? `<span class="author-edition">${item.edition}</span>` : ''}
-              </div>
-              ${item.date ? `<span class="author-date">${item.date}</span>` : ''}
             </div>
           </div>
         </article>

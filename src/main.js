@@ -40,10 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // 1b. Initialize Cinematic Hero Rotating Headline
   new HeadlineRotatorController('hero-rotator-wrapper', {
     phrases: [
-      'Crafted for Cult Brands.',
-      'Macro Beauty & Skincare Shoots.',
-      'Fashion & Lifestyle UGC.',
-      'High-Converting 9:16 Video.',
+      ' UGC Studio Where Your Brand Becomes Iconic.',
+      'CREATIVE UGC  CONTENT CREATION  ',
+      'PRODUCT PHOTOSHOOT  AND CREATOR CASTING',
     ],
     interval: 3500,
   });

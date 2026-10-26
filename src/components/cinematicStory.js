@@ -46,7 +46,7 @@ export class CinematicStoryEngine {
 
     this.options = Object.assign(
       {
-        enableIndicator: true,
+        enableIndicator: false,
         enableParallax: true,
         enableTilt: true,
         enableMagnetic: true,
@@ -66,14 +66,14 @@ export class CinematicStoryEngine {
     this.isInitialized = false;
 
     this.scenes = [
-      { id: 'hero', label: 'SCENE 01 // PROLOGUE & ALLOCATION' },
-      { id: 'product-slider', label: 'SCENE 02 // REELS IN MOTION' },
-      { id: 'about', label: 'SCENE 03 // CRAFT & PHILOSOPHY' },
-      { id: 'trust', label: 'SCENE 04 // BRAND PARTNERS' },
-      { id: 'ugc-showcase', label: 'SCENE 05 // EVERYDAY MOMENTS' },
-      { id: 'gallery', label: 'SCENE 06 // VISUAL ARCHIVE' },
-      { id: 'testimonials', label: 'SCENE 07 // PATRON REFLECTIONS' },
-      { id: 'faq', label: 'SCENE 08 // STUDIO CONCIERGE' },
+      { id: 'hero', label: 'UGC STUDIO // MAKE YOUR BRAND ICONIC' },
+      { id: 'product-slider', label: 'Authentic & Scroll-Stopping Content' },
+      { id: 'about', label: 'luxury in every frame' },
+      { id: 'trust', label: 'BRANDS' },
+      { id: 'ugc-showcase', label: 'Life captured naturally' },
+      { id: 'gallery', label: 'PHOTOSHOOT THAT LOOK LUXURIOUS' },
+      { id: 'testimonials', label: 'We create impact more than content' },
+      { id: 'faq', label: 'Got Questions ?, lets talk' },
     ];
 
     this.init();
@@ -317,7 +317,7 @@ export class CinematicStoryEngine {
       indicator.setAttribute('aria-hidden', 'true');
       indicator.innerHTML = `
         <span class="scene-rec-dot"></span>
-        <span class="scene-slate-text" id="scene-slate-text">SCENE 01 // PROLOGUE</span>
+        <span class="scene-slate-text" id="scene-slate-text">AURA STUDIO // CREATIVE PRODUCTION</span>
       `;
       document.body.appendChild(indicator);
     }
