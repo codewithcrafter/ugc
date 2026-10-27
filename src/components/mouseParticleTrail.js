@@ -30,7 +30,7 @@ export class MouseParticleTrailController {
   constructor(options = {}) {
     this.options = Object.assign(
       {
-        maxParticles: 140,
+        maxParticles: 24,
         colors: [
           // 1. Pure Luminous White
           {
@@ -121,7 +121,8 @@ export class MouseParticleTrailController {
     this.canvas.style.width = '100vw';
     this.canvas.style.height = '100vh';
     this.canvas.style.pointerEvents = 'none';
-    this.canvas.style.zIndex = '9998';
+    this.canvas.style.zIndex = '12';
+    this.canvas.style.opacity = '0.75';
 
     this.ctx = this.canvas.getContext('2d', { alpha: true });
     this.handleResize();
@@ -183,7 +184,7 @@ export class MouseParticleTrailController {
 
   bindInteractiveHover() {
     const interactiveTargets = document.querySelectorAll(
-      '#hero-primary-cta, #hero-secondary-cta, #header-inquire-btn, .btn-primary, .ugc-card, .gallery-card, .phone-reel-card, .image-stack-card'
+      '#hero-primary-cta, #hero-secondary-cta, #header-inquire-btn, .btn-primary'
     );
 
     interactiveTargets.forEach((target) => {
@@ -192,8 +193,8 @@ export class MouseParticleTrailController {
         const rect = target.getBoundingClientRect();
         const x = e.clientX || (rect.left + rect.width / 2);
         const y = e.clientY || (rect.top + rect.height / 2);
-        // Emit subtle gentle dispersal (5-7 delicate micro-particles)
-        this.spawnDispersal(x, y, 6);
+        // Emit delicate micro-accent (2 faint pinpoint particles)
+        this.spawnDispersal(x, y, 2);
       };
 
       target.addEventListener('mouseenter', onMouseEnter, { passive: true });
@@ -213,8 +214,6 @@ export class MouseParticleTrailController {
       this.lastY = y;
       this.lastTime = now;
       this.accumulatedDist = 0;
-      this.spawnParticle(x, y, 0, 0, 1.0);
-      this.wakeLoop();
       return;
     }
 
@@ -223,67 +222,44 @@ export class MouseParticleTrailController {
     const dist = Math.hypot(dx, dy);
 
     // Filter out sub-pixel jitter
-    if (dist < 1.5) {
+    if (dist < 2) {
       return;
     }
 
     const dt = Math.max(1, now - this.lastTime);
-    const speed = dist / dt; // px per ms
+    const speed = dist / dt;
 
-    // Distance-driven emission:
-    // When moving slowly, spacing is ~14px; when moving fast, spacing is ~9px
-    const spacing = speed > 1.2 ? 9 : 14;
-    const steps = Math.min(10, Math.max(1, Math.floor(dist / spacing)));
+    this.accumulatedDist += dist;
 
-    // Direction angle of pointer movement
-    const moveAngle = Math.atan2(dy, dx);
+    // Distance-driven subtle emission: 1 tiny stardust mote per ~42px of pointer distance
+    if (this.accumulatedDist >= 42) {
+      this.accumulatedDist = 0;
+      const moveAngle = Math.atan2(dy, dx);
+      const lateralSpread = (Math.random() - 0.5) * 0.8;
+      const particleVelocity = 0.2 + Math.random() * 0.35;
 
-    for (let i = 1; i <= steps; i++) {
-      const t = i / steps;
-      // Interpolated position along actual cursor trajectory
-      const px = this.lastX + dx * t;
-      const py = this.lastY + dy * t;
+      const vx = Math.cos(moveAngle + lateralSpread) * particleVelocity;
+      const vy = Math.sin(moveAngle + lateralSpread) * particleVelocity - 0.05;
 
-      // Particles inherit slight directional velocity along the wake
-      // plus subtle randomized lateral deflection
-      const lateralSpread = (Math.random() - 0.5) * 1.4;
-      const particleVelocity = (0.35 + Math.random() * 0.75) * Math.min(1.8, 0.8 + speed * 0.35);
-
-      const vx = Math.cos(moveAngle + lateralSpread) * particleVelocity * 0.45;
-      const vy = Math.sin(moveAngle + lateralSpread) * particleVelocity * 0.45 - 0.12;
-
-      this.spawnParticle(px, py, vx, vy, speed);
+      this.spawnParticle(x, y, vx, vy, speed);
+      this.wakeLoop();
     }
 
     this.lastX = x;
     this.lastY = y;
     this.lastTime = now;
-
-    this.wakeLoop();
   }
 
   spawnParticle(x, y, vx, vy, pointerSpeed = 1.0) {
     if (this.particles.length >= this.options.maxParticles) {
-      // Recycle the oldest particle to keep array size bounded
       this.particles.shift();
     }
 
     const colorScheme = this.getRandomColor();
-    const isAmbient = Math.random() < 0.4;
-
-    // Small, elegant circular particles
-    // Ambient background motes are smaller and softer; core particles are slightly more defined
-    const baseRadius = isAmbient
-      ? 1.0 + Math.random() * 0.8
-      : 1.6 + Math.random() * 1.4;
-
-    const maxLife = isAmbient
-      ? 42 + Math.floor(Math.random() * 26) // ~0.7 - 1.1s
-      : 30 + Math.floor(Math.random() * 20); // ~0.5 - 0.8s
-
-    const targetOpacity = isAmbient
-      ? 0.45 + Math.random() * 0.25
-      : 0.75 + Math.random() * 0.22;
+    // Subtle, tiny pinpoint circular motes
+    const baseRadius = 0.75 + Math.random() * 0.5;
+    const maxLife = 18 + Math.floor(Math.random() * 8); // Fast dissipation (0.3s)
+    const targetOpacity = 0.32 + Math.random() * 0.16;
 
     this.particles.push({
       x,
@@ -293,35 +269,34 @@ export class MouseParticleTrailController {
       radius: baseRadius,
       initialRadius: baseRadius,
       color: colorScheme,
-      isAmbient,
+      isAmbient: true,
       opacity: 0,
       targetOpacity,
       age: 0,
       maxLife,
-      // Subtle natural drift variation & fluid turbulence
-      driftX: (Math.random() - 0.5) * 0.04,
-      driftY: -0.018 - Math.random() * 0.025, // Gentle upward float
+      driftX: (Math.random() - 0.5) * 0.02,
+      driftY: -0.015,
       turbAngle: Math.random() * Math.PI * 2,
-      turbSpeed: 0.06 + Math.random() * 0.08,
-      turbAmp: 0.18 + Math.random() * 0.25,
+      turbSpeed: 0.05,
+      turbAmp: 0.1,
     });
   }
 
-  spawnDispersal(x, y, count = 6) {
+  spawnDispersal(x, y, count = 2) {
     const available = this.options.maxParticles - this.particles.length;
     const total = Math.min(count, Math.max(0, available));
     if (total <= 0) return;
 
     for (let i = 0; i < total; i++) {
       const colorScheme = this.getRandomColor();
-      const angle = (i / total) * Math.PI * 2 + (Math.random() - 0.5) * 0.6;
-      const speed = 0.6 + Math.random() * 1.4;
+      const angle = (i / total) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+      const speed = 0.3 + Math.random() * 0.4;
 
       const vx = Math.cos(angle) * speed;
-      const vy = Math.sin(angle) * speed - 0.1;
+      const vy = Math.sin(angle) * speed - 0.05;
 
-      const baseRadius = 1.4 + Math.random() * 1.2;
-      const maxLife = 32 + Math.floor(Math.random() * 18);
+      const baseRadius = 0.75 + Math.random() * 0.4;
+      const maxLife = 16 + Math.floor(Math.random() * 6);
 
       this.particles.push({
         x: x + (Math.random() - 0.5) * 4,
@@ -333,14 +308,14 @@ export class MouseParticleTrailController {
         color: colorScheme,
         isAmbient: false,
         opacity: 0,
-        targetOpacity: 0.85,
+        targetOpacity: 0.35,
         age: 0,
         maxLife,
         driftX: 0,
-        driftY: -0.02,
+        driftY: -0.01,
         turbAngle: Math.random() * Math.PI * 2,
-        turbSpeed: 0.08,
-        turbAmp: 0.22,
+        turbSpeed: 0.05,
+        turbAmp: 0.1,
       });
     }
 
@@ -369,7 +344,6 @@ export class MouseParticleTrailController {
     this.ctx.clearRect(0, 0, this.width, this.height);
 
     if (this.particles.length === 0) {
-      // Loop can safely sleep when no particles are active
       this.isRunning = false;
       return;
     }
@@ -382,34 +356,29 @@ export class MouseParticleTrailController {
       p.age++;
 
       if (p.age >= p.maxLife) {
-        continue; // Expired, skip from remaining
+        continue;
       }
 
-      // Physics update: apply velocity + drift + natural sinusoidal turbulence
       p.turbAngle += p.turbSpeed;
       p.x += p.vx + p.driftX + Math.sin(p.turbAngle) * p.turbAmp;
       p.y += p.vy + p.driftY;
 
-      // Smooth aerodynamic drag friction
-      p.vx *= 0.932;
-      p.vy *= 0.932;
+      p.vx *= 0.92;
+      p.vy *= 0.92;
 
-      const progress = p.age / p.maxLife; // 0.0 to 1.0
+      const progress = p.age / p.maxLife;
 
-      // Smooth opacity envelope:
-      // Fast fade-in in first 10% of life, then silky cubic fade-out
       let currentAlpha;
-      if (progress < 0.12) {
-        currentAlpha = (progress / 0.12) * p.targetOpacity;
+      if (progress < 0.15) {
+        currentAlpha = (progress / 0.15) * p.targetOpacity;
       } else {
-        const fadeProgress = (progress - 0.12) / 0.88;
-        currentAlpha = p.targetOpacity * Math.pow(1 - fadeProgress, 1.4);
+        const fadeProgress = (progress - 0.15) / 0.85;
+        currentAlpha = p.targetOpacity * Math.pow(1 - fadeProgress, 1.3);
       }
 
-      // Gentle diameter dissipation
-      const currentRadius = Math.max(0.4, p.initialRadius * (1 - progress * 0.4));
+      const currentRadius = Math.max(0.3, p.initialRadius * (1 - progress * 0.3));
 
-      if (currentAlpha > 0.01 && currentRadius > 0.3) {
+      if (currentAlpha > 0.01 && currentRadius > 0.2) {
         this.drawCircularParticle(p, currentRadius, currentAlpha);
         remaining.push(p);
       }
@@ -417,7 +386,6 @@ export class MouseParticleTrailController {
 
     this.particles = remaining;
 
-    // Continue loop as long as particles remain
     if (this.particles.length > 0) {
       this.rafId = requestAnimationFrame(() => this.updateAndRender());
     } else {
@@ -426,25 +394,23 @@ export class MouseParticleTrailController {
   }
 
   /**
-   * High-Performance Pure Circular Particle Rendering
-   * - Avoids expensive shadowBlur or SVG symbols
-   * - Uses an ambient soft halo circle and an inner luminous core
+   * Refined Minimalist Circular Particle Rendering
    */
   drawCircularParticle(p, radius, alpha) {
     const ctx = this.ctx;
     const clampedAlpha = Math.min(1, Math.max(0, alpha));
 
-    // 1. Soft Ambient Halo (wider radius, gentle low opacity for atmospheric glow)
-    const haloRadius = radius * 2.2;
+    // 1. Soft subtle halo (very low opacity, no harsh glow)
+    const haloRadius = radius * 1.5;
     ctx.beginPath();
     ctx.arc(p.x, p.y, haloRadius, 0, Math.PI * 2);
-    ctx.fillStyle = p.color.halo + (clampedAlpha * 0.28).toFixed(3) + ')';
+    ctx.fillStyle = p.color.halo + (clampedAlpha * 0.12).toFixed(3) + ')';
     ctx.fill();
 
-    // 2. Luminous Micro Core (sharp, focused circular particle)
+    // 2. Focused micro-mote
     ctx.beginPath();
     ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
-    ctx.fillStyle = p.color.core + clampedAlpha.toFixed(3) + ')';
+    ctx.fillStyle = p.color.core + (clampedAlpha * 0.65).toFixed(3) + ')';
     ctx.fill();
   }
 

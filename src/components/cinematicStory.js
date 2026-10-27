@@ -273,12 +273,12 @@ export class CinematicStoryEngine {
       );
     }
 
-    // 8. Lead card on desktop arrives with subtle 3D perspective depth
-    if (leadCard && !this.isMobile) {
+    // 8. Lead card arrives with subtle fade-in and slight upward move (runs once, no persistent transforms)
+    if (leadCard) {
       openTl.fromTo(
         leadCard,
-        { x: 38, opacity: 0, rotationY: -3.5, transformPerspective: 1200 },
-        { x: 0, opacity: 1, rotationY: 0, duration: 0.9, ease: 'power3.out' },
+        { y: 14, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.75, ease: 'power2.out' },
         0.3
       );
     }
@@ -395,20 +395,6 @@ export class CinematicStoryEngine {
       );
     }
 
-    if (leadCard && !this.isMobile) {
-      heroTl.to(
-        leadCard,
-        {
-          y: -30,
-          rotationX: 2.0,
-          rotationY: -2.0,
-          transformPerspective: 1100,
-          ease: 'none',
-        },
-        0
-      );
-    }
-
     if (specsBar) {
       heroTl.to(
         specsBar,
@@ -438,135 +424,34 @@ export class CinematicStoryEngine {
   }
 
   /**
-   * 3. SCENE 02: PREMIUM CENTERPIECE ANIMATION & SMARTPHONE REELS CAMERA DOLLY
-   * The smartphone mockup centerpiece dollies in from perspective depth into crisp focus,
-   * surrounded by floating light streaks, purple/lavender energy halo, and motes.
+   * 3. SCENE 02: COMMERCIAL REELS SHOWCASE (LIGHTWEIGHT ENTRANCE)
+   * Smooth, performant entrance reveal for 9:16 vertical video cards.
+   * Zero scroll-scrubbing overhead, preserving buttery natural page scrolling.
    */
   setupScene2ReelsTimeline() {
     const sliderSection = document.getElementById('product-slider');
     if (!sliderSection) return;
 
-    const phoneWrap = sliderSection.querySelector('.reels-phone-showcase-wrap') ||
-      sliderSection.querySelector('#product-slider-container');
-    const frame = sliderSection.querySelector('.smartphone-device-frame');
-    const header = sliderSection.querySelector('.section-header-compact');
-    const auraStage = sliderSection.querySelector('.centerpiece-aura-stage');
-    const energyHalo = sliderSection.querySelector('.centerpiece-energy-halo');
-    const streaks = sliderSection.querySelectorAll('.centerpiece-light-streaks .streak');
-    const motes = sliderSection.querySelectorAll('.centerpiece-floating-motes .mote');
+    const cards = sliderSection.querySelectorAll('.reel-card');
+    if (!cards.length) return;
 
-    if (!phoneWrap) return;
-
-    const reelsTl = gsap.timeline({
-      scrollTrigger: {
-        trigger: sliderSection,
-        start: 'top 85%',
-        end: 'bottom 15%',
-        scrub: 0.7,
-        invalidateOnRefresh: true,
-      },
-    });
-
-    // Header subtle upward mask glide
-    if (header) {
-      reelsTl.fromTo(
-        header,
-        { y: 25, opacity: 0.8 },
-        { y: 0, opacity: 1, duration: 0.35, ease: 'power2.out' },
-        0
-      );
-    }
-
-    // Centerpiece Smartphone Dolly-In, 3D Scale & Rotation
-    if (!this.isMobile && frame) {
-      reelsTl.fromTo(
-        frame,
-        {
-          scale: 0.88,
-          rotationX: 8,
-          rotationY: -4,
-          y: 75,
-          transformPerspective: 1400,
+    // Performant one-time stagger reveal (triggers once, zero continuous CPU scrub)
+    gsap.fromTo(
+      cards,
+      { y: 25, opacity: 0 },
+      {
+        y: 0,
+        opacity: 1,
+        duration: 0.55,
+        stagger: 0.08,
+        ease: 'power2.out',
+        scrollTrigger: {
+          trigger: sliderSection,
+          start: 'top 85%',
+          once: true,
         },
-        {
-          scale: 1.05,
-          rotationX: 0,
-          rotationY: 0,
-          y: 0,
-          duration: 0.5,
-          ease: 'power2.out',
-        },
-        0.05
-      );
-
-      // Transition smoothly into Scene 03 as user continues scrolling
-      reelsTl.to(
-        frame,
-        {
-          scale: 0.97,
-          rotationX: -4,
-          rotationY: 3,
-          y: -35,
-          duration: 0.45,
-          ease: 'power1.in',
-        },
-        0.55
-      );
-    }
-
-    // Atmospheric Centerpiece Energy Halo scale & radiance
-    if (energyHalo) {
-      reelsTl.fromTo(
-        energyHalo,
-        { scale: 0.75, opacity: 0.4 },
-        { scale: 1.18, opacity: 0.95, duration: 0.5, ease: 'power2.out' },
-        0.05
-      );
-      reelsTl.to(
-        energyHalo,
-        { scale: 0.92, opacity: 0.5, duration: 0.45, ease: 'power1.in' },
-        0.55
-      );
-    }
-
-    // Anamorphic Light Streaks sweep across with scroll scrub
-    if (streaks.length) {
-      streaks.forEach((streak, i) => {
-        const dir = i % 2 === 0 ? 1 : -1;
-        reelsTl.fromTo(
-          streak,
-          { x: -50 * dir, opacity: 0.3 },
-          { x: 50 * dir, opacity: 0.85, duration: 0.5, ease: 'none' },
-          0.05
-        );
-      });
-    }
-
-    // Floating motes multiplane vertical drift
-    if (motes.length) {
-      motes.forEach((mote, i) => {
-        const driftDist = ((i % 3) + 1) * 30;
-        reelsTl.fromTo(
-          mote,
-          { y: driftDist },
-          { y: -driftDist, duration: 1.0, ease: 'none' },
-          0
-        );
-      });
-    }
-
-    // Inner reel media aperture depth settle
-    const reelImages = sliderSection.querySelectorAll('.reels-media-wrap img, .reel-slide-media img, .phone-screen-viewport img');
-    if (reelImages.length) {
-      reelsTl.fromTo(
-        reelImages,
-        { scale: 1.06 },
-        { scale: 1.0, ease: 'none', duration: 0.5 },
-        0.05
-      );
-    }
-
-    this.timelines.push(reelsTl);
+      }
+    );
   }
 
   /**
@@ -951,7 +836,6 @@ export class CinematicStoryEngine {
    */
   initInteractive3DTilt() {
     const cardSelectors = [
-      '.lead-card',
       '.ugc-card',
       '.gallery-card',
       '.testimonial-card',
@@ -979,9 +863,7 @@ export class CinematicStoryEngine {
       let targetTiltX = 0;
       let targetTiltY = 0;
 
-      const maxAngle = card.classList.contains('lead-card')
-        ? 3.5
-        : card.classList.contains('testimonial-card')
+      const maxAngle = card.classList.contains('testimonial-card')
         ? 3.0
         : 4.5;
 

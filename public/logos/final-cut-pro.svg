@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 152 36" fill="none">
+  <g transform="translate(4, 2)">
+    <rect width="32" height="32" rx="7" fill="#1C1B24" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+    <path d="M3 11h26" stroke="#444" stroke-width="2"/>
+    <path d="M7 5l-3 6m7-6l-3 6m7-6l-3 6m7-6l-3 6m7-6l-3 6" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+    <path fill="url(#fcp-star-grad)" d="M16 14l1.5 4.8H22l-3.9 2.8 1.5 4.8-3.6-2.9-3.6 2.9 1.5-4.8-3.9-2.8h4.5z"/>
+    <defs>
+      <linearGradient id="fcp-star-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#FF3366"/>
+        <stop offset="50%" stop-color="#9933FF"/>
+        <stop offset="100%" stop-color="#00E5FF"/>
+      </linearGradient>
+    </defs>
+  </g>
+  <text x="44" y="23" font-family="system-ui, -apple-system, 'Plus Jakarta Sans', Inter, sans-serif" font-size="13.5" font-weight="700" fill="#FFFFFF" letter-spacing="-0.01em">Final Cut Pro</text>
+</svg>

@@ -1,33 +1,47 @@
 /**
- * Premium Customer Testimonials Slider
- * --------------------------------------
+ * UGC STUDIO — PREMIUM SINGLE-CARD INFINITE TESTIMONIALS SLIDER
+ * ---------------------------------------------------------------
+ * Art-directed, luxury dark-themed customer review showcase.
+ * 
  * Features:
- * - Fluid horizontal carousel with smooth GPU-accelerated translate
- * - Multi-card desktop view (3 cards), tablet (2 cards), and mobile (1 card)
- * - Auto-slide with graceful pause-on-hover and pause-on-touch
- * - Touch & swipe navigation on mobile/tablet
- * - Interactive pagination dots and numerical counter (e.g. 01 / 06)
- * - Accessible prev/next arrow controls and keyboard support (← / →)
- * - Respects prefers-reduced-motion
+ * - One Testimonial at a Time: Refined, prominent editorial card with
+ *   generous typography, understated quotation glyph, and balanced hierarchy.
+ * - Subtle Entrance Animation: Combines vertical slide, opacity fade, and slight
+ *   scale transition with micro-staggered typography entrance.
+ * - Genuinely Seamless Infinite Loop:
+ *   - NEXT on final testimonial (Client 3) wraps smoothly to the first (Client 1).
+ *   - PREV on first testimonial (Client 1) wraps smoothly to the final (Client 3).
+ *   - ZERO gaps, ZERO visible jumps, ZERO flickering, and ZERO abrupt resets.
+ * - Subtle Autoplay (6.5s interval):
+ *   - Pauses gracefully on hover or keyboard focus.
+ *   - Pauses when the browser tab is hidden (document.visibilityState === 'hidden').
+ *   - Resumes seamlessly when visible and unhovered.
+ *   - Respects prefers-reduced-motion.
+ * - Discreet Progress Counter (01 / 03), accessible Prev/Next arrows,
+ *   and interactive pagination dots.
+ * - Touch & keyboard accessible (ArrowLeft / ArrowRight).
  */
 
 export class TestimonialsSlider {
   constructor(containerElement, testimonialsData = []) {
     this.container = containerElement;
-    this.testimonials = testimonialsData || [];
+    this.testimonials = Array.isArray(testimonialsData) && testimonialsData.length ? testimonialsData : [];
     this.currentIndex = 0;
-    this.visibleCards = 3;
-    this.maxIndex = 0;
+    this.isTransitioning = false;
     this.autoSlideTimer = null;
-    this.isInteracting = false;
+    this.autoSlideInterval = 6500; // 6.5 seconds comfortable reading interval
+    this.isHoveredOrFocused = false;
 
     // Touch gesture tracking
     this.touchStartX = 0;
     this.touchStartY = 0;
-    this.isSwiping = false;
 
     // Reduced motion preference
-    this.prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches;
+
+    this._cleanupFns = [];
 
     this.init();
   }
@@ -37,44 +51,54 @@ export class TestimonialsSlider {
 
     this.render();
     this.cacheElements();
-    this.calculateLayout();
     this.bindEvents();
-    this.updateView(false);
+    this.renderCardContent(0, 'init');
 
     if (!this.prefersReducedMotion) {
       this.startAutoSlide();
     }
   }
 
-  getVisibleCardsCount() {
-    const width = window.innerWidth;
-    if (width <= 680) return 1;
-    if (width <= 1024) return 2;
-    return 3;
-  }
-
   render() {
-    const cardsHtml = this.testimonials
-      .map((item, index) => this.renderCard(item, index))
+    const totalCount = this.testimonials.length;
+    const formattedTotal = String(totalCount).padStart(2, '0');
+
+    // Build pagination dots
+    const dotsHtml = this.testimonials
+      .map(
+        (_, i) => `
+        <button 
+          type="button" 
+          class="testim-dot ${i === 0 ? 'is-active' : ''}" 
+          data-dot-index="${i}"
+          role="tab"
+          aria-selected="${i === 0 ? 'true' : 'false'}"
+          aria-label="Go to testimonial ${i + 1}"
+        ></button>
+      `
+      )
       .join('');
 
     this.container.innerHTML = `
-      <div class="testimonials-slider-component" id="testimonials-slider-box">
-        <!-- Slider Header Navigation & Counter -->
-        <div class="testimonials-slider-controls-bar">
+      <div class="testimonials-single-showcase" id="testimonials-single-showcase">
+        <!-- Ambient Stage Aura Lighting -->
+        <div class="testim-ambient-aura" aria-hidden="true"></div>
+
+        <!-- Upper Controls Toolbar (Progress Counter & Navigation Arrows) -->
+        <div class="testimonials-top-bar">
           <div class="testimonials-counter-pill" aria-live="polite">
             <span class="counter-num active-num" id="testim-active-num">01</span>
             <span class="counter-sep">/</span>
-            <span class="counter-num total-num" id="testim-total-num">${String(this.testimonials.length).padStart(2, '0')}</span>
+            <span class="counter-num total-num" id="testim-total-num">${formattedTotal}</span>
           </div>
 
-          <div class="testimonials-arrows-wrap">
+          <div class="testimonials-nav-arrows" role="group" aria-label="Testimonial Navigation">
             <button 
               type="button" 
               class="testimonial-nav-arrow arrow-prev" 
               id="testim-prev-btn" 
               aria-label="Previous testimonial"
-              title="Previous review"
+              title="Previous testimonial"
             >
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polyline points="15 18 9 12 15 6"></polyline>
@@ -86,7 +110,7 @@ export class TestimonialsSlider {
               class="testimonial-nav-arrow arrow-next" 
               id="testim-next-btn" 
               aria-label="Next testimonial"
-              title="Next review"
+              title="Next testimonial"
             >
               <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <polyline points="9 18 15 12 9 6"></polyline>
@@ -95,274 +119,142 @@ export class TestimonialsSlider {
           </div>
         </div>
 
-        <!-- Carousel Viewport & Sliding Track -->
-        <div class="testimonials-slider-viewport" id="testim-viewport">
-          <div 
-            class="testimonials-slider-track" 
-            id="testim-track" 
-            role="region" 
-            aria-label="Customer Reviews Slider"
-            tabindex="0"
-          >
-            ${cardsHtml}
+        <!-- Single Primary Testimonial Stage Viewport -->
+        <div class="testimonial-single-viewport" id="testim-viewport">
+          <div class="testimonial-single-card-wrap" id="testim-card-wrap">
+            <!-- Dynamically populated by renderCardContent() -->
           </div>
         </div>
 
-        <!-- Bottom Pagination Dots -->
-        <div class="testimonials-dots-wrap" id="testim-dots" role="tablist" aria-label="Testimonial slides pagination">
-          <!-- Dynamically generated dots -->
-        </div>
-      </div>
-    `;
-  }
-
-  renderCard(item, index) {
-    const initials = item.initials || item.name.split(' ').map(n => n[0]).join('').slice(0, 2);
-
-    return `
-      <div 
-        class="testimonial-slide-item" 
-        data-slide-index="${index}" 
-        role="group" 
-        aria-roledescription="slide" 
-        aria-label="Review ${index + 1} of ${this.testimonials.length} from ${item.name}"
-      >
-        <article class="testimonial-card">
-          <!-- Decorative Watermark Quote Glyph -->
-          <div class="testimonial-watermark" aria-hidden="true">“</div>
-
-          <blockquote class="testimonial-quote">
-            ${item.quote}
-          </blockquote>
-
-          <div class="testimonial-author">
-            <div class="author-avatar-badge">${initials}</div>
-            <div class="author-details">
-              <div class="author-top-line">
-                <strong class="author-name">— ${item.name}</strong>
-              </div>
-            </div>
+        <!-- Bottom Pagination Dots & Autoplay Bar -->
+        <div class="testimonials-bottom-bar">
+          <div class="testimonials-dots-wrap" id="testim-dots" role="tablist" aria-label="Testimonials pagination">
+            ${dotsHtml}
           </div>
-        </article>
+        </div>
       </div>
     `;
   }
 
   cacheElements() {
-    this.viewportEl = this.container.querySelector('#testim-viewport');
-    this.trackEl = this.container.querySelector('#testim-track');
-    this.activeNumEl = this.container.querySelector('#testim-active-num');
-    this.totalNumEl = this.container.querySelector('#testim-total-num');
-    this.prevBtn = this.container.querySelector('#testim-prev-btn');
-    this.nextBtn = this.container.querySelector('#testim-next-btn');
-    this.dotsContainer = this.container.querySelector('#testim-dots');
-    this.slides = Array.from(this.container.querySelectorAll('.testimonial-slide-item'));
+    this.cardWrap = this.container.querySelector('#testim-card-wrap');
+    this.counterCurrent = this.container.querySelector('#testim-active-num');
+    this.btnPrev = this.container.querySelector('#testim-prev-btn');
+    this.btnNext = this.container.querySelector('#testim-next-btn');
+    this.dots = Array.from(this.container.querySelectorAll('.testim-dot'));
+    this.componentEl = this.container.querySelector('#testimonials-single-showcase');
   }
 
-  calculateLayout() {
-    this.visibleCards = this.getVisibleCardsCount();
-    this.maxIndex = Math.max(0, this.testimonials.length - this.visibleCards);
+  getCardMarkup(item, index) {
+    const initials = item.initials || 'C' + (index + 1);
 
-    // Keep currentIndex within bounds
-    if (this.currentIndex > this.maxIndex) {
-      this.currentIndex = this.maxIndex;
-    }
+    return `
+      <article class="testimonial-single-card" data-index="${index}" role="group" aria-roledescription="slide" aria-label="Review ${index + 1} of ${this.testimonials.length} from ${item.name}">
+        <!-- Top Card Row: Minimalist Quote Mark & Star Rating -->
+        <div class="testimonial-card-header">
+          <div class="testimonial-quote-glyph" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="36" height="36" fill="currentColor">
+              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
+            </svg>
+          </div>
 
-    this.renderDots();
+          <div class="testimonial-verified-badge">
+            <span class="star-rating" aria-label="5 out of 5 stars">★★★★★</span>
+            <span class="verified-label">Verified Client Review</span>
+          </div>
+        </div>
+
+        <!-- Prominent Testimonial Text with micro-animation -->
+        <blockquote class="testimonial-single-quote">
+          “${item.quote}”
+        </blockquote>
+
+        <!-- Author Information Line with micro-animation -->
+        <div class="testimonial-single-author">
+          <div class="author-avatar-badge">${initials}</div>
+          <div class="author-details-column">
+            <strong class="author-name">— ${item.name}</strong>
+            <span class="author-role-caption">UGC Production Partner</span>
+          </div>
+        </div>
+      </article>
+    `;
   }
 
-  renderDots() {
-    if (!this.dotsContainer) return;
+  renderCardContent(targetIndex, direction = 'init') {
+    if (targetIndex < 0 || targetIndex >= this.testimonials.length) return;
 
-    // Number of steps
-    const totalDots = this.maxIndex + 1;
-    let dotsHtml = '';
+    const item = this.testimonials[targetIndex];
+    this.currentIndex = targetIndex;
 
-    for (let i = 0; i < totalDots; i++) {
-      dotsHtml += `
-        <button 
-          type="button" 
-          class="testim-dot ${i === this.currentIndex ? 'is-active' : ''}" 
-          data-dot-index="${i}" 
-          role="tab" 
-          aria-selected="${i === this.currentIndex}" 
-          aria-label="Go to slide group ${i + 1}"
-        ></button>
-      `;
+    // 1. Update counter pill
+    if (this.counterCurrent) {
+      this.counterCurrent.textContent = String(targetIndex + 1).padStart(2, '0');
     }
 
-    this.dotsContainer.innerHTML = dotsHtml;
-
-    // Bind dot clicks
-    const dots = this.dotsContainer.querySelectorAll('.testim-dot');
-    dots.forEach((dot) => {
-      dot.addEventListener('click', () => {
-        const idx = parseInt(dot.getAttribute('data-dot-index'), 10);
-        if (!isNaN(idx)) {
-          this.goTo(idx);
-        }
-      });
+    // 2. Update pagination dots
+    this.dots.forEach((dot, idx) => {
+      const isSelected = idx === targetIndex;
+      dot.classList.toggle('is-active', isSelected);
+      dot.setAttribute('aria-selected', isSelected ? 'true' : 'false');
     });
+
+    if (!this.cardWrap) return;
+
+    if (direction === 'init') {
+      this.cardWrap.innerHTML = this.getCardMarkup(item, targetIndex);
+      return;
+    }
+
+    // Subtle entrance animation combining vertical slide, opacity fade, and slight scale transition
+    const outgoingClass = direction === 'next' ? 'slide-out-next' : 'slide-out-prev';
+    const incomingClass = direction === 'next' ? 'slide-in-next' : 'slide-in-prev';
+
+    this.cardWrap.classList.remove('slide-in-next', 'slide-in-prev', 'slide-out-next', 'slide-out-prev');
+    this.cardWrap.classList.add(outgoingClass);
+
+    setTimeout(() => {
+      this.cardWrap.innerHTML = this.getCardMarkup(item, targetIndex);
+      this.cardWrap.classList.remove(outgoingClass);
+      this.cardWrap.classList.add(incomingClass);
+
+      setTimeout(() => {
+        this.cardWrap.classList.remove(incomingClass);
+      }, 340);
+    }, 180);
   }
 
-  bindEvents() {
-    // Next / Prev button clicks
-    this.prevBtn?.addEventListener('click', () => {
-      this.prev();
-      this.pauseAutoSlideTemporary();
-    });
+  goToSlide(targetIndex, direction = 'next') {
+    if (this.isTransitioning) return;
+    if (targetIndex === this.currentIndex) return;
 
-    this.nextBtn?.addEventListener('click', () => {
-      this.next();
-      this.pauseAutoSlideTemporary();
-    });
+    this.isTransitioning = true;
+    this.renderCardContent(targetIndex, direction);
 
-    // Keyboard navigation when track is focused
-    this.trackEl?.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        this.prev();
-        this.pauseAutoSlideTemporary();
-      } else if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        this.next();
-        this.pauseAutoSlideTemporary();
-      }
-    });
-
-    // Hover listeners to pause/resume auto-slide
-    const sliderBox = this.container.querySelector('#testimonials-slider-box');
-    if (sliderBox) {
-      sliderBox.addEventListener('mouseenter', () => this.stopAutoSlide());
-      sliderBox.addEventListener('mouseleave', () => {
-        if (!this.prefersReducedMotion) this.startAutoSlide();
-      });
-      sliderBox.addEventListener('focusin', () => this.stopAutoSlide());
-      sliderBox.addEventListener('focusout', () => {
-        if (!this.prefersReducedMotion) this.startAutoSlide();
-      });
-    }
-
-    // Touch / Swipe on Viewport
-    if (this.viewportEl) {
-      this.viewportEl.addEventListener(
-        'touchstart',
-        (e) => {
-          this.isSwiping = true;
-          this.stopAutoSlide();
-          this.touchStartX = e.touches[0].clientX;
-          this.touchStartY = e.touches[0].clientY;
-        },
-        { passive: true }
-      );
-
-      this.viewportEl.addEventListener(
-        'touchend',
-        (e) => {
-          if (!this.isSwiping) return;
-          this.isSwiping = false;
-
-          const touchEndX = e.changedTouches[0].clientX;
-          const touchEndY = e.changedTouches[0].clientY;
-          const diffX = this.touchStartX - touchEndX;
-          const diffY = this.touchStartY - touchEndY;
-
-          // Horizontal swipe > 40px
-          if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
-            if (diffX > 0) {
-              this.next();
-            } else {
-              this.prev();
-            }
-          }
-
-          if (!this.prefersReducedMotion) {
-            this.pauseAutoSlideTemporary();
-          }
-        },
-        { passive: true }
-      );
-    }
-
-    // Window resize debounced recalculation
-    let resizeTimer = null;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        this.calculateLayout();
-        this.updateView(false);
-      }, 150);
-    });
-  }
-
-  updateView(animated = true) {
-    if (!this.trackEl || !this.slides.length) return;
-
-    if (animated) {
-      this.trackEl.style.transition = 'transform 480ms cubic-bezier(0.16, 1, 0.3, 1)';
-    } else {
-      this.trackEl.style.transition = 'none';
-    }
-
-    // Calculate item width and gap
-    const firstSlide = this.slides[0];
-    const trackStyles = window.getComputedStyle(this.trackEl);
-    const gap = parseFloat(trackStyles.columnGap || trackStyles.gap || '24') || 24;
-    const slideWidth = firstSlide.offsetWidth;
-    const offset = this.currentIndex * (slideWidth + gap);
-
-    this.trackEl.style.transform = `translate3d(-${offset}px, 0, 0)`;
-
-    // Update Counter
-    if (this.activeNumEl) {
-      this.activeNumEl.textContent = String(this.currentIndex + 1).padStart(2, '0');
-    }
-
-    // Update Dots
-    if (this.dotsContainer) {
-      const dots = this.dotsContainer.querySelectorAll('.testim-dot');
-      dots.forEach((dot, idx) => {
-        const isActive = idx === this.currentIndex;
-        dot.classList.toggle('is-active', isActive);
-        dot.setAttribute('aria-selected', String(isActive));
-      });
-    }
-
-    // Update slide focus states
-    this.slides.forEach((slide, idx) => {
-      const isVisible = idx >= this.currentIndex && idx < this.currentIndex + this.visibleCards;
-      slide.setAttribute('aria-hidden', String(!isVisible));
-    });
+    setTimeout(() => {
+      this.isTransitioning = false;
+    }, 450);
   }
 
   next() {
-    if (this.currentIndex < this.maxIndex) {
-      this.currentIndex += 1;
-    } else {
-      this.currentIndex = 0; // Seamless loop to first
-    }
-    this.updateView(true);
+    // Seamless infinite wrap-around: 0 -> 1 -> 2 -> 0 -> 1...
+    const nextIdx = (this.currentIndex + 1) % this.testimonials.length;
+    this.goToSlide(nextIdx, 'next');
   }
 
   prev() {
-    if (this.currentIndex > 0) {
-      this.currentIndex -= 1;
-    } else {
-      this.currentIndex = this.maxIndex; // Seamless loop to last
-    }
-    this.updateView(true);
-  }
-
-  goTo(index) {
-    this.currentIndex = Math.max(0, Math.min(index, this.maxIndex));
-    this.updateView(true);
+    // Seamless infinite wrap-around: 2 <- 1 <- 0 <- 2...
+    const prevIdx = (this.currentIndex - 1 + this.testimonials.length) % this.testimonials.length;
+    this.goToSlide(prevIdx, 'prev');
   }
 
   startAutoSlide() {
     this.stopAutoSlide();
+    if (this.prefersReducedMotion) return;
+
     this.autoSlideTimer = setInterval(() => {
       this.next();
-    }, 5500);
+    }, this.autoSlideInterval);
   }
 
   stopAutoSlide() {
@@ -372,18 +264,143 @@ export class TestimonialsSlider {
     }
   }
 
-  pauseAutoSlideTemporary() {
-    this.stopAutoSlide();
-    clearTimeout(this._resumeTimeout);
-    this._resumeTimeout = setTimeout(() => {
-      if (!this.prefersReducedMotion) {
+  bindEvents() {
+    // Navigation arrows
+    if (this.btnPrev) {
+      this.btnPrev.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.prev();
         this.startAutoSlide();
-      }
-    }, 4000);
+      });
+    }
+
+    if (this.btnNext) {
+      this.btnNext.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.next();
+        this.startAutoSlide();
+      });
+    }
+
+    // Pagination dots
+    this.dots.forEach((dot, idx) => {
+      dot.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (idx === this.currentIndex) return;
+        const direction = idx > this.currentIndex ? 'next' : 'prev';
+        this.goToSlide(idx, direction);
+        this.startAutoSlide();
+      });
+    });
+
+    // Pause on hover
+    if (this.componentEl) {
+      const onMouseEnter = () => {
+        this.isHoveredOrFocused = true;
+        this.stopAutoSlide();
+      };
+
+      const onMouseLeave = () => {
+        this.isHoveredOrFocused = false;
+        if (!this.prefersReducedMotion && !document.hidden) {
+          this.startAutoSlide();
+        }
+      };
+
+      this.componentEl.addEventListener('mouseenter', onMouseEnter);
+      this.componentEl.addEventListener('mouseleave', onMouseLeave);
+
+      // Pause on keyboard focus
+      const onFocusIn = () => {
+        this.isHoveredOrFocused = true;
+        this.stopAutoSlide();
+      };
+
+      const onFocusOut = () => {
+        this.isHoveredOrFocused = false;
+        if (!this.prefersReducedMotion && !document.hidden) {
+          this.startAutoSlide();
+        }
+      };
+
+      this.componentEl.addEventListener('focusin', onFocusIn);
+      this.componentEl.addEventListener('focusout', onFocusOut);
+
+      // Keyboard navigation (ArrowLeft / ArrowRight)
+      const onKeyDown = (e) => {
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          this.next();
+          this.startAutoSlide();
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          this.prev();
+          this.startAutoSlide();
+        }
+      };
+      this.componentEl.addEventListener('keydown', onKeyDown);
+
+      // Touch gesture support
+      const onTouchStart = (e) => {
+        if (e.touches.length === 1) {
+          this.touchStartX = e.touches[0].clientX;
+          this.touchStartY = e.touches[0].clientY;
+        }
+      };
+
+      const onTouchEnd = (e) => {
+        if (e.changedTouches.length === 1) {
+          const diffX = this.touchStartX - e.changedTouches[0].clientX;
+          const diffY = this.touchStartY - e.changedTouches[0].clientY;
+
+          if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY) * 1.3) {
+            if (diffX > 0) {
+              this.next();
+            } else {
+              this.prev();
+            }
+            this.startAutoSlide();
+          }
+        }
+      };
+
+      this.componentEl.addEventListener('touchstart', onTouchStart, { passive: true });
+      this.componentEl.addEventListener('touchend', onTouchEnd, { passive: true });
+
+      // Tab visibility change listener: pause autoplay when tab is hidden, resume when visible
+      const onVisibilityChange = () => {
+        if (document.hidden) {
+          this.stopAutoSlide();
+        } else if (!this.isHoveredOrFocused && !this.prefersReducedMotion) {
+          this.startAutoSlide();
+        }
+      };
+      document.addEventListener('visibilitychange', onVisibilityChange);
+
+      this._cleanupFns.push(() => {
+        this.componentEl.removeEventListener('mouseenter', onMouseEnter);
+        this.componentEl.removeEventListener('mouseleave', onMouseLeave);
+        this.componentEl.removeEventListener('focusin', onFocusIn);
+        this.componentEl.removeEventListener('focusout', onFocusOut);
+        this.componentEl.removeEventListener('keydown', onKeyDown);
+        this.componentEl.removeEventListener('touchstart', onTouchStart);
+        this.componentEl.removeEventListener('touchend', onTouchEnd);
+        document.removeEventListener('visibilitychange', onVisibilityChange);
+      });
+    }
   }
 
   destroy() {
     this.stopAutoSlide();
-    clearTimeout(this._resumeTimeout);
+    this._cleanupFns.forEach((fn) => {
+      try {
+        fn();
+      } catch (err) {}
+    });
+    this._cleanupFns = [];
+
+    if (this.container) {
+      this.container.innerHTML = '';
+    }
   }
 }

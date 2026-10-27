@@ -47,7 +47,7 @@ export class MouseInteractionsController {
     }
 
     this.initCustomCursor();
-    this.initParticleTrail();
+    // Note: Particle trail disabled per specifications to maintain a refined, professional aesthetic
     this.initGlobalSpotlight();
     this.initCard3DTilt();
     this.initMagneticButtons();
@@ -56,11 +56,12 @@ export class MouseInteractionsController {
   }
 
   initParticleTrail() {
-    this.particleTrail = new MouseParticleTrailController();
+    // Particle trail disabled
   }
 
   /**
-   * 1. CUSTOM CURSOR
+   * 1. REFINED PREMIUM CUSTOM CURSOR
+   * Elegant center dot with 0ms lag + fluid follower ring with restrained easing.
    */
   initCustomCursor() {
     // Check if cursor already exists in DOM
@@ -74,16 +75,13 @@ export class MouseInteractionsController {
       this.cursorEl.setAttribute('aria-hidden', 'true');
       this.cursorEl.innerHTML = `
         <div class="cursor-dot"></div>
-        <div class="cursor-ring">
-          <span class="cursor-label"></span>
-        </div>
+        <div class="cursor-ring"></div>
       `;
       document.body.appendChild(this.cursorEl);
     }
 
     this.dotEl = this.cursorEl.querySelector('.cursor-dot');
     this.ringEl = this.cursorEl.querySelector('.cursor-ring');
-    this.labelEl = this.cursorEl.querySelector('.cursor-label');
 
     const onMouseMove = (e) => {
       this.mouseX = e.clientX;
@@ -111,16 +109,28 @@ export class MouseInteractionsController {
       this.updateCursorContext(e.target);
     };
 
+    const onMouseDown = () => {
+      this.cursorEl.classList.add('is-clicking');
+    };
+
+    const onMouseUp = () => {
+      this.cursorEl.classList.remove('is-clicking');
+    };
+
     window.addEventListener('mousemove', onMouseMove, { passive: true });
     document.addEventListener('mouseleave', onMouseLeaveDoc, { passive: true });
     document.addEventListener('mouseenter', onMouseEnterDoc, { passive: true });
     document.addEventListener('mouseover', onMouseOver, { passive: true });
+    window.addEventListener('mousedown', onMouseDown, { passive: true });
+    window.addEventListener('mouseup', onMouseUp, { passive: true });
 
     this.boundListeners.push(
       { target: window, type: 'mousemove', fn: onMouseMove },
       { target: document, type: 'mouseleave', fn: onMouseLeaveDoc },
       { target: document, type: 'mouseenter', fn: onMouseEnterDoc },
-      { target: document, type: 'mouseover', fn: onMouseOver }
+      { target: document, type: 'mouseover', fn: onMouseOver },
+      { target: window, type: 'mousedown', fn: onMouseDown },
+      { target: window, type: 'mouseup', fn: onMouseUp }
     );
 
     // Start RAF loop for silky smooth cursor tracking
@@ -130,80 +140,33 @@ export class MouseInteractionsController {
   updateCursorContext(target) {
     if (!target || !this.cursorEl) return;
 
-    const classesToRemove = [
-      'has-label',
-      'is-hover-link',
-      'is-hover-input',
-      'is-hover-reel',
-      'is-hover-stack',
-      'is-hover-gallery',
-      'is-hover-ugc',
-    ];
-    this.cursorEl.classList.remove(...classesToRemove);
+    this.cursorEl.classList.remove('is-hover-interactive', 'is-hover-input');
 
     // 1. Text Inputs: hide custom ring so native text caret is clean and unobstructed
     if (target.closest('input, textarea, select, [contenteditable="true"]')) {
       this.cursorEl.classList.add('is-hover-input');
-      this.setCursorLabel('');
       return;
     }
 
-    // 2. Smartphone Reels Showcase
-    if (target.closest('.smartphone-device-frame, .smartphone-showcase-stage, .phone-screen-viewport')) {
-      this.cursorEl.classList.add('has-label', 'is-hover-reel');
-      this.setCursorLabel('VIEW REEL');
+    // 2. Interactive Elements: subtle enlargement and accent border
+    if (
+      target.closest(
+        'a, button, [role="button"], input[type="submit"], input[type="button"], .btn, .nav-link, .reel-thumb-card, .brand-logo-card, .testimonial-nav-arrow, .testim-dot, .faq-header, .ugc-card, .gallery-item, .contact-pill, .active-audio-btn, .active-play-overlay, .tab-btn, .chip-filter, .mobile-menu-toggle, .active-reel-stage, .reel-nav-arrow'
+      )
+    ) {
+      this.cursorEl.classList.add('is-hover-interactive');
       return;
-    }
-
-    // 3. About Image Stack
-    if (target.closest('.image-stack-wrapper, .image-stack-card, .stack-arrow')) {
-      this.cursorEl.classList.add('has-label', 'is-hover-stack');
-      this.setCursorLabel('DRAG');
-      return;
-    }
-
-    // 4. Curated Gallery
-    if (target.closest('.gallery-card')) {
-      this.cursorEl.classList.add('has-label', 'is-hover-gallery');
-      this.setCursorLabel('EXPLORE');
-      return;
-    }
-
-    // 5. UGC Video / Showcase Cards
-    if (target.closest('.ugc-card')) {
-      this.cursorEl.classList.add('has-label', 'is-hover-ugc');
-      this.setCursorLabel('WATCH');
-      return;
-    }
-
-    // 6. Clickable Buttons, Links, Badges, Tabs
-    if (target.closest('a, button, .btn, .contact-pill, .nav-link, .faq-item, .brand-logo-card, .reels-dot')) {
-      this.cursorEl.classList.add('is-hover-link');
-      this.setCursorLabel('');
-      return;
-    }
-
-    // Default neutral
-    this.setCursorLabel('');
-  }
-
-  setCursorLabel(text) {
-    if (!this.labelEl) return;
-    if (this.currentLabel !== text) {
-      this.currentLabel = text;
-      this.labelEl.textContent = text;
     }
   }
 
   startCursorLoop() {
     const loop = () => {
-      // Dot moves briskly, Ring follows with smooth damping easing
-      const dotFactor = 0.45;
-      const ringFactor = 0.16;
+      // Dot aligns directly with pointer (zero lag, extreme precision)
+      this.dotX = this.mouseX;
+      this.dotY = this.mouseY;
 
-      this.dotX += (this.mouseX - this.dotX) * dotFactor;
-      this.dotY += (this.mouseY - this.dotY) * dotFactor;
-
+      // Outer ring follows with restrained, smooth easing (lerp factor 0.22)
+      const ringFactor = 0.22;
       this.ringX += (this.mouseX - this.ringX) * ringFactor;
       this.ringY += (this.mouseY - this.ringY) * ringFactor;
 

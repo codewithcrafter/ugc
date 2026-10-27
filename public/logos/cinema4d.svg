@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 142 36" fill="none">
+  <g transform="translate(4, 2)">
+    <rect width="32" height="32" rx="7" fill="#001B52" stroke="#004BE4" stroke-width="1.8"/>
+    <!-- 3D C4D Isometric facets -->
+    <path fill="#2E75FF" d="M16 6l9 5.2-9 5.2-9-5.2 9-5.2z"/>
+    <path fill="#004BE4" d="M7 11.2l9 5.2v10.4l-9-5.2V11.2z"/>
+    <path fill="#0035A8" d="M25 11.2v10.4l-9 5.2V16.4l9-5.2z"/>
+    <circle cx="16" cy="16.4" r="2.2" fill="#FFFFFF"/>
+  </g>
+  <text x="44" y="23" font-family="system-ui, -apple-system, 'Plus Jakarta Sans', Inter, sans-serif" font-size="13.5" font-weight="700" fill="#FFFFFF" letter-spacing="-0.01em">Cinema 4D</text>
+</svg>

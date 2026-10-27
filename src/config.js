@@ -233,30 +233,30 @@ export const productConfig = {
   slider: [],
 
   about: {
-    headline: 'luxury in every frame',
+    headline: 'Luxury in Every Frame',
     paragraphs: [
       'We  create creative visuals for your that enhance your product features that help you to get more leads. From professional photoshoot to ugc video content . We focus on engaging video editing , and brand identity .',
       'We are not limited to taking good pictures. We focus on every single detail that makes your brand different from others; we provide you best photoshoot . we create visual that feel premium and luxurious',
     ],
     specs: [
       {
-        num: '1',
-        title: 'natural   aesthetics',
+        num: '01',
+        title: 'Natural Aesthetics',
         desc: 'We use soft lighting at better angles so that your product look aesthetic and highlighted . At UGC studio , our team understand the beauty of natural aesthetic . We create the photoshoot and content that makes  your product look premium . ',
       },
       {
-        num: '2',
-        title: 'Expert team',
+        num: '02',
+        title: 'Expert Team',
         desc: 'We create photoshoots that  improve their appearance. Our team is well trained in lighting , camera angle , background and editing .  we  provide you best ugc  photoshoot  in Delhi so that you can reach to  quality customers',
       },
       {
-        num: '3',
-        title: 'campaign creative',
+        num: '03',
+        title: 'Campaign Creative',
         desc: 'We create engaging ugc content , professional photos, creative ad visuals. Everything is created according to brand identity and needs , so that it looks visually consistent and attention grabbing.',
       },
       {
-        num: '4',
-        title: 'authentic ugc story telling',
+        num: '04',
+        title: 'Authentic UGC Storytelling',
         desc: 'We create unique content for ugc , so that your product keep recognizable and remarkable. our team understand that every content has its own importance . so we create the best ugc content that help your brand to reach quality customers',
       },
     ],
@@ -297,16 +297,18 @@ export const productConfig = {
 
   brandWall: {
     logos: [
-      { name: 'Spotify', logoSrc: '/logos/spotify.svg' },
-      { name: 'Apple', logoSrc: '/logos/apple.svg' },
-      { name: 'Vite', logoSrc: '/logos/vite.svg' },
-      { name: 'Figma', logoSrc: '/logos/figma.svg' },
-      { name: 'GitHub', logoSrc: '/logos/github.svg' },
-      { name: 'Google', logoSrc: '/logos/google.svg' },
-      { name: 'JavaScript', logoSrc: '/logos/javascript.svg' },
-      { name: 'Discord', logoSrc: '/logos/discord.svg' },
-      { name: 'Bluesky', logoSrc: '/logos/bluesky.svg' },
-      { name: 'X', logoSrc: '/logos/x.svg' },
+      { name: 'Premiere Pro', logoSrc: '/logos/premiere-pro.svg', brandColor: '#9999FF', brandGlow: 'rgba(153, 153, 255, 0.5)' },
+      { name: 'After Effects', logoSrc: '/logos/after-effects.svg', brandColor: '#B886FF', brandGlow: 'rgba(184, 134, 255, 0.5)' },
+      { name: 'DaVinci Resolve', logoSrc: '/logos/davinci-resolve.svg', brandColor: '#FF3B30', brandGlow: 'rgba(255, 59, 48, 0.5)' },
+      { name: 'Photoshop', logoSrc: '/logos/photoshop.svg', brandColor: '#31A8FF', brandGlow: 'rgba(49, 168, 255, 0.5)' },
+      { name: 'Illustrator', logoSrc: '/logos/illustrator.svg', brandColor: '#FF9A00', brandGlow: 'rgba(255, 154, 0, 0.5)' },
+      { name: 'Figma', logoSrc: '/logos/figma.svg', brandColor: '#F24E1E', brandGlow: 'rgba(242, 78, 30, 0.5)' },
+      { name: 'CapCut', logoSrc: '/logos/capcut.svg', brandColor: '#00E5FF', brandGlow: 'rgba(0, 229, 255, 0.5)' },
+      { name: 'Final Cut Pro', logoSrc: '/logos/final-cut-pro.svg', brandColor: '#AF52DE', brandGlow: 'rgba(175, 82, 222, 0.5)' },
+      { name: 'Blender', logoSrc: '/logos/blender.svg', brandColor: '#EA7600', brandGlow: 'rgba(234, 118, 0, 0.5)' },
+      { name: 'Canva', logoSrc: '/logos/canva.svg', brandColor: '#00C4CC', brandGlow: 'rgba(0, 196, 204, 0.5)' },
+      { name: 'Lightroom', logoSrc: '/logos/lightroom.svg', brandColor: '#31A8FF', brandGlow: 'rgba(49, 168, 255, 0.5)' },
+      { name: 'Cinema 4D', logoSrc: '/logos/cinema4d.svg', brandColor: '#004BE4', brandGlow: 'rgba(0, 75, 228, 0.5)' },
     ],
   },
 

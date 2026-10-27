@@ -112,24 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateProgress();
   }
 
-  // C. Video Preview Hover Interactions
-  if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-    const previewCards = document.querySelectorAll('.phone-reel-card');
-    previewCards.forEach((card) => {
-      const video = card.querySelector('video');
-      if (!video) return;
-      card.addEventListener('mouseenter', () => {
-        if (video.paused) {
-          video.play().catch(() => {});
-        }
-      });
-      card.addEventListener('mouseleave', () => {
-        if (!video.paused && !card.classList.contains('is-sticky-playing')) {
-          video.pause();
-        }
-      });
-    });
-  }
+  // C. Video Preview Hover Interactions are handled directly by the ReelShowcaseController
 
 
   // 11. Initialize UGC Lightbox Modal

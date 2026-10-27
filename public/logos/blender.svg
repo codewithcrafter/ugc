@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 36" fill="none">
+  <g transform="translate(4, 2)">
+    <circle cx="16" cy="16" r="16" fill="#181824"/>
+    <circle cx="18" cy="18" r="9" fill="#EA7600"/>
+    <circle cx="18" cy="18" r="4.2" fill="#FFFFFF"/>
+    <circle cx="18" cy="18" r="2.8" fill="#265787"/>
+    <path d="M7 6l8 9M5 16l9 1M11 25l6-4" stroke="#EA7600" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="42" y="23" font-family="system-ui, -apple-system, 'Plus Jakarta Sans', Inter, sans-serif" font-size="13.5" font-weight="700" fill="#FFFFFF" letter-spacing="-0.01em">Blender</text>
+</svg>

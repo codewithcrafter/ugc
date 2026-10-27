@@ -84,7 +84,6 @@ export class PhotographyMotionController {
    */
   initMouseReactiveCards() {
     const cardSelectors = [
-      '.lead-card',
       '.gallery-card',
       '.ugc-card',
       '.spec-card',
@@ -172,7 +171,7 @@ export class PhotographyMotionController {
    */
   initCinematicReveals() {
     const revealTargets = document.querySelectorAll(
-      '.section-hero, .hero-pitch, .lead-card, .section-header-compact, .ugc-card, .gallery-card, .testimonial-card, .spec-card, .faq-item, .brand-logo-card, .about-text-col, .image-stack-wrapper'
+      '.section-hero, .hero-pitch, .section-header-compact, .ugc-card, .gallery-card, .testimonial-card, .spec-card, .faq-item, .brand-logo-card, .about-text-col, .image-stack-wrapper'
     );
 
     if (this.prefersReducedMotion || !('IntersectionObserver' in window)) {

@@ -94,7 +94,6 @@ export class Motion3DController {
     const cardSelectors = [
       '#hero-media-card',
       '.hero-3d-composition',
-      '.lead-card',
       '.ugc-card',
       '.gallery-card',
       '.spec-card',
@@ -127,8 +126,6 @@ export class Motion3DController {
       // Maximum tilt angle: approximately 8 degrees as requested
       const maxTilt = card.classList.contains('hero-3d-composition') || card.id === 'hero-media-card'
         ? 8.0
-        : card.classList.contains('lead-card')
-        ? 6.5
         : card.classList.contains('ugc-card')
         ? 8.0
         : card.classList.contains('gallery-card')
