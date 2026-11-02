@@ -14,8 +14,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({ className = '' }) => {
     fullName: '',
     email: '',
     phone: '',
-    editionPreference: 'Flagship Travertine Edition',
-    consent: true,
+    message: '',
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof LeadFormData, string>>>({});
@@ -89,7 +88,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({ className = '' }) => {
         </h3>
 
         <p className="text-sm text-[#555260] leading-relaxed mb-4">
-          Your private allocation request for the <strong className="text-[#1A1918] font-semibold">{formData.editionPreference}</strong> has been logged. Our studio concierge will contact you within 2 business hours.
+          Your private allocation request  has been logged. Our studio concierge will contact you within 2 business hours.
         </p>
 
         {submissionResult.leadId && (
@@ -100,7 +99,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({ className = '' }) => {
 
         <div className="flex flex-col gap-2.5">
           <a
-            href={`https://wa.me/15557294820?text=Hello%20AURA%20Studio!%20My%20inquiry%20reference%20is%20${encodeURIComponent(submissionResult.leadId || '')}.%20I'd%20like%20to%20confirm%20my%20allocation.`}
+            href={`https://wa.me/919205499604?text=Hello%20AURA%20Studio!%20My%20inquiry%20reference%20is%20${encodeURIComponent(submissionResult.leadId || '')}.%20I'd%20like%20to%20confirm%20my%20allocation.`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-[#25D366] text-white font-heading text-sm font-semibold hover:bg-[#20ba59] transition-all shadow-md hover:shadow-lg"
@@ -214,7 +213,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({ className = '' }) => {
             name="phone"
             value={formData.phone}
             onChange={handleChange}
-            placeholder="+1 (555) 000-0000"
+            placeholder="+91 92054 99604"
             autoComplete="tel"
             required
             className={`w-full px-3.5 py-2.5 rounded-xl border text-sm transition-all outline-none bg-[#FFFCF8] text-[#1A1918] placeholder:text-[#827D90]/70 ${
@@ -230,44 +229,20 @@ export const LeadForm: React.FC<LeadFormProps> = ({ className = '' }) => {
           )}
         </div>
 
-        {/* Edition Preference */}
+        {/* Message */}
         <div>
-          <label htmlFor="lead-edition" className="block font-heading text-xs font-semibold text-[#1A1918] mb-1">
-            Preferred Acoustic Edition
+          <label htmlFor="lead-message" className="block font-heading text-xs font-semibold text-[#1A1918] mb-1">
+            Message <span className="text-[#827D90] font-normal">(Optional)</span>
           </label>
-          <select
-            id="lead-edition"
-            name="editionPreference"
-            value={formData.editionPreference}
-            onChange={handleChange}
-            className="w-full px-3.5 py-2.5 rounded-xl border border-[#7545F5]/20 text-sm bg-[#FFFCF8] text-[#1A1918] outline-none focus:border-[#7545F5] focus:ring-2 focus:ring-[#7545F5]/15"
-          >
-            <option value="Flagship Travertine Edition">Flagship Travertine Edition ($389)</option>
-            <option value="Matte Charcoal & Brass">Matte Charcoal & Solid Brass ($419)</option>
-            <option value="Dual-Sync Stereo Pair">Dual-Sync Stereo Pair (Numbered Batch)</option>
-            <option value="Architectural Custom Inquiry">Architectural / Trade Inquiry</option>
-          </select>
-        </div>
-
-        {/* Consent */}
-        <div className="pt-1">
-          <label className="flex items-start gap-2.5 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              name="consent"
-              checked={formData.consent}
-              onChange={handleChange}
-              className="mt-0.5 rounded border-[#7545F5]/30 text-[#7545F5] focus:ring-[#7545F5]/20 accent-[#7545F5]"
-            />
-            <span className="text-[11px] sm:text-xs text-[#555260] leading-snug">
-              I agree to receive allocation details and craftsmanship updates. We never share your details.
-            </span>
-          </label>
-          {errors.consent && (
-            <p className="text-xs text-red-500 mt-1" role="alert">
-              {errors.consent}
-            </p>
-          )}
+          <textarea
+            id="lead-message"
+            name="message"
+            value={formData.message || ''}
+            onChange={handleChange as any}
+            placeholder="Tell us about your brand, deliverables, or shooting requirements..."
+            rows={3}
+            className="w-full px-3.5 py-2.5 rounded-xl border border-[#7545F5]/20 text-sm bg-[#FFFCF8] text-[#1A1918] placeholder:text-[#827D90]/70 outline-none focus:border-[#7545F5] focus:ring-2 focus:ring-[#7545F5]/15"
+          />
         </div>
 
         {/* Submit Button */}

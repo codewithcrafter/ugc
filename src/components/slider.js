@@ -352,7 +352,7 @@ export class SmartphoneReelsFeed {
               <div class="phone-reels-header">
                 <div class="reels-header-left">
                   <span class="reels-app-logo">Reels</span>
-                  <span class="reels-community-badge">AURA Studio</span>
+                  <span class="reels-community-badge">MyUGC Video</span>
                 </div>
                 
                 <button 

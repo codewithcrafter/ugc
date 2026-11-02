@@ -19,7 +19,7 @@ import { HeadlineRotatorController } from './components/headlineRotator.js';
 import { CinematicStoryEngine } from './components/cinematicStory.js';
 import { ScrollRevealController } from './components/scrollReveal.js';
 import { FooterAmbientParticlesController } from './components/footerParticles.js';
-import { submitLead, CONFIGURED_API_ENDPOINT } from './services/leadService.js';
+import { submitLead } from './services/leadService.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Ensure page-loaded is active immediately so all UI elements are visible
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 1b. Initialize Cinematic Hero Rotating Headline
   new HeadlineRotatorController('hero-rotator-wrapper', {
     phrases: [
-      ' UGC Studio Where Your Brand Becomes Iconic.',
+      ' MyUGC Video Where Your Brand Becomes Iconic.',
       'CREATIVE UGC  CONTENT CREATION  ',
       'PRODUCT PHOTOSHOOT  AND CREATOR CASTING',
     ],
@@ -247,8 +247,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const inquirySubmitBtn = document.getElementById('inquiry-submit-btn');
   const inquiryStatusFeedback = document.getElementById('inquiry-status-feedback');
 
-  const openInquiryModal = () => {
+  const openInquiryModal = (sourceName = 'Inquiry Modal') => {
     if (inquiryModal) {
+      inquiryModal.dataset.source = sourceName;
       inquiryModal.removeAttribute('hidden');
       inquiryModal.classList.add('is-active');
       document.body.classList.add('modal-is-open');
@@ -273,15 +274,32 @@ document.addEventListener('DOMContentLoaded', () => {
   const headerInquireBtn = document.getElementById('header-inquire-btn');
   headerInquireBtn?.addEventListener('click', (e) => {
     e.preventDefault();
-    openInquiryModal();
+    openInquiryModal('Header Inquire Button');
   });
 
   // Also wire any CTA with class .btn-open-inquiry
   document.querySelectorAll('.btn-open-inquiry, [data-action="open-inquiry"]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
-      openInquiryModal();
+      openInquiryModal(btn.getAttribute('data-source') || 'Inquiry Modal CTA');
     });
+  });
+
+  // Global delegation: Every "Book a Photoshoot" CTA opens the inquiry modal
+  document.addEventListener('click', (e) => {
+    const target = e.target.closest('button, a');
+    if (!target || target.closest('.inquiry-modal-dialog')) return;
+
+    const text = (target.textContent || '').trim().toLowerCase();
+    if (text.includes('book a photoshoot')) {
+      e.preventDefault();
+      openInquiryModal('Photoshoot Popup');
+    }
+  });
+
+  // Also listen for the custom event dispatched by the chatbot "Book a Photoshoot" button
+  document.addEventListener('open-inquiry-modal', (e) => {
+    openInquiryModal(e.detail?.source || 'Chatbot Photoshoot Action');
   });
 
   closeInquiryBtn?.addEventListener('click', closeInquiryModal);
@@ -319,16 +337,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const nameInput = document.getElementById('inquiry-fullname');
       const emailInput = document.getElementById('inquiry-email');
       const phoneInput = document.getElementById('inquiry-phone');
-      const serviceInput = document.getElementById('inquiry-service');
-      const budgetInput = document.getElementById('inquiry-budget');
-      const detailsInput = document.getElementById('inquiry-details');
+      const messageInput = document.getElementById('inquiry-message');
+      const honeypotInput = document.getElementById('inquiry-hp');
 
       const fullName = (nameInput?.value || '').trim();
       const email = (emailInput?.value || '').trim();
       const phone = (phoneInput?.value || '').trim();
-      const service = serviceInput?.value || '';
-      const budget = budgetInput?.value || 'Unspecified';
-      const details = (detailsInput?.value || '').trim();
+      const message = (messageInput?.value || '').trim();
+      const honeypot = (honeypotInput?.value || '').trim();
+      const formSource = (inquiryModal && inquiryModal.dataset.source) || 'Photoshoot Popup';
 
       let hasErrors = false;
 
@@ -358,82 +375,56 @@ document.addEventListener('DOMContentLoaded', () => {
         hasErrors = true;
       }
 
-      // Validate Service
-      if (!service) {
-        serviceInput?.classList.add('has-error');
-        const err = document.getElementById('error-inquiry-service');
-        if (err) err.textContent = 'Please choose a required service.';
-        hasErrors = true;
-      }
+      // Message is optional — never causes error
 
       if (hasErrors) {
         return;
       }
 
-      // Submit state
+      // Submit state & duplicate submission prevention
       isSubmitting = true;
+      const inquiryBtnText = inquirySubmitBtn ? inquirySubmitBtn.querySelector('.btn-text') : null;
       if (inquirySubmitBtn) {
         inquirySubmitBtn.disabled = true;
-        inquirySubmitBtn.classList.add('is-loading');
+      }
+      if (inquiryBtnText) {
+        inquiryBtnText.textContent = 'Submitting...';
       }
 
-      const payload = {
-        fullName,
-        email,
-        phone,
-        service,
-        budget,
-        details,
-        submittedAt: new Date().toISOString(),
-        source: 'navbar_inquiry_popup',
-      };
-
       try {
-        let result = null;
-        if (CONFIGURED_API_ENDPOINT) {
-          result = await submitLead({
-            fullName,
-            email,
-            phone,
-            editionPreference: `${service} (${budget})`,
-            consent: true,
-          });
-        } else {
-          // Transparent simulation with audit storage
-          await new Promise((resolve) => setTimeout(resolve, 600));
-          const inquiryId = 'AURA-INQ-' + Date.now().toString(36).toUpperCase() + '-' + Math.floor(Math.random() * 899 + 100);
-          try {
-            const existing = JSON.parse(sessionStorage.getItem('aura_submitted_inquiries') || '[]');
-            existing.push({ id: inquiryId, ...payload });
-            sessionStorage.setItem('aura_submitted_inquiries', JSON.stringify(existing));
-          } catch (storageErr) {
-            // ignore
-          }
-          result = {
-            success: true,
-            inquiryId,
-            isSimulation: true,
-          };
-        }
+        // Send to central Google Sheets submission service
+        const result = await submitLead({
+          fullName,
+          email,
+          phone,
+          message,
+          formSource,
+          honeypot,
+        });
 
         if (result && result.success) {
           if (inquiryStatusFeedback) {
             inquiryStatusFeedback.className = 'inquiry-status-feedback is-success';
-            const refText = result.inquiryId || 'AURA-INQ';
+            const refText = result.leadId || 'MYUGC-INQ';
             inquiryStatusFeedback.innerHTML = `
-              <strong>Inquiry Validated & Recorded (Ref: ${refText})</strong><br>
-              Thank you, ${fullName}! Your production request has been logged. Our studio team reviews project briefs within 24 hours.<br>
+              <strong>Inquiry Received ✔ (Ref: ${refText})</strong><br>
+              Thank you, ${fullName}! Our team will review your photoshoot requirements.<br>
               <span style="font-size:0.8rem;opacity:0.9;display:block;margin-top:6px;">
-                Need instant availability confirmation? 
-                <a href="https://wa.me/15557294820?text=Hi%20AURA%20Studio!%20I%20just%20submitted%20inquiry%20${encodeURIComponent(refText)}%20for%20${encodeURIComponent(service)}." target="_blank" rel="noopener noreferrer" style="color:#C4A5FF;font-weight:600;text-decoration:underline;">
-                  Click here to message our team on WhatsApp →
+                Need an immediate response? 
+                <a href="https://wa.me/919205499604?text=Hi%20MyUGC%20Video!%20I%20just%20submitted%20inquiry%20${encodeURIComponent(refText)}." target="_blank" rel="noopener noreferrer" style="color:#C4A5FF;font-weight:600;text-decoration:underline;">
+                  Message us on WhatsApp →
                 </a>
               </span>
             `;
           }
+          // Only reset the form on confirmed success
           inquiryForm.reset();
         } else {
-          throw new Error(result?.error || 'Failed to submit inquiry.');
+          // Honest failure reporting - never display false success
+          if (inquiryStatusFeedback) {
+            inquiryStatusFeedback.className = 'inquiry-status-feedback is-error';
+            inquiryStatusFeedback.textContent = result?.error || 'Submission failed. Please check your connection or try again.';
+          }
         }
       } catch (err) {
         console.error('[InquiryModal] Error during inquiry submission:', err);
@@ -445,9 +436,21 @@ document.addEventListener('DOMContentLoaded', () => {
         isSubmitting = false;
         if (inquirySubmitBtn) {
           inquirySubmitBtn.disabled = false;
-          inquirySubmitBtn.classList.remove('is-loading');
+        }
+        if (inquiryBtnText) {
+          inquiryBtnText.textContent = 'Submit Inquiry';
         }
       }
+    });
+
+    // Real-time inline feedback to clear errors as user types
+    ['inquiry-fullname', 'inquiry-email', 'inquiry-phone'].forEach((id) => {
+      const input = document.getElementById(id);
+      input?.addEventListener('input', () => {
+        input.classList.remove('has-error');
+        const err = document.getElementById('error-' + id);
+        if (err) err.textContent = '';
+      });
     });
   }
 
@@ -544,6 +547,6 @@ document.addEventListener('DOMContentLoaded', () => {
   handleScrollState();
 
   console.info(
-    `[AURA Studio] Landing Page initialized successfully. Brand: ${productConfig.brand.name}.`
+    `[MyUGC Video] Landing Page initialized successfully. Brand: ${productConfig.brand.name}.`
   );
 });

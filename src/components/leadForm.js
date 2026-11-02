@@ -37,6 +37,12 @@ export class LeadFormController {
         </div>
 
         <form class="lead-form" id="lead-capture-form" novalidate>
+          <!-- Anti-Spam Honeypot Field (invisible to users, catches automated bots) -->
+          <div style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; overflow: hidden;" aria-hidden="true">
+            <label for="lead-hp">Leave this empty</label>
+            <input type="text" id="lead-hp" name="_hp_website" tabindex="-1" autocomplete="off" />
+          </div>
+
           <!-- Global Alert Banner -->
           <div class="form-alert" id="form-alert" role="alert" aria-live="assertive" style="display: none;"></div>
 
@@ -102,7 +108,7 @@ export class LeadFormController {
                 id="lead-phone" 
                 name="phone" 
                 class="form-input" 
-                placeholder="+1 (555) 000-0000" 
+                placeholder="+91 92054 99604" 
                 autocomplete="tel" 
                 required 
                 aria-required="true"
@@ -111,37 +117,20 @@ export class LeadFormController {
             <div class="field-error" id="error-phone" aria-live="polite"></div>
           </div>
 
-          <!-- Edition Preference (Optional) -->
-          <div class="form-group" id="group-edition">
-            <label for="lead-edition" class="form-label">Edition Preference</label>
-            <div class="select-wrapper">
-              <select id="lead-edition" name="editionPreference" class="form-select">
-                <option value="Full-Service UGC Video Shoot (5-10 Assets)">Full-Service UGC Video Shoot (5-10 Assets)</option>
-                <option value="Macro Beauty & Skincare Product Photography">Macro Beauty & Skincare Product Photography</option>
-                <option value="Fashion & Lifestyle UGC Creator Campaign">Fashion & Lifestyle UGC Creator Campaign</option>
-                <option value="Studio BTS & Social-First Editorial Batch">Studio BTS & Social-First Editorial Batch</option>
-                <option value="Custom Monthly Production Retainer">Custom Monthly Production Retainer</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Privacy Consent Checkbox -->
-          <div class="form-group checkbox-group" id="group-consent">
-            <label class="checkbox-label" for="lead-consent">
-              <input 
-                type="checkbox" 
-                id="lead-consent" 
-                name="consent" 
-                class="form-checkbox" 
-                required 
-                aria-required="true"
-              />
-              <span class="checkbox-custom" aria-hidden="true"></span>
-              <span class="checkbox-text">
-                I agree to be contacted with production proposals and rates. We respect your confidentiality.
-              </span>
+          <!-- Message (Optional) -->
+          <div class="form-group" id="group-message">
+            <label for="lead-message" class="form-label">
+              Message <span class="optional-label">(Optional)</span>
             </label>
-            <div class="field-error" id="error-consent" aria-live="polite"></div>
+            <div class="input-wrapper">
+              <textarea 
+                id="lead-message" 
+                name="message" 
+                class="form-input form-textarea" 
+                placeholder="Tell us about your brand, deliverables, shooting timeline, or creator requirements..." 
+                rows="3"
+              ></textarea>
+            </div>
           </div>
 
           <!-- Submit Button -->
@@ -150,12 +139,7 @@ export class LeadFormController {
             class="btn btn-primary btn-block btn-submit" 
             id="lead-submit-btn"
           >
-            <span class="btn-text">Request Production Details</span>
-            <span class="btn-spinner" aria-hidden="true" style="display: none;">
-              <svg class="spinner-svg" viewBox="0 0 24 24">
-                <circle class="spinner-path" cx="12" cy="12" r="10" fill="none" stroke-width="3"></circle>
-              </svg>
-            </span>
+            <span class="btn-text">Submit Inquiry</span>
           </button>
 
           <!-- Direct WhatsApp Note -->
@@ -184,20 +168,18 @@ export class LeadFormController {
     this.form = this.container.querySelector('#lead-capture-form');
     this.submitBtn = this.container.querySelector('#lead-submit-btn');
     this.btnText = this.container.querySelector('.btn-text');
-    this.btnSpinner = this.container.querySelector('.btn-spinner');
     this.alertBox = this.container.querySelector('#form-alert');
+    this.honeypotInput = this.container.querySelector('#lead-hp');
     this.inputs = {
       fullName: this.container.querySelector('#lead-fullname'),
       email: this.container.querySelector('#lead-email'),
       phone: this.container.querySelector('#lead-phone'),
-      editionPreference: this.container.querySelector('#lead-edition'),
-      consent: this.container.querySelector('#lead-consent'),
+      message: this.container.querySelector('#lead-message'),
     };
     this.errorContainers = {
       fullName: this.container.querySelector('#error-fullName'),
       email: this.container.querySelector('#error-email'),
       phone: this.container.querySelector('#error-phone'),
-      consent: this.container.querySelector('#error-consent'),
     };
   }
 
@@ -228,8 +210,9 @@ export class LeadFormController {
       fullName: this.inputs.fullName?.value || '',
       email: this.inputs.email?.value || '',
       phone: this.inputs.phone?.value || '',
-      editionPreference: this.inputs.editionPreference?.value || '',
-      consent: this.inputs.consent?.checked || false,
+      message: this.inputs.message?.value || '',
+      formSource: 'Hero Form',
+      honeypot: this.honeypotInput?.value || '',
     };
   }
 
@@ -300,14 +283,8 @@ export class LeadFormController {
       if (input) input.disabled = isSubmitting;
     });
 
-    if (this.btnText && this.btnSpinner) {
-      if (isSubmitting) {
-        this.btnText.textContent = 'Securing Allocation...';
-        this.btnSpinner.style.display = 'inline-flex';
-      } else {
-        this.btnText.textContent = 'Request Details';
-        this.btnSpinner.style.display = 'none';
-      }
+    if (this.btnText) {
+      this.btnText.textContent = isSubmitting ? 'Submitting...' : 'Submit Inquiry';
     }
   }
 
@@ -368,16 +345,12 @@ export class LeadFormController {
         </div>
 
         <h3 class="success-title">Inquiry Received</h3>
-        <p class="success-subtitle">Thank you, <strong>${this.escapeHtml(data.fullName)}</strong>. Our studio concierge has reserved your allocation request.</p>
+        <p class="success-subtitle">Thank you, <strong>${this.escapeHtml(data.fullName)}</strong>. Our team at MyUGC Video has received your request and will review your project brief.</p>
 
         <div class="success-summary-box">
           <div class="summary-row">
             <span class="summary-label">Reference ID</span>
             <span class="summary-value ref-id">${this.escapeHtml(leadId)}</span>
-          </div>
-          <div class="summary-row">
-            <span class="summary-label">Preferred Edition</span>
-            <span class="summary-value">${this.escapeHtml(data.editionPreference)}</span>
           </div>
           <div class="summary-row">
             <span class="summary-label">Confirmation To</span>
@@ -386,12 +359,12 @@ export class LeadFormController {
         </div>
 
         <p class="success-note">
-          We will contact you via email and phone shortly with production lead-times and private ordering links.
+          We will contact you via email and phone shortly with production timelines and bespoke details.
         </p>
 
         <div class="success-actions">
           <a 
-            href="https://wa.me/${contact.whatsappRaw}?text=${encodeURIComponent('Hello! My inquiry reference is ' + leadId + '. I would like to confirm my allocation.')}" 
+            href="https://wa.me/${contact.whatsappRaw}?text=${encodeURIComponent('Hello MyUGC Video! My inquiry reference is ' + leadId + '. I would like to discuss my shoot.')}" 
             target="_blank" 
             rel="noopener noreferrer" 
             class="btn btn-whatsapp btn-block"
@@ -399,7 +372,7 @@ export class LeadFormController {
             <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
               <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zm0 18.06c-1.49 0-2.94-.4-4.21-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.136 8.136 0 0 1-1.25-4.29c0-4.5 3.66-8.16 8.16-8.16 2.18 0 4.23.85 5.77 2.39a8.106 8.106 0 0 1 2.39 5.77c0 4.5-3.66 8.16-8.16 8.16z"></path>
             </svg>
-            <span>Priority WhatsApp Concierge</span>
+            <span>Priority WhatsApp Contact</span>
           </a>
 
           <button type="button" class="btn-text-link" id="reset-lead-form-btn">

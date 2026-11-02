@@ -1,5 +1,5 @@
 /**
- * UGC STUDIO — SEAMLESS INFINITE BRAND LOGO MARQUEE
+ * MyUGC Video — SEAMLESS INFINITE BRAND LOGO MARQUEE
  * --------------------------------------------------
  * Solves the infinite-loop boundary issue completely:
  * - Genuine Seamless Infinite Loop: The slider moves continuously in one direction.

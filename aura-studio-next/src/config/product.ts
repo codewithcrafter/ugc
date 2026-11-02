@@ -11,11 +11,11 @@ export const productConfig: ProductConfig = {
   },
 
   contact: {
-    whatsappRaw: '15557294820',
-    whatsappDisplay: '+1 (555) 729-4820',
+    whatsappRaw: '919205499604',
+    whatsappDisplay: '+91 92054 99604',
     whatsappPrefill: "Hi, I'm interested in your products and would like more information.",
-    phoneRaw: '+15557294820',
-    phoneDisplay: '+1 (555) 729-4820',
+    phoneRaw: '+919205499604',
+    phoneDisplay: '+91 92054 99604',
     email: 'inquiries@aurastudio.design',
     hours: 'Mon – Fri, 9am – 6pm EST',
     address: '142 Mercer Street, Soho, New York, NY 10012',
@@ -23,17 +23,17 @@ export const productConfig: ProductConfig = {
 
   contactWidget: {
     whatsapp: {
-      number: '15557294820',
-      displayNumber: '+1 (555) 729-4820',
+      number: '919205499604',
+      displayNumber: '+91 92054 99604',
       prefilledMessage: "Hi, I'm interested in your products and would like more information.",
       tooltip: 'WhatsApp',
       ariaLabel: 'Chat with us on WhatsApp (opens in new tab)',
     },
     phone: {
-      number: '+15557294820',
-      displayNumber: '+1 (555) 729-4820',
+      number: '+919205499604',
+      displayNumber: '+91 92054 99604',
       tooltip: 'Call Us',
-      ariaLabel: 'Call our team directly at +1 (555) 729-4820',
+      ariaLabel: 'Call our team directly at +91 92054 99604',
     },
     chatbot: {
       tooltip: 'Chat with Us',

@@ -186,8 +186,9 @@ export interface LeadFormData {
   fullName: string;
   email: string;
   phone: string;
-  editionPreference: string;
-  consent: boolean;
+  message?: string;
+  editionPreference?: string;
+  consent?: boolean;
 }
 
 export interface ValidationResult {

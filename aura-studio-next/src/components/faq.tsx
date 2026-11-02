@@ -13,7 +13,7 @@ export function Faq() {
     setOpenIndex(openIndex === index ? null : index);
   };
 
-  const waUrl = `https://wa.me/${contact.whatsappRaw}?text=${encodeURIComponent('Hello AURA Studio! I have a question before ordering.')}`;
+  const waUrl = `https://wa.me/${contact.whatsappRaw}?text=${encodeURIComponent('Hello MyUGC Video! I have a question before ordering.')}`;
 
   return (
     <section 

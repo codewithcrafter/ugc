@@ -66,7 +66,7 @@ export class CinematicStoryEngine {
     this.isInitialized = false;
 
     this.scenes = [
-      { id: 'hero', label: 'UGC STUDIO // MAKE YOUR BRAND ICONIC' },
+      { id: 'hero', label: 'MyUGC Video // MAKE YOUR BRAND ICONIC' },
       { id: 'product-slider', label: 'Authentic & Scroll-Stopping Content' },
       { id: 'about', label: 'luxury in every frame' },
       { id: 'trust', label: 'BRANDS' },
@@ -317,7 +317,7 @@ export class CinematicStoryEngine {
       indicator.setAttribute('aria-hidden', 'true');
       indicator.innerHTML = `
         <span class="scene-rec-dot"></span>
-        <span class="scene-slate-text" id="scene-slate-text">AURA STUDIO // CREATIVE PRODUCTION</span>
+        <span class="scene-slate-text" id="scene-slate-text">MyUGC Video // CREATIVE PRODUCTION</span>
       `;
       document.body.appendChild(indicator);
     }

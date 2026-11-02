@@ -1,29 +1,40 @@
 /**
- * Lead Capture & Submission Service
- * ---------------------------------
- * This service handles lead validation, duplicate prevention, and submission.
+ * MyUGC Video — Centralized Lead Ingestion & Validation Service
+ * -------------------------------------------------------------
+ * Validates inquiries and securely delivers submissions to the
+ * central Google Apps Script Web App endpoint.
  *
- * INTEGRATION INSTRUCTIONS:
- * 1. To connect to your backend or CRM (e.g. HubSpot, Zapier, Webhook, Formspree),
- *    set `CONFIGURED_API_ENDPOINT` to your endpoint URL.
- * 2. If no endpoint is configured, this service operates in transparent client simulation
- *    mode, providing realistic network latency, logging to console, and persisting to
- *    sessionStorage so inquiries can be inspected during review.
+ * All website forms (Hero Form, Photoshoot Popup, Inquiry Modal,
+ * Chatbot Action) submit through this unified service.
+ *
+ * Core Features:
+ * - 4-field validation (Full Name, Email Address, Phone Number, Optional Message).
+ * - Honeypot spam defense.
+ * - Anti-duplicate submission protection.
+ * - Simple POST CORS handling compatible with Google Apps Script 302 redirects.
+ * - Verified JSON response parsing (no false positives via opaque no-cors).
+ * - Clear error reporting if remote submission fails.
+ * - Transparent local simulation fallback when GOOGLE_SHEETS_WEB_APP_URL is unconfigured.
  */
 
-// Replace with your real webhook or backend endpoint (e.g. 'https://api.yourdomain.com/leads')
-export const CONFIGURED_API_ENDPOINT = null;
+import { GOOGLE_SHEETS_WEB_APP_URL } from '../config.js';
 
-// Validation helpers
+// Central configuration endpoint reference
+export const CONFIGURED_API_ENDPOINT = GOOGLE_SHEETS_WEB_APP_URL;
+
+/**
+ * Validates the standard 4 form fields
+ * @param {Object} formData
+ * @returns {{ isValid: boolean, errors: Record<string, string> }}
+ */
 export function validateLead(formData) {
   const errors = {};
 
   const fullName = (formData.fullName || '').trim();
   const email = (formData.email || '').trim();
   const phone = (formData.phone || '').trim();
-  const consent = Boolean(formData.consent);
 
-  // Validate Name
+  // 1. Validate Full Name (required, min 2 chars, letters and basic punctuation)
   if (!fullName) {
     errors.fullName = 'Please enter your full name.';
   } else if (fullName.length < 2) {
@@ -32,16 +43,15 @@ export function validateLead(formData) {
     errors.fullName = 'Please enter a valid name using letters and standard punctuation.';
   }
 
-  // Validate Email
+  // 2. Validate Email Address (required, standard RFC email pattern)
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
   if (!email) {
     errors.email = 'Please enter your email address.';
   } else if (!emailRegex.test(email)) {
-    errors.email = 'Please enter a valid email address (e.g., name@example.com).';
+    errors.email = 'Please enter a valid email address (e.g., name@brand.com).';
   }
 
-  // Validate Phone
-  // Allows optional '+', digits, spaces, parentheses, dashes, dots; requires 7 to 15 digits
+  // 3. Validate Phone Number (required, 7 to 15 digits)
   const phoneDigitsOnly = phone.replace(/\D/g, '');
   const phonePattern = /^[+]?[\d\s().-]{7,25}$/;
   if (!phone) {
@@ -50,10 +60,7 @@ export function validateLead(formData) {
     errors.phone = 'Please enter a valid phone number (7 to 15 digits).';
   }
 
-  // Validate Consent
-  if (!consent) {
-    errors.consent = 'Please confirm your consent to receive product details.';
-  }
+  // 4. Message is Optional — an empty message never invalidates the form.
 
   return {
     isValid: Object.keys(errors).length === 0,
@@ -62,11 +69,18 @@ export function validateLead(formData) {
 }
 
 /**
- * Submit lead payload
- * @param {Object} leadData - Form data object
- * @returns {Promise<{ success: boolean, leadId?: string, error?: string, data?: object }>}
+ * Submit inquiry to the central Google Apps Script endpoint
+ * @param {Object} leadData
+ * @param {string} leadData.fullName - Full Name *
+ * @param {string} leadData.email - Email Address *
+ * @param {string} leadData.phone - Phone Number *
+ * @param {string} [leadData.message] - Optional message
+ * @param {string} [leadData.formSource] - Origin identifier ("Hero Form", "Photoshoot Popup", etc.)
+ * @param {string} [leadData.honeypot] - Hidden anti-spam field
+ * @returns {Promise<{ success: boolean, leadId?: string, error?: string, fieldErrors?: object, isSimulation?: boolean }>}
  */
 export async function submitLead(leadData) {
+  // 1. Client-side field validation
   const validation = validateLead(leadData);
   if (!validation.isValid) {
     const firstErrorMessage = Object.values(validation.errors)[0];
@@ -77,74 +91,107 @@ export async function submitLead(leadData) {
     };
   }
 
+  // 2. Anti-Spam Honeypot Check
+  // If a bot filled out the hidden honeypot input, silently discard without hitting Google Sheets
+  const honeypot = (leadData.honeypot || leadData._hp_website || '').trim();
+  if (honeypot.length > 0) {
+    console.warn('[LeadService] Honeypot triggered; discarding spam submission.');
+    return {
+      success: true,
+      leadId: 'MYUGC-HP-' + Date.now().toString(36).toUpperCase(),
+    };
+  }
+
+  // 3. Prepare payload mapped to central spreadsheet columns:
+  // [Timestamp (backend), Full Name, Email Address, Phone Number, Message, Form Source, Page URL]
   const payload = {
     fullName: leadData.fullName.trim(),
     email: leadData.email.trim(),
     phone: leadData.phone.trim(),
-    editionPreference: leadData.editionPreference || 'Flagship Travertine Edition',
-    consent: Boolean(leadData.consent),
-    submittedAt: new Date().toISOString(),
-    sourceUrl: window.location.href,
-    userAgent: navigator.userAgent,
+    message: (leadData.message || leadData.details || '').trim(),
+    formSource: (leadData.formSource || leadData.source || 'Website Form').trim(),
+    pageUrl: (typeof window !== 'undefined' && window.location ? window.location.href : ''),
+    honeypot: '',
   };
 
-  // If a live backend endpoint is configured, send the HTTP POST request
-  if (CONFIGURED_API_ENDPOINT) {
+  const endpointUrl = (GOOGLE_SHEETS_WEB_APP_URL || CONFIGURED_API_ENDPOINT || '').trim();
+
+  // 4. Remote Submission to Google Apps Script
+  if (endpointUrl) {
     try {
-      const response = await fetch(CONFIGURED_API_ENDPOINT, {
+      /**
+       * Note on Google Apps Script CORS:
+       * Sending 'text/plain;charset=utf-8' with redirect: 'follow' performs a standard Simple POST.
+       * This avoids CORS preflight OPTIONS failures (which Google Apps Script does not support)
+       * and allows the browser to transparently follow Google's 302 redirect to script.googleusercontent.com,
+       * which returns Access-Control-Allow-Origin: * and the verified JSON response.
+       */
+      const response = await fetch(endpointUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
+          'Content-Type': 'text/plain;charset=utf-8',
         },
         body: JSON.stringify(payload),
+        redirect: 'follow',
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Server returned status ${response.status}: ${errorText || 'Unknown error'}`);
+        if (response.status === 401) {
+          throw new Error('Google Apps Script returned 401 Unauthorized. Please verify the Web App deployment is configured with "Execute as: Me" and "Who has access: Anyone".');
+        }
+        throw new Error(`Google Apps Script responded with HTTP status ${response.status}`);
       }
 
-      const result = await response.json().catch(() => ({}));
-      return {
-        success: true,
-        leadId: result.id || 'LEAD-' + Math.random().toString(36).substring(2, 9).toUpperCase(),
-        data: payload,
-      };
+      // Read real verified response from Google Apps Script
+      const result = await response.json();
+
+      if (result && result.status === 'success') {
+        return {
+          success: true,
+          leadId: result.leadId || 'MYUGC-' + Date.now().toString(36).toUpperCase(),
+          data: payload,
+          timestamp: result.timestamp,
+        };
+      } else {
+        throw new Error(result?.message || 'The Google Apps Script rejected the submission.');
+      }
     } catch (err) {
-      console.error('[LeadService] Remote submission failed:', err);
+      console.error('[LeadService] Google Sheets submission error:', err);
+      let errorDetail = err.message || 'Unable to record your inquiry.';
+      if (errorDetail === 'Failed to fetch' || errorDetail.includes('Failed to fetch')) {
+        errorDetail = 'Failed to fetch. Request blocked by Google: please verify your Apps Script Web App is deployed with "Execute as: Me" and "Who has access: Anyone".';
+      }
       return {
         success: false,
-        error: 'Unable to reach the server. Please check your connection or contact us directly on WhatsApp.',
+        error: `Submission failed: ${errorDetail}`,
       };
     }
   }
 
-  // Transparent simulation mode for local development & demonstration
-  // Simulates network latency (800ms) and stores in browser storage for auditability
-  await new Promise((resolve) => setTimeout(resolve, 800));
+  // 5. Transparent Simulation Fallback (When endpoint URL is not configured yet)
+  // Simulates realistic network round-trip and saves to sessionStorage for local developer auditing
+  await new Promise((resolve) => setTimeout(resolve, 600));
 
-  const leadId = 'AURA-' + Date.now().toString(36).toUpperCase() + '-' + Math.floor(Math.random() * 899 + 100);
+  const leadId = 'MYUGC-' + Date.now().toString(36).toUpperCase() + '-' + Math.floor(Math.random() * 899 + 100);
 
-  // Store into sessionStorage for local developer inspection
   try {
-    const existing = JSON.parse(sessionStorage.getItem('aura_submitted_leads') || '[]');
-    existing.push({ id: leadId, ...payload });
-    sessionStorage.setItem('aura_submitted_leads', JSON.stringify(existing));
+    const existing = JSON.parse(sessionStorage.getItem('myugcvideo_submitted_leads') || '[]');
+    existing.push({ id: leadId, ...payload, submittedAt: new Date().toISOString() });
+    sessionStorage.setItem('myugcvideo_submitted_leads', JSON.stringify(existing));
   } catch (e) {
-    // Ignore storage quota errors
+    // Ignore storage quota limits
   }
 
-  console.info('[LeadService] Lead successfully processed in local integration mode:', {
+  console.info('[LeadService] Lead processed in local simulation mode (VITE_GOOGLE_SHEETS_WEB_APP_URL is not set):', {
     leadId,
     payload,
-    note: 'To send leads to your production CRM, set CONFIGURED_API_ENDPOINT in src/services/leadService.js',
+    setupGuide: 'Deploy google-apps-script/Code.gs as a Web App and add its URL to .env as VITE_GOOGLE_SHEETS_WEB_APP_URL',
   });
 
   return {
     success: true,
     leadId,
     data: payload,
-    isLocalSimulation: true,
+    isSimulation: true,
   };
 }

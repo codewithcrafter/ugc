@@ -506,7 +506,7 @@ export class GalleryLightboxController {
       preload.src = item.src;
       preload.onload = () => {
         this.imgEl.src = item.src;
-        this.imgEl.alt = item.alt || item.title || 'AURA Studio perspective';
+        this.imgEl.alt = item.alt || item.title || 'MyUGC Video perspective';
         requestAnimationFrame(() => {
           this.imgEl.style.opacity = '1';
           this.imgEl.style.transform = 'scale(1)';
@@ -515,7 +515,7 @@ export class GalleryLightboxController {
       // Fallback if cached immediately
       if (preload.complete) {
         this.imgEl.src = item.src;
-        this.imgEl.alt = item.alt || item.title || 'AURA Studio perspective';
+        this.imgEl.alt = item.alt || item.title || 'MyUGC Video perspective';
         requestAnimationFrame(() => {
           this.imgEl.style.opacity = '1';
           this.imgEl.style.transform = 'scale(1)';
@@ -525,7 +525,7 @@ export class GalleryLightboxController {
 
     // Text content
     if (this.titleEl) {
-      this.titleEl.textContent = item.title || 'AURA Studio Perspective';
+      this.titleEl.textContent = item.title || 'MyUGC Video Perspective';
     }
 
     if (this.descEl) {

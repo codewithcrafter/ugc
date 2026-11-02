@@ -65,8 +65,8 @@ export class UgcModalController {
             <div class="ugc-creator-profile">
               <div class="creator-avatar-badge">${(ugcItem.creator || ugcItem.title || 'U').charAt(0).toUpperCase()}</div>
               <div>
-                <h4 class="ugc-creator-name">${ugcItem.creator || ugcItem.title || 'UGC Studio'}</h4>
-                <p class="ugc-creator-handle">${ugcItem.handle ? `${ugcItem.handle} • ${ugcItem.role || 'Creator'}` : (ugcItem.role || 'UGC Studio Delhi')}</p>
+                <h4 class="ugc-creator-name">${ugcItem.creator || ugcItem.title || 'MyUGC Video'}</h4>
+                <p class="ugc-creator-handle">${ugcItem.handle ? `${ugcItem.handle} • ${ugcItem.role || 'Creator'}` : (ugcItem.role || 'MyUGC Video Delhi')}</p>
               </div>
             </div>
 

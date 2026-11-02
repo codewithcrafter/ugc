@@ -1,57 +1,55 @@
 /**
- * Floating Contact Toolbar, WhatsApp, Phone & Guided FAQ Chatbot
- * --------------------------------------------------------------
+ * Floating Contact Toolbar, WhatsApp, Phone & Direct-Contact Chatbot
+ * ------------------------------------------------------------------
  * Features:
  * - Fixed right-side contact toolbar with WhatsApp, Direct Call, and Chatbot buttons
  * - Recognizable SVG icons, accessible colors, and hover tooltips
  * - WhatsApp integration with prefilled introductory message
  * - Telephone call integration using tel: link
- * - Guided FAQ Chatbot panel with quick-action chips, typing indicator, and keyword handling
+ * - Direct-contact chatbot: shows contact options immediately, no loops
  * - Automatic welcome popup after ~4 seconds (once per session, dismissible)
- * - Fullscreen gallery lightbox synchronization (completely hides widget when lightbox is active)
+ * - Fullscreen gallery lightbox synchronization
  * - Keyboard accessible, focus management, and mobile safe-area compliance
  */
 
 export class FloatingContactController {
   constructor(config = {}) {
     this.config = config.contactWidget || {};
-    this.brand = config.brand || { name: 'AURA Studio' };
+    this.brand = config.brand || { name: 'MyUGC Video' };
 
     this.whatsappConfig = this.config.whatsapp || {
-      number: '15557294820',
-      displayNumber: '+1 (555) 729-4820',
-      prefilledMessage: "Hi, I'm interested in your products and would like more information.",
+      number: '919205499604',
+      displayNumber: '+91 92054 99604',
+      prefilledMessage: "Hi, I'm interested in working with MyUGC Video.",
       tooltip: 'WhatsApp',
       ariaLabel: 'Chat with us on WhatsApp',
     };
 
     this.phoneConfig = this.config.phone || {
-      number: '+15557294820',
-      displayNumber: '+1 (555) 729-4820',
+      number: '+919205499604',
+      displayNumber: '+91 92054 99604',
       tooltip: 'Call Us',
       ariaLabel: 'Call our team directly',
     };
 
     this.chatbotConfig = this.config.chatbot || {
       tooltip: 'Chat with Us',
-      ariaLabel: 'Open concierge chatbot assistant',
-      headerTitle: 'How can we help?',
-      headerSubtitle: 'AURA Concierge • Guided FAQ Assistant',
-      welcomeMessage:
-        "Welcome to AURA Studio! 👋 I'm your guided product concierge. How can we help you today?",
-      typingDelayMs: 650,
+      ariaLabel: 'Open chat assistant',
+      headerTitle: 'MyUGC Video',
+      headerSubtitle: 'UGC & Product Photography',
+      welcomeMessage: "Hi there! 👋 Welcome to MyUGC Video. How can we help your brand today?",
+      typingDelayMs: 500,
       quickReplies: [],
-      fallbackReply:
-        'Thank you for your inquiry! You can connect directly with our studio specialists via WhatsApp or call our line below.',
+      fallbackReply: 'Use the options below to connect with our team instantly.',
     };
 
     this.welcomeConfig = this.config.welcomePopup || {
       enabled: true,
       delayMs: 4000,
-      sessionStorageKey: 'aura_welcome_popup_dismissed',
-      badge: 'AURA Concierge',
-      message: 'Hi there! 👋 Need help choosing the right product?',
-      acceptText: 'Chat with Us',
+      sessionStorageKey: 'myugcvideo_welcome_popup_dismissed',
+      badge: 'MyUGC Video',
+      message: 'Looking for the best UGC video services or photoshoot in Delhi? Let\'s talk.',
+      acceptText: 'Inquire Now',
       dismissText: 'Maybe Later',
     };
 
@@ -59,6 +57,16 @@ export class FloatingContactController {
     this.hasChatBeenOpened = false;
     this.welcomeTimer = null;
     this.isTyping = false;
+
+    this.clickedQuickReplyIds = new Set();
+    try {
+      const saved = JSON.parse(sessionStorage.getItem('myugc_clicked_replies') || '[]');
+      if (Array.isArray(saved)) {
+        saved.forEach((id) => this.clickedQuickReplyIds.add(id));
+      }
+    } catch (e) {
+      // Ignore storage errors
+    }
 
     this.init();
   }
@@ -72,6 +80,23 @@ export class FloatingContactController {
   }
 
   /**
+   * Build WhatsApp & phone URLs
+   */
+  buildWaUrl() {
+    const cleanWaNumber = String(this.whatsappConfig.number).replace(/[^0-9]/g, '');
+    const encodedWaText = encodeURIComponent(this.whatsappConfig.prefilledMessage || '');
+    return `https://wa.me/${cleanWaNumber}?text=${encodedWaText}`;
+  }
+
+  buildPhoneUrl() {
+    return `tel:${this.phoneConfig.number}`;
+  }
+
+  buildEmailUrl() {
+    return 'mailto:contact@myugcvideo.in';
+  }
+
+  /**
    * Render Toolbar, Chat Panel, and Welcome Popup into DOM
    */
   renderElements() {
@@ -80,17 +105,12 @@ export class FloatingContactController {
     this.rootContainer.className = 'floating-contact-root';
     this.rootContainer.id = 'floating-contact-root';
 
-    // WhatsApp clean URL
-    const cleanWaNumber = String(this.whatsappConfig.number).replace(/[^0-9]/g, '');
-    const encodedWaText = encodeURIComponent(this.whatsappConfig.prefilledMessage || '');
-    const waUrl = `https://wa.me/${cleanWaNumber}?text=${encodedWaText}`;
-
-    // Phone URL
-    const phoneUrl = `tel:${this.phoneConfig.number}`;
+    const waUrl = this.buildWaUrl();
+    const phoneUrl = this.buildPhoneUrl();
 
     this.rootContainer.innerHTML = `
       <!-- FLOATING VERTICAL TOOLBAR -->
-      <nav class="floating-contact-toolbar" id="floating-contact-toolbar" aria-label="Quick Contact and Concierge Toolbar">
+      <nav class="floating-contact-toolbar" id="floating-contact-toolbar" aria-label="Quick Contact and Chatbot Toolbar">
         <!-- 1. WhatsApp Button -->
         <a 
           href="${waUrl}" 
@@ -155,7 +175,7 @@ export class FloatingContactController {
         class="floating-welcome-popup" 
         id="floating-welcome-popup" 
         role="region" 
-        aria-label="Welcome Concierge Message" 
+        aria-label="Welcome Message" 
         hidden
       >
         <button type="button" class="welcome-popup-close" id="welcome-popup-close" aria-label="Dismiss message">
@@ -166,11 +186,11 @@ export class FloatingContactController {
         </button>
         <div class="welcome-popup-header">
           <div class="welcome-avatar-wrap">
-            <div class="welcome-avatar">A</div>
+            <div class="welcome-avatar">M</div>
             <span class="welcome-status-ping" aria-hidden="true"></span>
           </div>
           <div class="welcome-header-text">
-            <span class="welcome-badge">${this.welcomeConfig.badge || 'AURA Concierge'}</span>
+            <span class="welcome-badge">${this.welcomeConfig.badge || 'MyUGC Video'}</span>
             <span class="welcome-status-label">Online</span>
           </div>
         </div>
@@ -185,7 +205,7 @@ export class FloatingContactController {
         </div>
       </aside>
 
-      <!-- GUIDED FAQ CHATBOT PANEL -->
+      <!-- DIRECT-CONTACT CHATBOT PANEL -->
       <section 
         class="floating-chat-panel" 
         id="floating-chat-panel" 
@@ -198,12 +218,12 @@ export class FloatingContactController {
         <header class="chat-panel-header">
           <div class="chat-header-info">
             <div class="chat-avatar-wrap">
-              <span class="chat-avatar">A</span>
+              <span class="chat-avatar">M</span>
               <span class="chat-online-indicator" aria-hidden="true"></span>
             </div>
             <div class="chat-title-group">
-              <h2 id="chat-panel-title" class="chat-header-title">${this.chatbotConfig.headerTitle || 'How can we help?'}</h2>
-              <p class="chat-header-subtitle">${this.chatbotConfig.headerSubtitle || 'AURA Concierge • Guided FAQ'}</p>
+              <h2 id="chat-panel-title" class="chat-header-title">${this.chatbotConfig.headerTitle || 'MyUGC Video'}</h2>
+              <p class="chat-header-subtitle">${this.chatbotConfig.headerSubtitle || 'UGC & Product Photography'}</p>
             </div>
           </div>
           <button type="button" class="chat-close-btn" id="chat-panel-close-btn" aria-label="Close Chat Window">
@@ -214,24 +234,13 @@ export class FloatingContactController {
           </button>
         </header>
 
-        <!-- Chat Conversation Messages -->
+        <!-- Chat Messages -->
         <div class="chat-messages-container" id="chat-messages-container" role="log" aria-live="polite">
-          <div class="chat-system-notice">
-            <span>Guided Concierge Assistant</span>
-          </div>
-
-          <!-- Initial Assistant Message -->
-          <div class="chat-message-row msg-assistant">
-            <div class="msg-avatar" aria-hidden="true">A</div>
-            <div class="msg-bubble">
-              <p>${this.chatbotConfig.welcomeMessage}</p>
-              <time class="msg-time">${this.formatCurrentTime()}</time>
-            </div>
-          </div>
+          <!-- Initial Welcome Message with contact options injected on open -->
         </div>
 
         <!-- Typing Indicator -->
-        <div class="chat-typing-indicator" id="chat-typing-indicator" aria-label="Assistant is typing" hidden>
+        <div class="chat-typing-indicator" id="chat-typing-indicator" aria-label="Typing" hidden>
           <div class="typing-bubble">
             <span class="dot"></span>
             <span class="dot"></span>
@@ -240,20 +249,28 @@ export class FloatingContactController {
         </div>
 
         <!-- Quick Action Chips -->
-        <div class="chat-quick-replies" id="chat-quick-replies" aria-label="Suggested quick actions">
-          <span class="quick-replies-label">Suggested topics:</span>
-          <div class="quick-chips-track">
-            ${(this.chatbotConfig.quickReplies || [])
-              .map(
-                (chip) => `
-              <button type="button" class="quick-chip-btn" data-reply-id="${chip.id}">
-                ${chip.label}
-              </button>
-            `
-              )
-              .join('')}
-          </div>
-        </div>
+        ${(() => {
+          const availableChips = (this.chatbotConfig.quickReplies || []).filter(
+            (chip) => !this.clickedQuickReplyIds.has(chip.id)
+          );
+          const isHidden = availableChips.length === 0;
+          return `
+            <div class="chat-quick-replies ${isHidden ? 'is-hidden' : ''}" id="chat-quick-replies" aria-label="Quick topics" ${isHidden ? 'hidden' : ''}>
+              <span class="quick-replies-label">Ask about:</span>
+              <div class="quick-chips-track">
+                ${availableChips
+                  .map(
+                    (chip) => `
+                  <button type="button" class="quick-chip-btn" data-reply-id="${chip.id}">
+                    ${chip.label}
+                  </button>
+                `
+                  )
+                  .join('')}
+              </div>
+            </div>
+          `;
+        })()}
 
         <!-- Message Input Form -->
         <footer class="chat-panel-footer">
@@ -275,7 +292,7 @@ export class FloatingContactController {
             </button>
           </form>
           <div class="chat-footer-disclaimer">
-            <span>Powered by AURA Concierge • Guided FAQ Mode</span>
+            <span>MyUGC Video — Delhi, India</span>
           </div>
         </footer>
       </section>
@@ -330,7 +347,7 @@ export class FloatingContactController {
       this.dismissWelcomePopup();
     });
 
-    // Dismiss welcome popup whenever user interacts with or focuses the lead form
+    // Dismiss welcome popup when lead form is focused
     const leadFormEl = document.getElementById('lead-form');
     if (leadFormEl) {
       leadFormEl.addEventListener('focusin', () => {
@@ -352,16 +369,29 @@ export class FloatingContactController {
     // 5. Quick Reply Chips
     this.quickRepliesTrack?.addEventListener('click', (e) => {
       const chipBtn = e.target.closest('.quick-chip-btn');
-      if (chipBtn) {
+      if (chipBtn && !chipBtn.disabled && !chipBtn.classList.contains('is-fading-out')) {
         const replyId = chipBtn.getAttribute('data-reply-id');
-        this.handleQuickReply(replyId, chipBtn.textContent.trim());
+        this.handleQuickReply(replyId, chipBtn.textContent.trim(), chipBtn);
       }
     });
 
-    // 6. Keyboard Shortcuts: Escape to close chat
+    // 6. Keyboard: Escape to close chat
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && this.isChatOpen) {
         this.closeChat();
+      }
+    });
+
+    // 7. Chat action buttons (delegated — for dynamically injected contact pills)
+    this.messagesContainer?.addEventListener('click', (e) => {
+      const bookBtn = e.target.closest('[data-chat-action="book-photoshoot"]');
+      if (bookBtn) {
+        this.closeChat();
+        // Open the inquiry modal with source metadata
+        const openEvent = new CustomEvent('open-inquiry-modal', {
+          detail: { source: 'Chatbot Photoshoot Action' },
+        });
+        document.dispatchEvent(openEvent);
       }
     });
   }
@@ -372,19 +402,14 @@ export class FloatingContactController {
   initWelcomePopup() {
     if (!this.welcomeConfig.enabled) return;
 
-    // Check if dismissed previously in this session
     const isDismissed = sessionStorage.getItem(this.welcomeConfig.sessionStorageKey);
-    if (isDismissed === 'true') {
-      return;
-    }
+    if (isDismissed === 'true') return;
 
     const delay = this.welcomeConfig.delayMs || 4000;
 
     this.welcomeTimer = setTimeout(() => {
-      // Do not display if chat is already opened, or if lightbox is open
       if (this.isChatOpen || this.hasChatBeenOpened) return;
       if (document.body.classList.contains('lightbox-is-open')) {
-        // Retry in 3 seconds if user was browsing lightbox
         this.welcomeTimer = setTimeout(() => {
           if (!this.isChatOpen && !document.body.classList.contains('lightbox-is-open')) {
             this.showWelcomePopup();
@@ -400,19 +425,15 @@ export class FloatingContactController {
   showWelcomePopup() {
     if (!this.welcomePopup) return;
 
-    // Do not show if user is actively focused on or hovering the lead capture form
     const leadFormEl = document.getElementById('lead-form');
     const activeEl = document.activeElement;
-    if (leadFormEl && activeEl && leadFormEl.contains(activeEl)) {
-      return;
-    }
+    if (leadFormEl && activeEl && leadFormEl.contains(activeEl)) return;
 
     this.welcomePopup.removeAttribute('hidden');
     this.welcomePopup.style.pointerEvents = 'auto';
-    void this.welcomePopup.offsetWidth; // Force reflow
+    void this.welcomePopup.offsetWidth;
     this.welcomePopup.classList.add('is-visible');
 
-    // Show pulse dot on chatbot button
     if (this.unreadDot) {
       this.unreadDot.classList.add('is-active');
     }
@@ -433,7 +454,7 @@ export class FloatingContactController {
   }
 
   /**
-   * Lightbox Observer: Hides floating contact widgets completely when fullscreen lightbox is open
+   * Lightbox Observer
    */
   initLightboxObserver() {
     const observer = new MutationObserver(() => {
@@ -465,15 +486,12 @@ export class FloatingContactController {
     this.isChatOpen = true;
     this.hasChatBeenOpened = true;
 
-    // Dismiss welcome popup if open
     this.dismissWelcomePopup();
 
-    // Remove unread dot
     if (this.unreadDot) {
       this.unreadDot.classList.remove('is-active');
     }
 
-    // Toggle button state
     this.chatbotToggleBtn.setAttribute('aria-expanded', 'true');
     this.chatbotToggleBtn.classList.add('is-active');
     if (this.chatIconBubble && this.chatIconClose) {
@@ -481,13 +499,25 @@ export class FloatingContactController {
       this.chatIconClose.style.display = 'flex';
     }
 
-    // Display panel
     this.chatPanel.removeAttribute('hidden');
     this.chatPanel.style.pointerEvents = 'auto';
     void this.chatPanel.offsetWidth;
     this.chatPanel.classList.add('is-open');
 
-    // Auto-focus input
+    // Show welcome message + contact options if first time opening
+    if (this.messagesContainer && this.messagesContainer.children.length === 0) {
+      this.renderWelcomeWithContactOptions();
+    }
+
+    // Ensure quick replies track is hidden if all chips have been clicked
+    if (this.quickRepliesTrack) {
+      const remaining = this.quickRepliesTrack.querySelectorAll('.quick-chip-btn:not(.is-fading-out)');
+      if (remaining.length === 0) {
+        this.quickRepliesTrack.classList.add('is-hidden');
+        this.quickRepliesTrack.setAttribute('hidden', '');
+      }
+    }
+
     setTimeout(() => {
       this.textInput?.focus();
       this.scrollToBottom();
@@ -499,7 +529,6 @@ export class FloatingContactController {
 
     this.isChatOpen = false;
 
-    // Toggle button state
     this.chatbotToggleBtn.setAttribute('aria-expanded', 'false');
     this.chatbotToggleBtn.classList.remove('is-active');
     if (this.chatIconBubble && this.chatIconClose) {
@@ -515,8 +544,58 @@ export class FloatingContactController {
       }
     }, 260);
 
-    // Return focus to toggle button
     this.chatbotToggleBtn.focus();
+  }
+
+  /**
+   * Render the welcome message with immediate contact options
+   */
+  renderWelcomeWithContactOptions() {
+    const waUrl = this.buildWaUrl();
+    const phoneUrl = this.buildPhoneUrl();
+    const emailUrl = this.buildEmailUrl();
+
+    const welcomeRow = document.createElement('div');
+    welcomeRow.className = 'chat-message-row msg-assistant';
+    welcomeRow.innerHTML = `
+      <div class="msg-avatar" aria-hidden="true">M</div>
+      <div class="msg-bubble">
+        <p>${this.chatbotConfig.welcomeMessage || 'Hi there! 👋 How can we help you today?'}</p>
+        <div class="msg-contact-actions">
+          <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="msg-action-pill pill-whatsapp">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
+              <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.04 14.69 2 12.04 2"/>
+            </svg>
+            <span>WhatsApp Us</span>
+          </a>
+          <a href="${phoneUrl}" class="msg-action-pill pill-phone">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
+            <span>Call Us</span>
+          </a>
+          <a href="${emailUrl}" class="msg-action-pill pill-email">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <span>Email Us</span>
+          </a>
+          <button type="button" class="msg-action-pill pill-book" data-chat-action="book-photoshoot">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span>Book a Photoshoot</span>
+          </button>
+        </div>
+        <time class="msg-time">${this.formatCurrentTime()}</time>
+      </div>
+    `;
+    this.messagesContainer.appendChild(welcomeRow);
+    this.scrollToBottom();
   }
 
   /**
@@ -527,7 +606,6 @@ export class FloatingContactController {
 
     const rawText = this.textInput.value.trim();
     if (!rawText) {
-      // Empty input visual shake
       this.textInput.classList.add('is-invalid');
       setTimeout(() => this.textInput.classList.remove('is-invalid'), 600);
       return;
@@ -535,121 +613,143 @@ export class FloatingContactController {
 
     this.textInput.value = '';
     this.appendUserMessage(rawText);
-
-    // Process reply
     this.processInquiry(rawText);
   }
 
-  handleQuickReply(replyId, label) {
+  handleQuickReply(replyId, label, chipBtn) {
     if (this.isTyping) return;
+
+    if (chipBtn) {
+      chipBtn.disabled = true;
+      chipBtn.classList.add('is-fading-out');
+
+      this.clickedQuickReplyIds.add(replyId);
+      try {
+        sessionStorage.setItem('myugc_clicked_replies', JSON.stringify([...this.clickedQuickReplyIds]));
+      } catch (e) {
+        // Ignore storage errors
+      }
+
+      setTimeout(() => {
+        chipBtn.remove();
+        if (this.quickRepliesTrack) {
+          const remaining = this.quickRepliesTrack.querySelectorAll('.quick-chip-btn:not(.is-fading-out)');
+          if (remaining.length === 0) {
+            this.quickRepliesTrack.classList.add('is-hidden');
+            this.quickRepliesTrack.setAttribute('hidden', '');
+          }
+        }
+      }, 200);
+    }
 
     this.appendUserMessage(label);
 
     const match = (this.chatbotConfig.quickReplies || []).find((q) => q.id === replyId);
     if (match) {
-      this.showAssistantTypingThenReply(match.reply, match.showActionButtons);
+      this.showAssistantTypingThenReply(match.reply, true);
     } else {
-      this.showAssistantTypingThenReply(this.chatbotConfig.fallbackReply);
+      this.showAssistantTypingThenReplyWithContact(this.chatbotConfig.fallbackReply);
     }
   }
 
   /**
-   * Rule-based Guided FAQ inquiry processor
-   * (Modular structure so an AI backend endpoint can be easily integrated later)
+   * Rule-based inquiry processor — always steers towards contact
    */
   async processInquiry(userText) {
     const textLower = userText.toLowerCase();
 
-    // 1. Pricing / Availability
+    // Services
+    if (
+      textLower.includes('service') ||
+      textLower.includes('ugc') ||
+      textLower.includes('video') ||
+      textLower.includes('photo') ||
+      textLower.includes('lifestyle') ||
+      textLower.includes('content') ||
+      textLower.includes('ad') ||
+      textLower.includes('reel')
+    ) {
+      const q = this.getQuickReply('services');
+      this.showAssistantTypingThenReplyWithContact(q ? q.reply : this.chatbotConfig.fallbackReply);
+      return;
+    }
+
+    // Pricing
     if (
       textLower.includes('price') ||
       textLower.includes('cost') ||
-      textLower.includes('buy') ||
-      textLower.includes('purchase') ||
-      textLower.includes('order') ||
-      textLower.includes('available') ||
-      textLower.includes('availability') ||
-      textLower.includes('edition')
+      textLower.includes('budget') ||
+      textLower.includes('rate') ||
+      textLower.includes('quote') ||
+      textLower.includes('package') ||
+      textLower.includes('pricing')
     ) {
-      const q = this.getQuickReply('pricing-availability');
-      this.showAssistantTypingThenReply(q ? q.reply : this.chatbotConfig.fallbackReply);
+      const q = this.getQuickReply('custom-quote');
+      this.showAssistantTypingThenReplyWithContact(q ? q.reply : this.chatbotConfig.fallbackReply);
       return;
     }
 
-    // 2. Product Information / Specs / Sound
+    // Timeline / turnaround
     if (
-      textLower.includes('product') ||
-      textLower.includes('spec') ||
-      textLower.includes('sound') ||
-      textLower.includes('battery') ||
-      textLower.includes('stone') ||
-      textLower.includes('brass') ||
-      textLower.includes('driver') ||
-      textLower.includes('bluetooth') ||
-      textLower.includes('size') ||
-      textLower.includes('weight')
+      textLower.includes('timeline') ||
+      textLower.includes('turnaround') ||
+      textLower.includes('time') ||
+      textLower.includes('how long') ||
+      textLower.includes('delivery') ||
+      textLower.includes('deadline')
     ) {
-      const q = this.getQuickReply('product-info');
-      this.showAssistantTypingThenReply(q ? q.reply : this.chatbotConfig.fallbackReply);
+      const q = this.getQuickReply('turnaround');
+      this.showAssistantTypingThenReplyWithContact(q ? q.reply : this.chatbotConfig.fallbackReply);
       return;
     }
 
-    // 3. Talk to Team / Human / Representative
+    // Contact / connect
     if (
-      textLower.includes('team') ||
-      textLower.includes('human') ||
-      textLower.includes('agent') ||
-      textLower.includes('person') ||
-      textLower.includes('representative') ||
-      textLower.includes('call') ||
-      textLower.includes('whatsapp') ||
       textLower.includes('contact') ||
-      textLower.includes('help')
+      textLower.includes('whatsapp') ||
+      textLower.includes('call') ||
+      textLower.includes('email') ||
+      textLower.includes('reach') ||
+      textLower.includes('talk') ||
+      textLower.includes('speak') ||
+      textLower.includes('human') ||
+      textLower.includes('help') ||
+      textLower.includes('book')
     ) {
-      const q = this.getQuickReply('talk-team');
-      this.showAssistantTypingThenReply(
-        q
-          ? q.reply
-          : 'Our studio team is available Mon–Fri, 9am–6pm EST. You can connect immediately with a human specialist via WhatsApp or direct phone call below:',
-        true
+      this.showAssistantTypingThenReplyWithContact(
+        'Here are the quickest ways to reach our team directly:'
       );
       return;
     }
 
-    // 4. Shipping / Warranty
-    if (
-      textLower.includes('ship') ||
-      textLower.includes('delivery') ||
-      textLower.includes('warranty') ||
-      textLower.includes('guarantee') ||
-      textLower.includes('return') ||
-      textLower.includes('package')
-    ) {
-      const q = this.getQuickReply('shipping-warranty');
-      this.showAssistantTypingThenReply(q ? q.reply : this.chatbotConfig.fallbackReply);
-      return;
-    }
-
-    // 5. Fallback Response with FAQ guidance
-    this.showAssistantTypingThenReply(this.chatbotConfig.fallbackReply, true);
+    // Fallback — always show contact options
+    this.showAssistantTypingThenReplyWithContact(this.chatbotConfig.fallbackReply);
   }
 
   getQuickReply(id) {
     return (this.chatbotConfig.quickReplies || []).find((q) => q.id === id);
   }
 
-  showAssistantTypingThenReply(replyText, includeActionButtons = false) {
+  showAssistantTypingThenReply(replyText, includeContactButtons = false) {
     this.isTyping = true;
     this.typingIndicator.removeAttribute('hidden');
     this.scrollToBottom();
 
-    const delay = this.chatbotConfig.typingDelayMs || 650;
+    const delay = this.chatbotConfig.typingDelayMs || 500;
 
     setTimeout(() => {
       this.typingIndicator.setAttribute('hidden', '');
       this.isTyping = false;
-      this.appendAssistantMessage(replyText, includeActionButtons);
+      if (includeContactButtons) {
+        this.appendAssistantMessageWithContact(replyText);
+      } else {
+        this.appendAssistantMessage(replyText, false);
+      }
     }, delay);
+  }
+
+  showAssistantTypingThenReplyWithContact(replyText) {
+    this.showAssistantTypingThenReply(replyText, true);
   }
 
   appendUserMessage(text) {
@@ -669,36 +769,58 @@ export class FloatingContactController {
     const row = document.createElement('div');
     row.className = 'chat-message-row msg-assistant';
 
-    let actionButtonsHtml = '';
-    if (includeActionButtons) {
-      const cleanWaNumber = String(this.whatsappConfig.number).replace(/[^0-9]/g, '');
-      const encodedWaText = encodeURIComponent(this.whatsappConfig.prefilledMessage || '');
-      const waUrl = `https://wa.me/${cleanWaNumber}?text=${encodedWaText}`;
-      const phoneUrl = `tel:${this.phoneConfig.number}`;
-
-      actionButtonsHtml = `
-        <div class="msg-action-buttons">
-          <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="msg-action-pill pill-whatsapp">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
-              <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.04 14.69 2 12.04 2"></path>
-            </svg>
-            <span>Message on WhatsApp</span>
-          </a>
-          <a href="${phoneUrl}" class="msg-action-pill pill-phone">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-            </svg>
-            <span>Call Direct (${this.phoneConfig.displayNumber || this.phoneConfig.number})</span>
-          </a>
-        </div>
-      `;
-    }
-
     row.innerHTML = `
-      <div class="msg-avatar" aria-hidden="true">A</div>
+      <div class="msg-avatar" aria-hidden="true">M</div>
       <div class="msg-bubble">
         <p>${text}</p>
-        ${actionButtonsHtml}
+        <time class="msg-time">${this.formatCurrentTime()}</time>
+      </div>
+    `;
+    this.messagesContainer.appendChild(row);
+    this.scrollToBottom();
+  }
+
+  appendAssistantMessageWithContact(text) {
+    const waUrl = this.buildWaUrl();
+    const phoneUrl = this.buildPhoneUrl();
+    const emailUrl = this.buildEmailUrl();
+
+    const row = document.createElement('div');
+    row.className = 'chat-message-row msg-assistant';
+    row.innerHTML = `
+      <div class="msg-avatar" aria-hidden="true">M</div>
+      <div class="msg-bubble">
+        <p>${text}</p>
+        <div class="msg-contact-actions">
+          <a href="${waUrl}" target="_blank" rel="noopener noreferrer" class="msg-action-pill pill-whatsapp">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+              <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.04 14.69 2 12.04 2"/>
+            </svg>
+            <span>WhatsApp Us</span>
+          </a>
+          <a href="${phoneUrl}" class="msg-action-pill pill-phone">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
+            <span>Call Us</span>
+          </a>
+          <a href="${emailUrl}" class="msg-action-pill pill-email">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <span>Email Us</span>
+          </a>
+          <button type="button" class="msg-action-pill pill-book" data-chat-action="book-photoshoot">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            <span>Book a Photoshoot</span>
+          </button>
+        </div>
         <time class="msg-time">${this.formatCurrentTime()}</time>
       </div>
     `;

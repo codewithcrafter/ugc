@@ -63,7 +63,7 @@ export class ImageStackController {
               <div class="stack-floating-badge" aria-hidden="true">
                 <span class="badge-accent-dot"></span>
                 <div class="badge-text-wrap">
-                  <span class="stack-badge-title">${item.title || 'AURA Studio'}</span>
+                  <span class="stack-badge-title">${item.title || 'MyUGC Video'}</span>
                   <span class="stack-badge-sub">${item.badge}</span>
                 </div>
               </div>

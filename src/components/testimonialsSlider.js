@@ -1,5 +1,5 @@
 /**
- * UGC STUDIO — PREMIUM SINGLE-CARD INFINITE TESTIMONIALS SLIDER
+ * MyUGC Video — PREMIUM SINGLE-CARD INFINITE TESTIMONIALS SLIDER
  * ---------------------------------------------------------------
  * Art-directed, luxury dark-themed customer review showcase.
  * 

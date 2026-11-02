@@ -1,96 +1,114 @@
 /**
- * AURA Studio — Content & Production Configuration
+ * MyUGC Video — Content & Production Configuration
  * -------------------------------------------------
  * Premium UGC content creation and product photography studio based in Delhi.
  * Core services: UGC video production, product photoshoots, lifestyle and beauty content,
  * creator casting, and creative advertising content.
  */
 
+/**
+ * Google Sheets Web App Endpoint
+ * --------------------------------
+ * Centralized endpoint URL for Google Sheets Apps Script ingestion.
+ * Set via environment variable VITE_GOOGLE_SHEETS_WEB_APP_URL in .env
+ * or fallback to an empty string (operates in transparent local test mode).
+ */
+export const GOOGLE_SHEETS_WEB_APP_URL =
+  (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GOOGLE_SHEETS_WEB_APP_URL)
+    ? import.meta.env.VITE_GOOGLE_SHEETS_WEB_APP_URL.trim()
+    : (typeof process !== 'undefined' && process.env && process.env.VITE_GOOGLE_SHEETS_WEB_APP_URL)
+      ? process.env.VITE_GOOGLE_SHEETS_WEB_APP_URL.trim()
+      : '';
+
 export const productConfig = {
+  googleSheets: {
+    endpointUrl: GOOGLE_SHEETS_WEB_APP_URL,
+    sheetName: 'Inquiries',
+  },
   brand: {
-    name: 'UGC Studio',
-    shortName: 'UGC',
+    name: 'MyUGC Video',
+    shortName: 'MyUGC',
     tagline: 'MAKE YOUR BRAND ICONIC',
     category: 'CREATIVE UGC CONTENT CREATION · PRODUCT PHOTOSHOOT AND CREATOR CASTING',
     location: 'Delhi, India',
-    logoText: 'UGC',
-    logoSubtext: 'STUDIO',
+    logoText: 'MyUGC',
+    logoSubtext: 'VIDEO',
   },
 
   contact: {
-    whatsappRaw: '15557294820',
-    whatsappDisplay: '+1 (555) 729-4820',
-    whatsappPrefill: "Hi, I'm interested in working with UGC Studio.",
+    whatsappRaw: '919205499604',
+    whatsappDisplay: '+91 92054 99604',
+    whatsappPrefill: "Hi, I'm interested in working with MyUGC Video.",
 
-    phoneRaw: '+15557294820',
-    phoneDisplay: '+1 (555) 729-4820',
+    phoneRaw: '+919205499604',
+    phoneDisplay: '+91 92054 99604',
 
-    email: 'production@ugcstudio.design',
+    email: 'contact@myugcvideo.in',
     hours: 'Mon – Sat, 10am – 7pm IST',
     address: 'Delhi, India',
   },
 
   contactWidget: {
     whatsapp: {
-      number: '15557294820',
-      displayNumber: '+1 (555) 729-4820',
-      prefilledMessage: "Hi, I'm interested in working with UGC Studio.",
+      number: '919205499604',
+      displayNumber: '+91 92054 99604',
+      prefilledMessage: "Hi, I'm interested in working with MyUGC Video.",
       tooltip: 'WhatsApp',
       ariaLabel: 'Chat with our studio team on WhatsApp (opens in new tab)',
     },
 
     phone: {
-      number: '+15557294820',
-      displayNumber: '+1 (555) 729-4820',
+      number: '+919205499604',
+      displayNumber: '+91 92054 99604',
       tooltip: 'Call Us',
       ariaLabel: 'Call our Delhi studio line directly',
     },
 
     chatbot: {
       tooltip: 'Chat with Us',
-      ariaLabel: 'Open concierge chatbot assistant',
-      headerTitle: 'UGC Studio Concierge',
-      headerSubtitle: 'UGC & Product Photography Consultation',
+      ariaLabel: 'Open chat assistant',
+      headerTitle: 'MyUGC Video',
+      headerSubtitle: 'UGC & Product Photography',
       welcomeMessage:
-        "Welcome to UGC Studio! 👋 At UGC Studio, we provide you with the best user-generated content in Delhi. How can we help your brand today?",
-      typingDelayMs: 650,
+        "Hi there! 👋 Welcome to MyUGC Video. How can we help your brand today?",
+      typingDelayMs: 500,
       quickReplies: [
         {
           id: 'services',
           label: 'Services Offered',
           reply:
-            'We provide ugc video , product photoshoot  , lifestyle and beauty content , creative advertisement content . we customise plan according to every project.',
+            'We provide UGC video, product photoshoot, lifestyle and beauty content, and creative advertisement content. We customise plans according to every project.',
         },
         {
           id: 'turnaround',
           label: 'Project Timelines',
           reply:
-            'Exact timeline can be decided after finalising the  project . it depends upon the project type           , size and project requirements.',
+            'The exact timeline can be decided after finalising the project. It depends on the project type, size and requirements.',
         },
         {
           id: 'who-can-work',
           label: 'Who can work with us',
           reply:
-            'Brands wants a photoshoot ,  lifestyle, content creator, e commerce can contact us . we help them in creating suitable content according to their need .',
+            'Brands that want photoshoots, lifestyle content, or e-commerce content can contact us. We help create suitable content according to their needs.',
         },
         {
           id: 'custom-quote',
           label: 'Pricing & Quotation',
           reply:
-            'Pricing depends upon brands content needs , content type, and delivery time . you can share your requirements.  we will discuss a suitable package and quotation according to your needs',
+            'Pricing depends on the brand\'s content needs, content type, and delivery time. Share your requirements and we will discuss a suitable package.',
           showActionButtons: true,
         },
       ],
       fallbackReply:
-        "Thank you for contacting UGC Studio! Connect with our team on WhatsApp or submit an inquiry.",
+        "Thanks for reaching out to MyUGC Video! Use the options below to connect with our team instantly.",
     },
 
     welcomePopup: {
       enabled: true,
       delayMs: 4000,
-      sessionStorageKey: 'ugc_welcome_popup_dismissed',
-      badge: 'UGC Studio',
-      message: 'Looking for the best UGC video services or photoshoot in Delhi? Let’s talk.',
+      sessionStorageKey: 'myugcvideo_welcome_popup_dismissed',
+      badge: 'MyUGC Video',
+      message: 'Looking for the best UGC video services or photoshoot in Delhi? Let\'s talk.',
       acceptText: 'Inquire Now',
       dismissText: 'Maybe Later',
     },
@@ -98,12 +116,12 @@ export const productConfig = {
 
   ugcIntro: {
     enabled: true,
-    metaScene: 'UGC STUDIO // 4K CINE',
+    metaScene: 'MyUGC VIDEO // 4K CINE',
     fpsTag: '4K · 24 FPS · 50MM F/1.2 CINE',
     headline: 'MAKE YOUR BRAND ICONIC',
-    subtitle: 'UGC Studio Where Your Brand Becomes Iconic.',
+    subtitle: 'MyUGC Video Where Your Brand Becomes Iconic.',
     scrollPrompt: 'SCROLL TO EXPLORE',
-    videoCaption: 'UGC STUDIO',
+    videoCaption: 'MyUGC VIDEO',
     videoSrc: '/videos/intro_ugc.mp4',
     poster: '/images/ugc_studio_shoot.jpg',
     floatingFrames: [
@@ -126,12 +144,12 @@ export const productConfig = {
   hero: {
     eyebrow: 'CREATIVE UGC  CONTENT CREATION  · PRODUCT PHOTOSHOOT  AND CREATOR CASTING',
     title: 'MAKE YOUR BRAND ICONIC',
-    supporting: ' UGC Studio Where Your Brand Becomes Iconic.',
+    supporting: ' MyUGC Video Where Your Brand Becomes Iconic.',
     description:
-      'At UGC Studio, we provide you with the best user-generated content in Delhi that will make your brand unforgettable. From eye-catching photoshoot  to stop-scrolling content, as a UGC content creation agency,  we can create everything personalized  for your brand , that your brand needs to reach quality audience.We can customize everything according to what you need and what your brand needs .',
+      'At MyUGC Video, we provide you with the best user-generated content in Delhi that will make your brand unforgettable. From eye-catching photoshoot  to stop-scrolling content, as a UGC content creation agency,  we can create everything personalized  for your brand , that your brand needs to reach quality audience.We can customize everything according to what you need and what your brand needs .',
     primaryCta: {
       text: 'Book a Photoshoot',
-      action: '#lead-form',
+      action: 'open-inquiry',
     },
     secondaryCta: {
       text: 'Explore Our Work',
@@ -146,12 +164,12 @@ export const productConfig = {
   ugcReels: [
     {
       id: 'reel-1',
-      creator: 'UGC Studio',
-      handle: '@ugcstudio.delhi',
-      avatar: 'U',
+      creator: 'MyUGC Video',
+      handle: '@myugcvideo.delhi',
+      avatar: 'M',
       role: 'UGC Content Creation Agency',
       title: 'Authentic & Scroll-Stopping Content',
-      caption: '“Our team will provide you  authentic and engaging UGC  video content that grabs attention and makes people stop scrolling.”',
+      caption: '"Our team will provide you  authentic and engaging UGC  video content that grabs attention and makes people stop scrolling."',
       productTag: 'UGC Video',
       duration: '0:34',
       poster: '/images/ugc_beauty_macro.jpg',
@@ -161,11 +179,11 @@ export const productConfig = {
     {
       id: 'reel-2',
       creator: 'Expert team',
-      handle: '@ugcstudio.delhi',
+      handle: '@myugcvideo.delhi',
       avatar: 'E',
       role: 'Lighting, Camera Angle, Background & Editing',
       title: 'Professional Photoshoot in Delhi',
-      caption: '“We create photoshoots that  improve their appearance. Our team is well trained in lighting , camera angle , background and editing .”',
+      caption: '"We create photoshoots that  improve their appearance. Our team is well trained in lighting , camera angle , background and editing ."',
       productTag: 'Photoshoot',
       duration: '0:42',
       poster: '/images/ugc_creator_bts.jpg',
@@ -175,11 +193,11 @@ export const productConfig = {
     {
       id: 'reel-3',
       creator: 'campaign creative',
-      handle: '@ugcstudio.delhi',
+      handle: '@myugcvideo.delhi',
       avatar: 'C',
       role: 'Creative Ad Visuals',
       title: 'Consistent & Attention Grabbing',
-      caption: '“We create engaging ugc content , professional photos, creative ad visuals. Everything is created according to brand identity and needs .”',
+      caption: '"We create engaging ugc content , professional photos, creative ad visuals. Everything is created according to brand identity and needs ."',
       productTag: 'Campaign Creative',
       duration: '0:28',
       poster: '/images/ugc_fashion_lifestyle.jpg',
@@ -189,11 +207,11 @@ export const productConfig = {
     {
       id: 'reel-4',
       creator: 'natural   aesthetics',
-      handle: '@ugcstudio.delhi',
+      handle: '@myugcvideo.delhi',
       avatar: 'N',
       role: 'Soft Lighting & Better Angles',
       title: 'Aesthetic and Highlighted',
-      caption: '“We use soft lighting at better angles so that your product look aesthetic and highlighted . At UGC studio , our team understand the beauty of natural aesthetic .”',
+      caption: '"We use soft lighting at better angles so that your product look aesthetic and highlighted . At MyUGC Video, our team understand the beauty of natural aesthetic ."',
       productTag: 'Natural Aesthetics',
       duration: '0:55',
       poster: '/images/ugc_creator_gear.jpg',
@@ -203,11 +221,11 @@ export const productConfig = {
     {
       id: 'reel-5',
       creator: 'PHOTOSHOOT THAT LOOK LUXURIOUS',
-      handle: '@ugcstudio.delhi',
+      handle: '@myugcvideo.delhi',
       avatar: 'P',
       role: 'Visuals that create impact',
       title: 'High Quality Product Photoshoot',
-      caption: '“We create high quality  product photoshoot  that looks stunning. UGC studio is a well known ugc agency in delhi .”',
+      caption: '"We create high quality  product photoshoot  that looks stunning. MyUGC Video is a well known ugc agency in delhi ."',
       productTag: 'Luxury Photoshoot',
       duration: '0:36',
       poster: '/images/ugc_studio_shoot.jpg',
@@ -217,11 +235,11 @@ export const productConfig = {
     {
       id: 'reel-6',
       creator: 'Life captured naturally',
-      handle: '@ugcstudio.delhi',
+      handle: '@myugcvideo.delhi',
       avatar: 'L',
       role: 'Everyday Activity Into Memorable Stories',
       title: 'Aesthetically Authentic',
-      caption: '“We convert simple everyday activity into memorable stories. From morning ritual to gardening. Our team makes sure that everything look aesthetically authentic.”',
+      caption: '"We convert simple everyday activity into memorable stories. From morning ritual to gardening. Our team makes sure that everything look aesthetically authentic."',
       productTag: 'Lifestyle',
       duration: '0:31',
       poster: '/images/ugc_morning.jpg',
@@ -242,7 +260,7 @@ export const productConfig = {
       {
         num: '01',
         title: 'Natural Aesthetics',
-        desc: 'We use soft lighting at better angles so that your product look aesthetic and highlighted . At UGC studio , our team understand the beauty of natural aesthetic . We create the photoshoot and content that makes  your product look premium . ',
+        desc: 'We use soft lighting at better angles so that your product look aesthetic and highlighted . At MyUGC Video, our team understand the beauty of natural aesthetic . We create the photoshoot and content that makes  your product look premium . ',
       },
       {
         num: '02',
@@ -351,7 +369,7 @@ export const productConfig = {
   gallery: {
     eyebrow: 'Visuals that create impact',
     headline: 'PHOTOSHOOT THAT LOOK LUXURIOUS',
-    lead: 'We create high quality  product photoshoot  that looks stunning. UGC studio is a well known ugc agency in delhi .from camera angles to background, our team know everything. Our professional team can handle everything so that your product looks premium and recognisable.',
+    lead: 'We create high quality  product photoshoot  that looks stunning. MyUGC Video is a well known ugc agency in delhi .from camera angles to background, our team know everything. Our professional team can handle everything so that your product looks premium and recognisable.',
     cta: 'Book a Photoshoot',
     images: [
       {
@@ -375,7 +393,7 @@ export const productConfig = {
       {
         id: 'gallery-3',
         title: 'Professional Editing',
-        description: 'Editing can make or break an image but we retouch it without making the product look unrealistic. My UGC Video understands that good editing can enhance the beauty of an image, while poor editing can take its natural beauty away.',
+        description: 'Editing can make or break an image but we retouch it without making the product look unrealistic. MyUGC Video understands that good editing can enhance the beauty of an image, while poor editing can take its natural beauty away.',
         src: '/images/ugc_creator_bts.jpg',
         alt: 'Professional Editing',
         tag: 'Professional Editing',
@@ -420,7 +438,7 @@ export const productConfig = {
       {
         id: 'gallery-8',
         title: 'product styling',
-        description: "Product styling is not just arranging the product,  it's more about a beautiful and creative presentation of the product. My UGC Video style the product to make it more attractive, stunning and customer-attention-grabbing.",
+        description: "Product styling is not just arranging the product,  it's more about a beautiful and creative presentation of the product. MyUGC Video style the product to make it more attractive, stunning and customer-attention-grabbing.",
         src: '/images/ugc_morning.jpg',
         alt: 'product styling',
         tag: 'product styling',
@@ -444,7 +462,7 @@ export const productConfig = {
       name: 'Ishaani Kapoor',
       initials: 'IK',
       quote:
-        "Working with My UGC Video was a great experience. They worked according to our vision and turned our ideas into creative content that matched our brand perfectly.",
+        "Working with MyUGC Video was a great experience. They worked according to our vision and turned our ideas into creative content that matched our brand perfectly.",
     },
     {
       id: 'testimonial-2',

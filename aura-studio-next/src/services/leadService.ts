@@ -8,39 +8,7 @@ export function validateLead(formData: Partial<LeadFormData>): ValidationResult 
   const fullName = (formData.fullName || '').trim();
   const email = (formData.email || '').trim();
   const phone = (formData.phone || '').trim();
-  const consent = Boolean(formData.consent);
-
-  // Validate Name
-  if (!fullName) {
-    errors.fullName = 'Please enter your full name.';
-  } else if (fullName.length < 2) {
-    errors.fullName = 'Full name must be at least 2 characters.';
-  } else if (!/^[\p{L}\s.'-]+$/u.test(fullName)) {
-    errors.fullName = 'Please enter a valid name using letters and standard punctuation.';
-  }
-
-  // Validate Email
-  const emailRegex =
-    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-  if (!email) {
-    errors.email = 'Please enter your email address.';
-  } else if (!emailRegex.test(email)) {
-    errors.email = 'Please enter a valid email address (e.g., name@example.com).';
-  }
-
-  // Validate Phone
-  const phoneDigitsOnly = phone.replace(/\D/g, '');
-  const phonePattern = /^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]*$/;
-  if (!phone) {
-    errors.phone = 'Please enter your phone number.';
-  } else if (!phonePattern.test(phone) || phoneDigitsOnly.length < 7 || phoneDigitsOnly.length > 15) {
-    errors.phone = 'Please enter a valid phone number (at least 7 to 15 digits).';
-  }
-
-  // Validate Consent
-  if (!consent) {
-    errors.consent = 'Please confirm your consent to receive product details.';
-  }
+  
 
   return {
     isValid: Object.keys(errors).length === 0,
